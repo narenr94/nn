@@ -78,7 +78,7 @@ void logprintf(elog_level logLevelIndex, const char* func, int line, const char 
 
         if(m_print_console)
         {
-            cout << gDebugPrintBuffer << endl;
+            std::cout << gDebugPrintBuffer << std::endl;
         }
 
         //open log file and write
@@ -102,55 +102,55 @@ nn_progress_bar::nn_progress_bar(const char* vName, uint mVal)
     uint size = 0;
     size = (uint)strlen(vName);
 
-    lock_guard<mutex> lock(mtx);
+    std::lock_guard<std::mutex> lock(m_mtx);
 
-    if(valName)
+    if(m_parrValName)
     {
-        free(valName);
+        free(m_parrValName);
     }
-    valName = (char *)malloc(size);
+    m_parrValName = (char *)malloc(size);
 
-    strcpy(valName, vName);
+    strcpy(m_parrValName, vName);
 
-    currVal = 0;
+    m_unCurrVal = 0;
 
-    maxVal = mVal;
+    m_unMaxVal = mVal;
 
-    stopped = false;
+    m_bStopped = false;
 }
 
 void nn_progress_bar::print_progress_bar(uint cVal)
 {
     uint percentComplete = 0;
     uint i = 0;
-    std::unique_lock<std::mutex>lock(mtx);
+    std::unique_lock<std::mutex>lock(m_mtx);
     do
     {
-        cout<<"\r["<<valName<<":"<<currVal<<"/"<<maxVal<<"]";
-        percentComplete = currVal * 100;
-        percentComplete /= maxVal;
+        std::cout<<"\r["<<m_parrValName<<":"<<m_unCurrVal<<"/"<<m_unMaxVal<<"]";
+        percentComplete = m_unCurrVal * 100;
+        percentComplete /= m_unMaxVal;
 
         for(i = 0; i < percentComplete; i++)
         {
-            cout<<"#";
+            std::cout<<"#";
         }
 
         for(i = 0; i < (100 - percentComplete); i++)
         {
-            cout<<" ";
+            std::cout<<" ";
         }
 
-        cout<<"["<<percentComplete<<"%]";
+        std::cout<<"["<<percentComplete<<"%]";
 
-        cout<<std::flush;
+        std::cout<<std::flush;
 
-        updating = false;
+        m_bUpdating = false;
 
-        mCondVar.wait(lock);
+        m_CondVar.wait(lock);
 
-    } while (!stopped);
+    } while (!m_bStopped);
 
-    cout<<"\n";
+    std::cout<<"\n";
     
     lock.unlock();
 
@@ -161,37 +161,37 @@ void nn_progress_bar::print_progress_bar_periodic(uint cVal, uint ms)
 {
     uint percentComplete = 0;
     uint i = 0;
-    std::unique_lock<std::mutex>lock(mtx);
+    std::unique_lock<std::mutex>lock(m_mtx);
     do
     {
         
-        cout<<"\r["<<valName<<":"<<currVal<<"/"<<maxVal<<"]";
-        percentComplete = currVal * 100;
-        percentComplete /= maxVal;
+        std::cout<<"\r["<<m_parrValName<<":"<<m_unCurrVal<<"/"<<m_unMaxVal<<"]";
+        percentComplete = m_unCurrVal * 100;
+        percentComplete /= m_unMaxVal;
 
         for(i = 0; i < percentComplete; i++)
         {
-            cout<<"#";
+            std::cout<<"#";
         }
 
         for(i = 0; i < (100 - percentComplete); i++)
         {
-            cout<<" ";
+            std::cout<<" ";
         }
 
-        cout<<"["<<percentComplete<<"%]";
+        std::cout<<"["<<percentComplete<<"%]";
 
-        cout<<std::flush;
+        std::cout<<std::flush;
 
-        updating = false;
+        m_bUpdating = false;
 
         lock.unlock();
         usleep(ms * 1000);
         lock.lock();
 
-    } while (!stopped);
+    } while (!m_bStopped);
 
-    cout<<"\n";
+    std::cout<<"\n";
     
     lock.unlock();
 
@@ -200,30 +200,30 @@ void nn_progress_bar::print_progress_bar_periodic(uint cVal, uint ms)
 
 void nn_progress_bar::update_progress_bar(uint cVal)
 {
-    std::unique_lock<std::mutex>lock(mtx);
-    currVal = cVal;
-    updating = true;
-    mCondVar.notify_one();
+    std::unique_lock<std::mutex>lock(m_mtx);
+    m_unCurrVal = cVal;
+    m_bUpdating = true;
+    m_CondVar.notify_one();
 }
 
 void nn_progress_bar::reset()
 {
-    while(updating); //wait until current update of progress bar completes
+    while(m_bUpdating); //wait until current update of progress bar completes
 
-    std::unique_lock<std::mutex>lock(mtx);
-    currVal = 0;
-    stopped = false;
+    std::unique_lock<std::mutex>lock(m_mtx);
+    m_unCurrVal = 0;
+    m_bStopped = false;
 }
 
 void nn_progress_bar::stop()
 {
-    std::unique_lock<std::mutex>lock(mtx);
-    stopped = true;
-    mCondVar.notify_one();
+    std::unique_lock<std::mutex>lock(m_mtx);
+    m_bStopped = true;
+    m_CondVar.notify_one();
 }
 
 void nn_progress_bar::setMax(uint mVal)
 {
-    std::unique_lock<std::mutex>lock(mtx);
-    maxVal = mVal;
+    std::unique_lock<std::mutex>lock(m_mtx);
+    m_unMaxVal = mVal;
 }

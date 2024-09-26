@@ -1,16 +1,16 @@
 #include <math.h>
 #include "nn_math.h"
 
-float sigmoidf(float n) {
-    return (1 / (1 + powf(EULER_NUMBER_F, -n)));
+float get_sigmoidf(float fVal) {
+    return (1 / (1 + powf(EULER_NUMBER_F, - fVal)));
 }
 
-float derivative_sigmoidf(float n)
+float find_derivative_sigmoidf(float fVal)
 {
-    return (n * (1 - n));
+    return (fVal * (1 - fVal));
 }
 
-uint getRandomNumber(uint min, uint max) 
+uint getRandomNumber(uint unMin, uint unMax) 
 {
-    return rand() % (max - min + 1) + min;
+    return rand() % (unMax - unMin + 1) + unMin;
 }
