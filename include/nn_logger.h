@@ -12,8 +12,6 @@
 #include <condition_variable>
 #include "nn_math.h"
 
-using namespace std;
-
 #define MAX_DEBUG_LOG_BUFF_SIZE 512
 
 #define MAX_DUMP_FILE_SIZE 10000000 //10MBytes
@@ -64,7 +62,7 @@ do { \
     init_nn_logger : initialize logger
     @ll : log level to be set
 */
-void init_nn_logger(uint ll, bool printConsole);
+void init_nn_logger(uint unLogLevel, bool bPrintConsole);
 
 
 
@@ -75,7 +73,7 @@ void init_nn_logger(uint ll, bool printConsole);
     @line : line number from where log is printed
     @format : standard printf style format string followed by arguments
 */
-void logprintf(elog_level logLevel, const char* func, int line, const char *format, ...);
+void logprintf(elog_level eLogLevel, const char* const_parrcFunc, int nLine, const char* const_parrFormat, ...);
 
 /*
     get_log_level: returns log level
@@ -85,24 +83,24 @@ elog_level get_log_level();
 
 class nn_progress_bar{
 
-uint currVal = 0;
-uint maxVal = 0;
-char* valName = NULL;
-bool stopped = false;
-bool updating = false;
+uint m_unCurrVal = 0;
+uint m_unMaxVal = 0;
+char* m_parrValName = NULL;
+bool m_bStopped = false;
+bool m_bUpdating = false;
 
-std::mutex mtx;
-std::condition_variable mCondVar;
+std::mutex m_mtx;
+std::condition_variable m_CondVar;
 
 public:
 
-    nn_progress_bar(const char* vName, uint mVal);
+    nn_progress_bar(const char* const_parrcValName, uint unVal);
 
-    void print_progress_bar(uint cVal);
+    void print_progress_bar(uint unVal);
 
-    void print_progress_bar_periodic(uint cVal, uint ms);
+    void print_progress_bar_periodic(uint unVal, uint unMs);
 
-    void update_progress_bar(uint cVal);
+    void update_progress_bar(uint unVal);
 
     void reset();
 

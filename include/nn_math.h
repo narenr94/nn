@@ -4,16 +4,14 @@
 
 #define NN_MATH
 
-using namespace std;
-
 typedef unsigned int uint;
 
 #define EULER_NUMBER_F 2.71828182846
 
-float sigmoidf(float n);
+float get_sigmoidf(float fValue);
 
-float derivative_sigmoidf(float n);
+float find_derivative_sigmoidf(float fValue);
 
-uint getRandomNumber(uint min, uint max);
+uint getRandomNumber(uint uMin, uint uMax);
 
 #endif

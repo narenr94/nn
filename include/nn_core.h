@@ -37,10 +37,10 @@ enum eLyr_type{
 
 class nn_node{
 
-    float value; //value of node
-    float bias; //value of bias
+    float m_fValue; //value of node
+    float m_fBias; //value of bias
 
-    float delta; //delta value of node , used for back propogation
+    float m_fDelta; //delta value of node , used for back propogation
 
     
     
@@ -84,10 +84,10 @@ class nn_node{
 
 class nn_layer{
 
-    uint num_nodes; //total number of nodes
-    nn_node** nodes; //starting address from nodes can be accessed
-    bool initialized; //is layer initialized?
-    eLyr_type lyrType; //layer type
+    uint m_unNumNodes; //total number of nodes
+    nn_node** m_ppNodes; //starting address from nodes can be accessed
+    bool m_bInitialized; //is layer initialized?
+    eLyr_type eLyrType; //layer type
 
 
     
@@ -196,14 +196,14 @@ class nn_layer{
 
 class nn_l2l_weight_matrix{
     
-    nn_layer* input_layer; //input layer for matrix
-    nn_layer* output_layer; //output layer for matrix
+    nn_layer* m_pInputLayer; //input layer for matrix
+    nn_layer* m_pOutputLayer; //output layer for matrix
 
-    uint size; //size of matrix
+    uint m_unSize; //size of matrix
 
-    float* weight_matrix; //starting address from where weights of matrix are stored
+    float* m_pfWeightMatrix; //starting address from where weights of matrix are stored
 
-    bool initialized; //is weight matrix initialized?
+    bool m_bInitialized; //is weight matrix initialized?
 
     
     public:
@@ -259,17 +259,17 @@ class nn_l2l_weight_matrix{
 
 class NeuralNet{
 
-    eAct_func m_act_func; //activation funcation to be used
+    eAct_func m_eActFunc; //activation funcation to be used
 
-    nn_l2l_weight_matrix** m_wt_mtcs; //starting address of weight matrixes
+    nn_l2l_weight_matrix** m_ppWtMtcs; //starting address of weight matrixes
 
-    nn_layer** m_lys; //starting address of layers
+    nn_layer** m_ppLys; //starting address of layers
 
-    uint num_lys; //total number of layers in NN, including input and output layer
+    uint m_unNumLys; //total number of layers in NN, including input and output layer
 
-    bool initialized; //is neural net initialized?
+    bool m_bInitialized; //is neural net initialized?
 
-    float learningRate; //current learning rate of nn
+    float m_fLearningRate; //current learning rate of nn
 
 
     
@@ -291,14 +291,14 @@ class NeuralNet{
         @no_lys : total number of layers, including input and output layer
         @sz_lys : array containing size of each layer, size of this array must be equal to total number of layers
     */
-    bool init(uint no_lys, uint* sz_lys, eAct_func act_func, elog_level loglevel, bool consolePrint, float lRate);
+    bool init(uint unNoLys, uint* unSzLys, eAct_func eActFunc, elog_level eLogLevel, bool bConsolePrint, float fLearningRate);
 
     /*
-        forward_propagation() : perform 1 iteration of forward pass
+        do_forward_pass() : perform 1 iteration of forward pass
 
         @input_arr : array containing input node values
     */
-    bool forward_propagation(float* input_arr);
+    bool do_forward_pass(float* pfInputArr);
 
     /*
         dump_nn() : dumps current nn contents into dmp file
@@ -311,7 +311,7 @@ class NeuralNet{
         @idx : index of matrix
         @values : list of values to populate
     */
-    bool populate_weights(uint idx, float * values);
+    bool populate_weights(uint unIdx, float* pfValues);
 
     /*
         populate_nodes() : populates nodes of particular layer with specific values and biases. Useful during initialization
@@ -319,7 +319,7 @@ class NeuralNet{
         @lyr_idx : index of layer
         @biases : list of biases to populate
     */
-    bool populate_nodes_bias(uint lyr_idx, float* bias);
+    bool populate_nodes_bias(uint unLyrIdx, float* pfBias);
 
     /*
         calculate_error() : calculates error from expected and actual output. returns total error
@@ -327,14 +327,14 @@ class NeuralNet{
         @exp_out : expected output array
         @error : array where error ought to be stored
     */
-    float calculate_error(float* exp_out, float* error);
+    float calculate_error(float* pfExpOut, float* pfError);
 
     /*
         backward_propogation() : backward propogate once
 
         @exp_out : expected output array
     */
-    bool backward_propogation(float* exp_out);
+    bool do_backward_pass(float* pfExpOut);
     
     /*
         Train() : train neural net
@@ -342,7 +342,7 @@ class NeuralNet{
         @in : input array
         @out : expected output array
     */
-    bool Train(float* in, float* out);
+    bool Train(float* pfIn, float* pfOut);
 
     /*
         populateWeightsAndBiasesWithRandomNumbers() : fill weights and biases with random numbers
@@ -355,7 +355,7 @@ class NeuralNet{
         @in : input array
         @out : expected output array
     */
-    bool Test(float* in, float* out);
+    bool Test(float* pfIn, float* pfOut);
     
 
     private:
@@ -364,21 +364,21 @@ class NeuralNet{
 
         @in_layer_idx : input (relative) layer index
     */
-    bool forwardpass_to_next_layer(uint in_layer_idx);
+    bool do_forwardpass_to_next_layer(uint unInLayerIdx);
 
     /*
         apply_act_func() : applies act function as per config
 
         @n : value to which act func is to be applied
     */
-    float apply_act_func(float n);
+    float apply_act_func(float fVal);
 
     /*
         apply_act_func_derv() : applies act function derivative as per config
 
         @n : value to which act func derivative is to be applied
     */
-    float apply_act_func_derv(float n);
+    float apply_act_func_derv(float fVal);
 
     /*
         find_delta_of_all_nodes() : calculates and updates delta of all nodes in nn, also corrects biases
@@ -387,7 +387,7 @@ class NeuralNet{
 
         @return : total error
     */
-    float find_delta_of_all_nodes_and_correct_biases(float* exp_out);
+    float find_delta_of_all_nodes_and_correct_biases(float* pfExpOut);
 
     /*
         correct_weights() : corrects all weights
@@ -399,7 +399,7 @@ class NeuralNet{
 
         @out : expected output array
     */
-    bool isCorrectPrediction(float* out);   
+    bool isCorrectPrediction(float* pfOut);   
 
 };
 
