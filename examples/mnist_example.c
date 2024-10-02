@@ -64,7 +64,7 @@ int main()
 
     NeuralNet *nn = new NeuralNet();
 
-    string linestr = "Line";
+    std::string linestr = "Line";
 
     nn_progress_bar *pb = new nn_progress_bar(linestr.c_str(),TRAIN_MAX);
 
