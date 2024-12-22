@@ -98,13 +98,12 @@ int main()
     nn->populateWeightsAndBiasesWithRandomNumbers();
 
     std::thread pbThread(&nn_progress_bar::print_progress_bar_periodic, pb, 0, 1000);
-
+    
     for(j = 0; j < EPOCH_MAX; j++)
     {
         start = std::chrono::high_resolution_clock::now();
 
         printf("Epoch[%d] Started!!!\n", j + 1);
-        
         pb->setMax(TRAIN_MAX);
         fdr = fopen("MNIST/mnist_train.csv","r");
         //getNextLine(fdr, line_buff);
@@ -178,6 +177,8 @@ int main()
             pb->update_progress_bar(i + 1);
         }
 
+
+
         fclose(fdr);
 
         pb->reset();
@@ -195,6 +196,55 @@ int main()
 
     }
 
+    NeuralNet *nn2 = new NeuralNet(nn);
+
+    start = std::chrono::high_resolution_clock::now();
+
+    fdr = fopen("MNIST/mnist_test.csv","r");
+
+    //getNextLine(fdr, line_buff);
+
+    for(i = 0; i < TEST_MAX; i++)
+    {
+        
+        if(!fdr)
+        {
+            printf("fdr open fail!!!\n");
+            return 0;
+        }
+        getNextLine(fdr, line_buff);
+
+        label = parseLabelAndNormalizedValues(line_buff, norm_values, NORM_FACTOR);
+
+        setOutArray(label, out);            
+
+        if(nn2->Test(norm_values, out))
+        {
+            correct_count += 1.0;
+        }
+
+        pb->update_progress_bar(i + 1);
+    }
+
+
+
+    fclose(fdr);
+
+    pb->reset();
+
+    accuracy = correct_count / ((float)TEST_MAX);
+
+    printf("\nTest copy Accuracy:%f\n", accuracy);
+    end = std::chrono::high_resolution_clock::now();
+
+    time_taken = end - start;
+
+    printf("Time taken for test Epoch[%d]:%fSeconds\n", j + 1, time_taken.count());
+
+
+
+
+
     pb->stop();
     
     pbThread.join();
@@ -207,13 +257,15 @@ int main()
 
     end = std::chrono::high_resolution_clock::now();
 
-        time_taken = end - start;
+    time_taken = end - start;
 
     printf("Time taken to dump file:%fSeconds\n", time_taken.count());
-    
+
     printf("done dump\n");
 
     delete nn;
+
+    delete nn2;
 
     delete pb;
 

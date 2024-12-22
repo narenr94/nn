@@ -3,12 +3,13 @@ if [ ! -d "./MNIST" ]; then
   cd ./MNIST
   wget "https://pjreddie.com/media/files/mnist_train.csv"
   wget "https://pjreddie.com/media/files/mnist_test.csv"
+  cd ../
 fi
 
 rm ./*.dmp
 rm ./*.log
 rm ./*.o
-g++ -Wall -c ../src/*.cpp ./mnist_example.c -I ../include/ -g
-g++ -Wall ./*.o -o ./mnist_example -g
-./mnist_example
+g++ -Wall -c ../src/*.cpp ./mnist_example_batch.c -I ../include/ -g
+g++ -Wall ./*.o -o ./mnist_example_batch -g
+
 

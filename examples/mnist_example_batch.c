@@ -10,7 +10,9 @@
 #define TEST_MAX 10000 //max number of lines in testing set
 #define NORM_FACTOR 254.0 //max value in data set for normalization
 #define VAL_SIZE 784 //input layer size
-#define EPOCH_MAX 5 //number epochs of training and testing 
+#define EPOCH_MAX 20 //number epochs of training and testing 
+#define BATCH_SIZE 4
+#define LEARNING_RATE 0.5
 
 /*
 getLineNumber : gets particular line from file
@@ -55,11 +57,22 @@ int main()
 
     uint j = 0;
 
+    uint k = 0;
+
     uint sz[4] = {784,32,32,10};
 
     float* out = (float*)malloc(10*sizeof(float));
 
     float* norm_values = (float*)malloc(VAL_SIZE*sizeof(float));
+
+    float** norm_values_arr = (float**)malloc(BATCH_SIZE*sizeof(float*));
+    float** out_arr = (float**)malloc(BATCH_SIZE*sizeof(float*));
+
+    for(uint l = 0; l < BATCH_SIZE; l++)
+    {
+        norm_values_arr[l] = (float*)malloc(VAL_SIZE*sizeof(float));
+        out_arr[l] = (float*)malloc(VAL_SIZE*sizeof(float));
+    }
 
     NeuralNet *nn = new NeuralNet();
 
@@ -91,26 +104,30 @@ int main()
     initData->unNoLys = 4;
     initData->unSzLys = sz;
     initData->eAct_Func = eAct_func::SIGMOID;
-    initData->fLearningRate = 0.5f;
-
+    initData->fLearningRate = LEARNING_RATE;
+    
     nn->init(initData);
 
     nn->populateWeightsAndBiasesWithRandomNumbers();
 
+    nn->Init_Batch_Training(BATCH_SIZE);
+
+    
     std::thread pbThread(&nn_progress_bar::print_progress_bar_periodic, pb, 0, 1000);
 
+    
     for(j = 0; j < EPOCH_MAX; j++)
     {
         start = std::chrono::high_resolution_clock::now();
-
-        printf("Epoch[%d] Started!!!\n", j + 1);
         
+        printf("Epoch[%d] Started!!!\n", j + 1);
         pb->setMax(TRAIN_MAX);
         fdr = fopen("MNIST/mnist_train.csv","r");
         //getNextLine(fdr, line_buff);
 
-        for(i = 0; i < TRAIN_MAX; i++)
+        for(i = 0; i < TRAIN_MAX; i+=BATCH_SIZE)
         {
+
             
             if(!fdr)
             {
@@ -118,18 +135,20 @@ int main()
                 return 0;
             }
 
-            getNextLine(fdr, line_buff);
+             
 
-            label = parseLabelAndNormalizedValues(line_buff, norm_values, NORM_FACTOR);
-
-            setOutArray(label, out);            
-
-            if(nn->Train(norm_values, out))
+            for(k = 0; k < BATCH_SIZE; k++)
             {
-                correct_count += 1.0;
-            }
+                getNextLine(fdr, line_buff);
 
-            pb->update_progress_bar(i + 1);            
+                label = parseLabelAndNormalizedValues(line_buff, norm_values_arr[k], NORM_FACTOR);
+
+                setOutArray(label, out_arr[k]); 
+            }          
+
+            correct_count += nn->Train_batch(norm_values_arr, out_arr, BATCH_SIZE);
+
+            pb->update_progress_bar(i + BATCH_SIZE);            
 
         }
 
@@ -145,6 +164,8 @@ int main()
         time_taken = end - start;
 
         printf("Time taken for Train Epoch[%d]:%fSeconds\n", j + 1, time_taken.count());
+        
+
         
         correct_count = 0.0;
 
@@ -207,10 +228,10 @@ int main()
 
     end = std::chrono::high_resolution_clock::now();
 
-        time_taken = end - start;
+    time_taken = end - start;
+
 
     printf("Time taken to dump file:%fSeconds\n", time_taken.count());
-    
     printf("done dump\n");
 
     delete nn;

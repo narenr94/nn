@@ -38,6 +38,8 @@ class nn_l2l_weight_matrix{
     */
     bool set_weight(uint in_idx, uint out_idx, float wt);
 
+    bool set_weight(uint Idx, float fWt);
+
     /*
         set_all_weight() : sets all weight in matrix
 
@@ -52,6 +54,8 @@ class nn_l2l_weight_matrix{
         @out_idx : output node index
     */
     float get_weight(uint in_idx, uint out_idx);
+
+    float get_weight(uint Idx);
 
     /*
         get_size() : gets size of matrix
