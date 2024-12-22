@@ -1,4 +1,5 @@
 #include "nn_core.h"
+#include <vector>
 
 static const char* static_NNDumpFilePath = "./"; //dump file path
 
@@ -12,65 +13,134 @@ static const char * static_const_parrActFuncStr[SIGMOID+1] =
 	"SIGMOID" //Sigmoid
 };
 
+struct Batch_Training_Instance_data{
+    float* deltas;
+    bool bCorrectPredict;
+};
+
+struct Batch_Training_Args{
+    float *in;
+    float *out;
+    Batch_Training_Instance_data *sBData;
+};
+
+static Batch_Training_Args ** args = nullptr;
+
+// std::mutex argsMutex;
+
+
+
 NeuralNet::NeuralNet()
 {
-    NNLOG_TRACE("entering");
     m_eActFunc = SIGMOID;
     m_ppWtMtcs = NULL;
     m_ppLys = NULL;
 
     m_bInitialized = false;
-    NNLOG_TRACE("exiting");
+}
+
+NeuralNet::NeuralNet(NeuralNet* other)
+{
+    nnInitData *ret = new nnInitData();
+    ret->unSzLys = new uint [m_unNumLys];
+
+    //debug
+    static uint i = 1;
+
+    other->Get_Init_Data(ret);
+
+    ret->ID = i;
+    i++;
+
+    Set_Init_Data(ret);
+    populateWeightsAndBiasesWithExistingNN(other);
+
+    delete [] ret->unSzLys;
+
+    delete ret;
+}
+
+void NeuralNet::Get_Init_Data(nnInitData *ret)
+{
+    ret->unNoLys = m_unNumLys;
+    for(uint i = 0; i < m_unNumLys; i++)
+    {
+        ret->unSzLys[i] = m_ppLys[i]->get_num_nodes();
+    }
+    ret->eAct_Func = m_eActFunc;
+    ret->fLearningRate = m_fLearningRate;
+    ret->ID = nn_id;
+
+}
+
+void NeuralNet::Set_Init_Data(nnInitData* other_initData)
+{
+
+    // uint unNoLys = 0;
+    // uint* unSzLys = nullptr;
+    // eAct_func eAct_Func = eAct_func::SIGMOID;
+    // elog_level eLogLevel = elog_level::eLOGLEVEL_WARN;
+    // bool bConsolePrint = false;
+    // float fLearningRate = 0.5f;
+    m_unNumLys = other_initData->unNoLys;
+    m_eActFunc = other_initData->eAct_Func;
+    m_fLearningRate = other_initData->fLearningRate;
+    nn_id = other_initData->ID;
+
+    if(m_bInitialized)
+    {
+        delete [] m_ppLys;
+        delete [] m_ppWtMtcs;
+    }
+
+    
+
+    SetupLayersAndWeightMatrices(other_initData->unSzLys);
+
+    m_bInitialized = true;
+
+
 }
 
 NeuralNet::~NeuralNet()
 {
-    NNLOG_TRACE("entering");
     if(m_ppWtMtcs)
     {
-        free(m_ppWtMtcs);
+        for(uint i = 0; i < (m_unNumLys - 1); i++)
+        {
+            delete m_ppWtMtcs[i];
+        }
+        delete [] m_ppWtMtcs;
     }
     if(m_ppLys)
     {
-        free(m_ppLys);
+        for(uint i = 0; i < m_unNumLys; i++)
+        {
+            delete m_ppLys[i];
+        }
+        delete [] m_ppLys;
     }
-    NNLOG_TRACE("exiting");
+
+    if(initBatchTrain)
+    {
+        for(uint i  = 0; i < m_batchSz; i++)
+        {
+            
+            delete m_batch_nns[i];            
+
+        }
+        delete [] m_batch_nns;
+    }
 }
 
-bool NeuralNet::init(uint unNoLys, uint* unpSzLys, eAct_func eAFunc, elog_level eLLevel, bool bConsolePrint, float fLRate)
+
+void NeuralNet::SetupLayersAndWeightMatrices(uint *sz)
 {
-    init_nn_logger(eLLevel, bConsolePrint);
-
-    NNLOG_TRACE("entering no_lys:%d act_func:%d loglevel:%d consolePrint:%d", unNoLys, eAFunc, eLLevel, bConsolePrint);
-    
-    bool bRet = false;
-    //minimum layers is 3
-    if(unNoLys < 3)
+    m_ppLys = new nn_layer*[m_unNumLys];
+    m_ppWtMtcs = new nn_l2l_weight_matrix*[m_unNumLys - 1];
+    for(uint i = 0; i < m_unNumLys; i++)
     {
-        return bRet;
-    }
-
-    if(fLRate > 1.0 || fLRate <= 0.0)
-    {
-        return bRet;
-    }
-
-    srand(time(NULL));
-
-    m_eActFunc = eAFunc;
-
-    m_fLearningRate = fLRate;
-
-    uint i = 0; //local var for iterating loops
-
-    m_unNumLys = unNoLys;
-
-    //allocate layers
-    m_ppLys = (nn_layer**)malloc(m_unNumLys * sizeof(nn_layer*));
-
-    for(i = 0; i < m_unNumLys; i++)
-    {
-        m_ppLys[i] = new nn_layer(unpSzLys[i]);
+        m_ppLys[i] = new nn_layer(sz[i]);
         if(i == INPUT_LAYER_ID)
         {
             m_ppLys[i]->set_layer_type(INPUT_LYR);
@@ -78,27 +148,65 @@ bool NeuralNet::init(uint unNoLys, uint* unpSzLys, eAct_func eAFunc, elog_level 
         else if(i == (m_unNumLys -1))
         {
             m_ppLys[i]->set_layer_type(OUTPUT_LYR);
+            m_unTotalCorrectableNodes += sz[i];
         }
         else
         {
             m_ppLys[i]->set_layer_type(HIDDEN_LYR);
+            m_unTotalCorrectableNodes += sz[i];
         }
-    }
-    
-    //allocate weight matrices
-    m_ppWtMtcs = (nn_l2l_weight_matrix**)malloc((m_unNumLys - 1) * sizeof(nn_l2l_weight_matrix*));
 
-    for(i = 0; i < (m_unNumLys - 1); i++)
-    {
-        m_ppWtMtcs[i] = new nn_l2l_weight_matrix(m_ppLys[i], m_ppLys[i + 1]);
-        
     }
+
+    for(uint i = 0; i < (m_unNumLys - 1); i++)
+    {
+         m_ppWtMtcs[i] = new nn_l2l_weight_matrix(m_ppLys[i], m_ppLys[i + 1]);
+    }
+
+}
+
+
+bool NeuralNet::init(nnInitData* initData)
+{
+    bool bRet = false;
+    //minimum layers is 3
+    if(initData->unNoLys < 3)
+    {
+        return bRet;
+    }
+
+    if(initData->fLearningRate > 1.0 || initData->fLearningRate <= 0.0)
+    {
+        return bRet;
+    }
+
+    srand(time(NULL));
+
+    m_eActFunc = initData->eAct_Func;
+
+    m_fLearningRate = initData->fLearningRate;
+
+    m_unNumLys = initData->unNoLys;
+
+    m_unTotalCorrectableNodes = 0;
+
+    //debug
+    nn_id = initData->ID;
+
+    //allocate layers
+    m_ppLys = new nn_layer*[m_unNumLys];
+
+    //allocate weight matrices
+    m_ppWtMtcs = new nn_l2l_weight_matrix*[(m_unNumLys - 1)];
+
+    SetupLayersAndWeightMatrices(initData->unSzLys);
+
+    
+
     
     m_bInitialized = true;
 
     bRet = true;
-
-    NNLOG_TRACE("exiting");
 
     return bRet;
     
@@ -108,16 +216,11 @@ bool NeuralNet::init(uint unNoLys, uint* unpSzLys, eAct_func eAFunc, elog_level 
 bool NeuralNet::do_forward_pass(float* pfInputArr)
 {
 
-    NNLOG_TRACE("entering");
-
-    NNLOG_MIL("Forward Propogation Started");
-
     bool bRet = false;
 
     //check if NN is initalised
     if(!m_bInitialized)
     {
-        NNLOG_ERR("Not Initialized!!!");
         return bRet;
     }
 
@@ -141,17 +244,12 @@ bool NeuralNet::do_forward_pass(float* pfInputArr)
     
     bRet = true;
 
-    NNLOG_TRACE("exiting");
-
-    NNLOG_MIL("Forward Propogation Complete");
-
     return bRet;
 
 }
 
 bool NeuralNet::do_forwardpass_to_next_layer(uint unInLayerIdx)
 {
-    NNLOG_TRACE("entering in_layer_idx:%d", unInLayerIdx);
     bool bRet = false;
 
     if(!m_bInitialized)
@@ -177,33 +275,22 @@ bool NeuralNet::do_forwardpass_to_next_layer(uint unInLayerIdx)
         for(i = 0; i < in_lyr_sz; i++)
         {
             sigma += (curr_mtx_ptr->get_weight(i, j) * in_lyr->get_node_value_idx(i));
-            NNLOG_DEBUG("layer [%d]: wt[%d][%d]=%f in_lyr_val=%f", unInLayerIdx + 1, i, j, curr_mtx_ptr->get_weight(i, j), in_lyr->get_node_value_idx(i));
-            // if(unInLayerIdx == INPUT_LAYER_ID)
-            // {
-            //     NNLOG_MIL("layer [%d]: wt[%d][%d]=%f in_lyr_val=%f", unInLayerIdx + 1, i, j, curr_mtx_ptr->get_weight(i, j), in_lyr->get_node_value_idx(i));
-            // }
-            
+                        
         }
         sigma += out_lyr->get_node_bias_idx(j);
         sigma /= in_lyr->get_num_nodes();
-        NNLOG_DEBUG("layer [%d]: node[%d]:net=%f", unInLayerIdx + 1, j, sigma);
         sigma = apply_act_func(sigma);
-        NNLOG_DEBUG("layer [%d]: node[%d]=%f", unInLayerIdx + 1, j, sigma);
         out_lyr->set_node_value(sigma, j);
         sigma = 0;
     }
 
     bRet = true;
 
-    NNLOG_TRACE("exiting");
-
     return bRet;
 }
 
 void NeuralNet::dump_nn()
 {
-
-    NNLOG_TRACE("entering");
 
     //todo corner conditions to be checked .... prone to crashes
 
@@ -225,11 +312,10 @@ void NeuralNet::dump_nn()
     
     if(!m_bInitialized)
     {
-        NNLOG_ERR("exiting, not initialized!!!");
         return;
     }
 
-    char * nn_str = (char *)malloc(MAX_DUMP_FILE_SIZE * sizeof(char));
+    char * nn_str = new char[MAX_DUMP_FILE_SIZE];
 
     char temp[500];
 
@@ -290,11 +376,6 @@ void NeuralNet::dump_nn()
 
     FILE* dump_file;
     
-    NNLOG_DEBUG("fileName: %s", fileName);
-
-    NNLOG_DEBUG("dump content \n%s\ndone", nn_str);
-
-
     dump_file = fopen(fileName, "w");
 
     //write nn content into dump file
@@ -303,36 +384,30 @@ void NeuralNet::dump_nn()
 
     fclose(dump_file);
 
-    free(nn_str);
+    delete [] nn_str;
 
     //increment dump_file_num for next dump
     static_nDumpFileNum++;
 
-    NNLOG_TRACE("exiting");
-
+    
 
 }
 
 bool NeuralNet::populate_weights(uint unIdx, float* pfValues)
 {
-    NNLOG_TRACE("entering idx:%d", unIdx);
     bool bRet = false;
 
     if(!m_bInitialized)
     {
-        NNLOG_ERR("exiting, not initialized!!!");
         return bRet;
     }
 
     if(unIdx >= m_unNumLys - 1)
     {
-        NNLOG_ERR("exiting, idx >= num_lys - 1 !!!");
         return bRet;
     }
 
     bRet = m_ppWtMtcs[unIdx]->set_all_weight(pfValues);
-
-    NNLOG_TRACE("exiting");
 
     return bRet;
 
@@ -340,25 +415,19 @@ bool NeuralNet::populate_weights(uint unIdx, float* pfValues)
 
 bool NeuralNet::populate_nodes_bias(uint unLyrIdx, float* pfBias)
 {
-    NNLOG_TRACE("entering lyr_idx:%d", unLyrIdx);
     bool bRet = false;
 
     if(!m_bInitialized)
     {
-        NNLOG_ERR("exiting, not initialized!!!");
         return bRet;
     }
 
     if(unLyrIdx >= m_unNumLys)
     {
-        NNLOG_ERR("exiting, idx >= num_lys!!!");
         return bRet;
     }
 
     bRet = m_ppLys[unLyrIdx]->set_all_node_biases(pfBias);
-
-    NNLOG_TRACE("exiting");
-    
 
     return bRet;
 }
@@ -368,7 +437,6 @@ float NeuralNet::calculate_error(float* pfExpOut, float* pfError)
     float fRet = 0;
     if(!m_bInitialized)
     {
-        NNLOG_ERR("exiting, not initialized!!!");
         return fRet;
     }
 
@@ -384,15 +452,10 @@ float NeuralNet::calculate_error(float* pfExpOut, float* pfError)
 
         pfError[i] *= pfError[i];
 
-        NNLOG_DEBUG("node[%d] pfExpOut=%f actual_out=%f error=%f", i, pfExpOut[i], output_lyr->get_node_value_idx(i), pfError[i]);
-        //NNLOG_MIL("node[%d] pfExpOut=%f actual_out=%f", i, pfExpOut[i], output_lyr->get_node_value_idx(i));
-        
         fRet += pfError[i];
     }
 
     fRet /= output_lyr->get_num_nodes();
-
-    NNLOG_MIL("total error=%f", fRet);
 
     return fRet;
 
@@ -404,11 +467,8 @@ bool NeuralNet::do_backward_pass(float* pfExpOut)
 
     if(!m_bInitialized)
     {
-        NNLOG_ERR("exiting, not initialized!!!");
         return bRet;
     }
-
-    NNLOG_MIL("Backward Propogation Started");
 
     //calculate error for every layer's node. except input layer
 
@@ -425,8 +485,6 @@ bool NeuralNet::do_backward_pass(float* pfExpOut)
 
     bRet = true;
 
-    NNLOG_MIL("Backward Propogation Complete");
-
     return bRet;
 
 }
@@ -436,7 +494,6 @@ float NeuralNet::apply_act_func(float n)
     float fRet = 0.0;
     if(!m_bInitialized)
     {
-        NNLOG_ERR("exiting, not initialized!!!");
         return fRet;
     }
 
@@ -457,7 +514,6 @@ float NeuralNet::apply_act_func_derv(float fVal)
     float fRet = 0.0;
     if(!m_bInitialized)
     {
-        NNLOG_ERR("exiting, not initialized!!!");
         return fRet;
     }
 
@@ -473,12 +529,12 @@ float NeuralNet::apply_act_func_derv(float fVal)
     return fRet;
 }
 
+
 float NeuralNet::find_delta_of_all_nodes_and_correct_biases(float* pfExpOut)
 {
 
     if(!m_bInitialized)
     {
-        NNLOG_ERR("exiting, not initialized!!!");
         return -1.0;
     }
 
@@ -486,7 +542,7 @@ float NeuralNet::find_delta_of_all_nodes_and_correct_biases(float* pfExpOut)
     uint j = 0; //current layer node index
     uint k = 0; //previous layer node index
 
-    float* error = (float*)malloc(m_ppLys[m_unNumLys - 1]->get_num_nodes() * sizeof(float));
+    float* error = new float[m_ppLys[m_unNumLys - 1]->get_num_nodes()];
 
     float total_error = calculate_error(pfExpOut, error);
 
@@ -507,11 +563,8 @@ float NeuralNet::find_delta_of_all_nodes_and_correct_biases(float* pfExpOut)
             {
                 temp = -1.0 * (pfExpOut[j] - m_ppLys[i]->get_node_value_idx(j)); //deivative of error function
                 //temp *= m_lys[i - 1]->get_num_nodes();
-                NNLOG_DEBUG("-(target_Node - act_node)=%f", temp);
                 temp *= apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
-                NNLOG_DEBUG("apply_act_func_derv=%f val:%f", apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j)), m_ppLys[i]->get_node_value_idx(j));
                 m_ppLys[i]->set_node_delta(temp, j);
-                NNLOG_DEBUG("layer[%d] node[%d] bias=%f delta=%f learningRate=%f", i, j, m_ppLys[i]->get_node_bias_idx(j), temp, m_fLearningRate);
                 m_ppLys[i]->set_node_bias((m_ppLys[i]->get_node_bias_idx(j) - (m_fLearningRate * temp)), j);
             }
         }
@@ -524,13 +577,10 @@ float NeuralNet::find_delta_of_all_nodes_and_correct_biases(float* pfExpOut)
                 for(k = 0; k < m_ppLys[i + 1]->get_num_nodes(); k++)
                 {
                     temp += m_ppLys[i + 1]->get_node_delta_idx(k) * m_ppWtMtcs[i]->get_weight(j, k);
-                    NNLOG_DEBUG("prev layer[%d] node[%d] deltas:%f wt:%f", i + 1, k,m_ppLys[i + 1]->get_node_delta_idx(k), m_ppWtMtcs[i]->get_weight(j, k));
                 }
                 //temp *= m_lys[i - 1]->get_num_nodes();
-                NNLOG_DEBUG("sum of prev layer nodes deltas * appropriate wts:%f node_val:%f", temp, m_ppLys[i]->get_node_value_idx(j));
                 temp *= apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
                 m_ppLys[i]->set_node_delta(temp, j);
-                NNLOG_DEBUG("layer[%d] node[%d] bias=%f delta=%f learningRate=%f apply_act_func_derv:%f", i, j, m_ppLys[i]->get_node_bias_idx(j), temp, m_fLearningRate, apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j)));
                 m_ppLys[i]->set_node_bias((m_ppLys[i]->get_node_bias_idx(j) - (m_fLearningRate * temp)), j);
             }
         }
@@ -538,7 +588,7 @@ float NeuralNet::find_delta_of_all_nodes_and_correct_biases(float* pfExpOut)
 
     }
 
-    free(error);
+    delete [] error;
 
     return total_error;
 
@@ -548,7 +598,6 @@ void NeuralNet::correct_weights()
 {
     if(!m_bInitialized)
     {
-        NNLOG_ERR("exiting, not initialized!!!");
         return;
     }
 
@@ -566,12 +615,9 @@ void NeuralNet::correct_weights()
             for(k = 0; k < m_ppLys[i + 1]->get_num_nodes(); k++)
             {
                 delta_wt = m_ppLys[i + 1]->get_node_delta_idx(k) * m_ppLys[i]->get_node_value_idx(j);
-                NNLOG_DEBUG("layer[%d] wt[%d][%d] out_node_delta=%f in_node_val=%f learningRate=%f old_wt:%f", i, j, k,  m_ppLys[i + 1]->get_node_delta_idx(k), m_ppLys[i]->get_node_value_idx(j), m_fLearningRate, m_ppWtMtcs[i]->get_weight(j, k));
                 delta_wt *= m_fLearningRate;
 
                 m_ppWtMtcs[i]->set_weight(j, k, (m_ppWtMtcs[i]->get_weight(j, k) - delta_wt));
-
-                NNLOG_DEBUG("layer[%d] wt[%d][%d] new_wt=%f delta_wt=%f", i, j, k,  m_ppWtMtcs[i]->get_weight(j, k), delta_wt);
             }
             
 
@@ -593,6 +639,168 @@ bool NeuralNet::Train(float* in, float* out)
     return bRet;
 }
 
+void NeuralNet::MergeBiasAndWeights(uint i)
+{
+    //merge bias
+    for(uint j = 1; j < m_unNumLys; j++)
+    {
+        for(uint k = 0; k < m_ppLys[j]->get_num_nodes(); k++)
+        {
+            m_ppLys[j]->set_node_bias(m_ppLys[j]->get_node_bias_idx(k) + m_batch_nns[i]->GetBias(j, k), k);
+        }
+    }
+    //merge weights
+    for(uint j = 0; j < m_unNumLys - 1 ; j++)
+    {
+        for(uint k = 0; k < m_ppWtMtcs[j]->get_size(); k++)
+        {
+            m_ppWtMtcs[j]->set_weight(k, m_ppWtMtcs[j]->get_weight(k) + m_batch_nns[i]->GetWeight(j, k));
+        }
+    }
+}
+
+void NeuralNet::Batch_Training(uint i) 
+{ 
+    do_forward_pass(args[i]->in);
+
+    args[i]->sBData->bCorrectPredict = isCorrectPrediction(args[i]->out);
+
+    do_backward_pass(args[i]->out);
+    
+    
+}
+
+
+void Setup_Batch_Processing_Args(uint numIn, uint TotalCorrectableNodes, uint inputLayerSz, uint outputLayerSz)
+{
+    
+    args = new Batch_Training_Args* [numIn]; 
+
+    
+    for(uint i = 0; i < numIn; i++)
+    {
+        args[i] = new Batch_Training_Args();
+        
+        args[i]->in = new float[inputLayerSz];
+        
+        args[i]->out = new float[outputLayerSz];
+        
+        args[i]->sBData = new Batch_Training_Instance_data();        
+        
+        args[i]->sBData->deltas = new float[TotalCorrectableNodes];
+        
+    }
+
+    
+}
+
+void Release_Args(uint numIn)
+{
+    for(uint i = 0; i < numIn; i++)
+    {
+        delete [] args[i]->sBData->deltas;
+        delete args[i]->sBData;
+        delete [] args[i]->out;
+        delete [] args[i]->in;
+        delete args[i];
+    }
+
+    delete [] args;
+}
+
+void NeuralNet::Populate_Batch_Processing_Args(float** in, float** out, uint numIn)
+{
+    for(uint i =0; i < numIn; i++)
+    {
+        for(uint j = 0; j < m_ppLys[0]->get_num_nodes(); j++)
+        {
+            args[i]->in[j] = in[i][j];
+        }
+        for(uint k = 0; k < m_ppLys[m_unNumLys - 1]->get_num_nodes(); k++)
+        {
+            args[i]->out[k] = out[i][k];
+        }
+
+    }
+}
+
+void NeuralNet::Init_Batch_Training(uint batchSz)
+{
+    if(initBatchTrain)
+    {
+
+        delete [] m_batch_nns;
+
+    }
+
+    m_batch_nns = new NeuralNet*[batchSz];
+
+    for(uint i  = 0; i < batchSz; i++)
+    {
+        
+        m_batch_nns[i] = new NeuralNet(this);
+        
+
+    }
+
+    m_batchSz = batchSz;
+
+    initBatchTrain = true;
+
+}
+
+
+uint NeuralNet::Train_batch(float** in, float** out, uint numIn)
+{
+    // printf("\nEntered Train_batch\n");
+    // fflush(stdout);
+    std::thread **threads = new std::thread* [numIn];
+    uint bRet = 0;
+
+    
+    Setup_Batch_Processing_Args(numIn, m_unTotalCorrectableNodes, m_ppLys[0]->get_num_nodes(),m_ppLys[m_unNumLys  -1]->get_num_nodes());
+    
+    Populate_Batch_Processing_Args(in, out, numIn);
+    
+    // Create threads dynamically
+    for(uint i = 0; i < numIn; i++)
+    {
+        //thread th4(&Base::foo, &b);
+        threads[i] = new std::thread(&NeuralNet::Batch_Training, m_batch_nns[i], i);              
+        
+    }
+    
+
+    for (uint i = 0; i < numIn; i++) 
+    { 
+        if (threads[i]->joinable())
+        { 
+            threads[i]->join(); 
+
+            MergeBiasAndWeights(i);
+            if(args[i]->sBData->bCorrectPredict)
+            {
+                bRet++;
+            }
+            
+        } 
+        delete threads[i];
+        
+        
+    }
+
+    // apply_delats_to_weights_and_biases_batch_training(deltas);
+       
+
+    correct_weights();
+    
+    delete [] threads; 
+    Release_Args(numIn);
+    args = nullptr;
+
+    return bRet;
+}
+
 void NeuralNet::populateWeightsAndBiasesWithRandomNumbers()
 {
     uint i = 0;
@@ -604,6 +812,51 @@ void NeuralNet::populateWeightsAndBiasesWithRandomNumbers()
             m_ppWtMtcs[i]->populateWeightsWithRandomNumbers();
         }
         m_ppLys[i]->populateBiasesWithRandomNumbers();
+    }
+}
+
+float NeuralNet::GetBias(uint LayerID, uint NodeID)
+{
+    return m_ppLys[LayerID]->get_node_bias_idx(NodeID);
+}
+
+uint NeuralNet::GetSzLayer(uint LayerID)
+{
+    return m_ppLys[LayerID]->get_num_nodes();
+}
+
+uint NeuralNet::GetSzMtx(uint MtxID)
+{
+    return m_ppWtMtcs[MtxID]->get_size();
+}
+
+float NeuralNet::GetWeight(uint MtxID, uint Idx)
+{
+    return m_ppWtMtcs[MtxID]->get_weight(Idx);
+}
+
+
+void NeuralNet::populateWeightsAndBiasesWithExistingNN(NeuralNet* other)
+{
+    uint i = 0;
+    uint j = 0;
+    uint sz = 0;
+
+    for(i = 1; i < m_unNumLys; i++)
+    {
+        sz = other->GetSzLayer(i);
+        for(j = 0; j < sz; j++)
+        {
+            m_ppLys[i]->set_node_bias(other->GetBias(i, j), j);
+        }
+    }
+    for(i = 0; i < (m_unNumLys - 1); i++)
+    {
+        sz = other->GetSzMtx(i);
+        for(j = 0; j < sz; j++)
+        {
+            m_ppWtMtcs[i]->set_weight(j, other->GetWeight(i, j));
+        }
     }
 }
 

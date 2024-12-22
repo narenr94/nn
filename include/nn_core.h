@@ -3,8 +3,13 @@
 
 #include <stdlib.h>
 #include <cstdlib>
+#include <unistd.h>
+#include <thread>
 #include "nn_math.h"
 #include "nn_l2l_weight_matrix.h"
+
+//debug
+// #include <iostream>
 
 
 #define INPUT_LAYER_ID 0 //input layer is the first layer
@@ -13,12 +18,26 @@
 
 #define MAX_DUMP_FILE_NAME_STR_SIZE 20 //size of dump file name str including '\0' terminator
 
+#define BATCH_PROC_NO_THREADS_PER_CPU 2 //number of threads per cpu to be created during batch processing
+
+#define MAX_DUMP_FILE_SIZE 10000000 //10Mbytes
+
 
 /*
     list of activation functions
 */
 enum eAct_func{
     SIGMOID
+};
+
+struct nnInitData{
+
+    uint unNoLys = 0;
+    uint* unSzLys = nullptr;
+    eAct_func eAct_Func = eAct_func::SIGMOID;
+    float fLearningRate = 0.5f;
+    uint ID = 0;
+
 };
 
 class NeuralNet{
@@ -31,9 +50,24 @@ class NeuralNet{
 
     uint m_unNumLys; //total number of layers in NN, including input and output layer
 
-    bool m_bInitialized; //is neural net initialized?
+    bool m_bInitialized = false; //is neural net initialized?
 
     float m_fLearningRate; //current learning rate of nn
+
+    uint m_unTotalCorrectableNodes;
+
+    //Batch Training Specific 
+    bool initBatchTrain = false;
+
+    NeuralNet ** m_batch_nns = nullptr;
+
+    uint m_batchSz = 0;
+
+    //debug
+    uint nn_id = 0;
+
+
+    
 
 
     
@@ -44,10 +78,17 @@ class NeuralNet{
     */
     NeuralNet();
 
+    // Copy constructor
+    NeuralNet(NeuralNet* other);
+
     /* 
         Destructor
     */
     ~NeuralNet();
+
+    void Get_Init_Data(nnInitData *ret);
+
+    void Init_Batch_Training(uint batchSz);
 
     /*
         init() : sets neural network
@@ -55,7 +96,7 @@ class NeuralNet{
         @no_lys : total number of layers, including input and output layer
         @sz_lys : array containing size of each layer, size of this array must be equal to total number of layers
     */
-    bool init(uint unNoLys, uint* unSzLys, eAct_func eActFunc, elog_level eLogLevel, bool bConsolePrint, float fLearningRate);
+    bool init(nnInitData* initData);
 
     /*
         do_forward_pass() : perform 1 iteration of forward pass
@@ -109,9 +150,19 @@ class NeuralNet{
     bool Train(float* pfIn, float* pfOut);
 
     /*
+        Train() : train neural net
+
+        @in : input array
+        @out : expected output array
+    */
+    uint Train_batch(float** in, float** out, uint numIn);
+
+    /*
         populateWeightsAndBiasesWithRandomNumbers() : fill weights and biases with random numbers
     */
     void populateWeightsAndBiasesWithRandomNumbers();    
+
+    void populateWeightsAndBiasesWithExistingNN(NeuralNet *other);
 
     /*
         Test() : tes neural net
@@ -123,6 +174,14 @@ class NeuralNet{
     
 
     private:
+
+    float GetBias(uint LayerID, uint NodeID);
+
+    uint GetSzLayer(uint LayerID);
+
+    uint GetSzMtx(uint MtxID);
+
+    float GetWeight(uint MtxID, uint Idx);
     /*
         forwardpass_to_next_layer() : perform forward pass from (in_layer_idx)th layer to (in_layer_idx + 1)th layer
 
@@ -153,6 +212,8 @@ class NeuralNet{
     */
     float find_delta_of_all_nodes_and_correct_biases(float* pfExpOut);
 
+    // float find_delta_of_all_nodes_batch_training(float* pfExpOut, float*deltaArr);
+
     /*
         correct_weights() : corrects all weights
     */
@@ -164,6 +225,19 @@ class NeuralNet{
         @out : expected output array
     */
     bool isCorrectPrediction(float* pfOut);   
+
+    void Batch_Training(uint i);
+    void Populate_Batch_Processing_Args(float** in, float** out, uint numIn);
+
+    // void Batch_Training();
+
+    // void apply_delats_to_weights_and_biases_batch_training(float* deltas);
+
+    void Set_Init_Data(nnInitData* other_initData);
+
+    void SetupLayersAndWeightMatrices(uint *sz);
+
+    void MergeBiasAndWeights(uint i);
 
 };
 
