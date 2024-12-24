@@ -9,7 +9,7 @@ fi
 rm ./*.dmp
 rm ./*.log
 rm ./*.o
-g++ -Wall -c ../src/*.cpp ../src/ActivationFunctions/*.cpp ./mnist_example_batch.c -I ../include/ -g
-g++ -Wall ./*.o -o ./mnist_example_batch -g
+g++ -Wall -c ../src/*.cpp ../src/ActivationFunctions/*.cpp ./mnist_actFunc_example.c -I ../include/ -g
+g++ -Wall ./*.o -o ./mnist_example_actFunc -g
 
 

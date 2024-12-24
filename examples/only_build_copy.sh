@@ -9,7 +9,7 @@ fi
 rm ./*.dmp
 rm ./*.log
 rm ./*.o
-g++ -Wall -c ../src/*.cpp ./mnist_copy_example.c -I ../include/ -g
+g++ -Wall -c ../src/*.cpp ../src/ActivationFunctions/*.cpp ./mnist_copy_example.c -I ../include/ -g
 g++ -Wall ./*.o -o ./mnist_example_copy -g
 
 

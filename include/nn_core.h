@@ -8,6 +8,12 @@
 #include "nn_math.h"
 #include "nn_l2l_weight_matrix.h"
 
+//activation functions
+#include "sigmoidActFunc.h"
+#include "reluActFunc.h"
+#include "leakyReluActFunc.h"
+#include "tanhActFunc.h"
+
 //debug
 // #include <iostream>
 
@@ -27,7 +33,10 @@
     list of activation functions
 */
 enum eAct_func{
-    SIGMOID
+    SIGMOID,
+    RELU,
+    LEAKY_RELU,
+    TANH
 };
 
 struct nnInitData{
@@ -55,6 +64,9 @@ class NeuralNet{
     float m_fLearningRate; //current learning rate of nn
 
     uint m_unTotalCorrectableNodes;
+
+    //Activation Function
+    ActivationFunction* m_pActFunc;
 
     //Batch Training Specific 
     bool initBatchTrain = false;
@@ -188,20 +200,6 @@ class NeuralNet{
         @in_layer_idx : input (relative) layer index
     */
     bool do_forwardpass_to_next_layer(uint unInLayerIdx);
-
-    /*
-        apply_act_func() : applies act function as per config
-
-        @n : value to which act func is to be applied
-    */
-    float apply_act_func(float fVal);
-
-    /*
-        apply_act_func_derv() : applies act function derivative as per config
-
-        @n : value to which act func derivative is to be applied
-    */
-    float apply_act_func_derv(float fVal);
 
     /*
         find_delta_of_all_nodes() : calculates and updates delta of all nodes in nn, also corrects biases

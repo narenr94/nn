@@ -76,14 +76,25 @@ void NeuralNet::Get_Init_Data(nnInitData *ret)
 void NeuralNet::Set_Init_Data(nnInitData* other_initData)
 {
 
-    // uint unNoLys = 0;
-    // uint* unSzLys = nullptr;
-    // eAct_func eAct_Func = eAct_func::SIGMOID;
-    // elog_level eLogLevel = elog_level::eLOGLEVEL_WARN;
-    // bool bConsolePrint = false;
-    // float fLearningRate = 0.5f;
     m_unNumLys = other_initData->unNoLys;
     m_eActFunc = other_initData->eAct_Func;
+    switch(m_eActFunc)
+    {
+        case eAct_func::SIGMOID:
+            m_pActFunc = new SigmoidActFunc();
+            break;
+        case eAct_func::RELU:
+            m_pActFunc = new ReluActFunc();
+            break;
+        case eAct_func::LEAKY_RELU:
+            m_pActFunc = new LeakyReluActFunc();
+            break;
+        case eAct_func::TANH:
+            m_pActFunc = new TanhActFunc();
+            break;
+        default:
+            m_pActFunc = new SigmoidActFunc();
+    }
     m_fLearningRate = other_initData->fLearningRate;
     nn_id = other_initData->ID;
 
@@ -184,6 +195,25 @@ bool NeuralNet::init(nnInitData* initData)
 
     m_eActFunc = initData->eAct_Func;
 
+    //setup Activation function
+    switch(m_eActFunc)
+    {
+        case eAct_func::SIGMOID:
+            m_pActFunc = new SigmoidActFunc();
+            break;
+        case eAct_func::RELU:
+            m_pActFunc = new ReluActFunc();
+            break;
+        case eAct_func::LEAKY_RELU:
+            m_pActFunc = new LeakyReluActFunc();
+            break;
+        case eAct_func::TANH:
+            m_pActFunc = new TanhActFunc();
+            break;
+        default:
+            m_pActFunc = new SigmoidActFunc();
+    }
+
     m_fLearningRate = initData->fLearningRate;
 
     m_unNumLys = initData->unNoLys;
@@ -279,7 +309,7 @@ bool NeuralNet::do_forwardpass_to_next_layer(uint unInLayerIdx)
         }
         sigma += out_lyr->get_node_bias_idx(j);
         sigma /= in_lyr->get_num_nodes();
-        sigma = apply_act_func(sigma);
+        sigma = m_pActFunc->apply_act_func(sigma);
         out_lyr->set_node_value(sigma, j);
         sigma = 0;
     }
@@ -489,47 +519,6 @@ bool NeuralNet::do_backward_pass(float* pfExpOut)
 
 }
 
-float NeuralNet::apply_act_func(float n)
-{
-    float fRet = 0.0;
-    if(!m_bInitialized)
-    {
-        return fRet;
-    }
-
-    switch(m_eActFunc)
-    {
-        case SIGMOID:
-            fRet = get_sigmoidf(n);
-
-        default:
-            break;
-    }
-
-    return fRet;
-}
-
-float NeuralNet::apply_act_func_derv(float fVal)
-{
-    float fRet = 0.0;
-    if(!m_bInitialized)
-    {
-        return fRet;
-    }
-
-    switch(m_eActFunc)
-    {
-        case SIGMOID:
-            fRet = find_derivative_sigmoidf(fVal);
-
-        default:
-            break;
-    }
-
-    return fRet;
-}
-
-
 float NeuralNet::find_delta_of_all_nodes_and_correct_biases(float* pfExpOut)
 {
 
@@ -563,7 +552,7 @@ float NeuralNet::find_delta_of_all_nodes_and_correct_biases(float* pfExpOut)
             {
                 temp = -1.0 * (pfExpOut[j] - m_ppLys[i]->get_node_value_idx(j)); //deivative of error function
                 //temp *= m_lys[i - 1]->get_num_nodes();
-                temp *= apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
+                temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
                 m_ppLys[i]->set_node_delta(temp, j);
                 m_ppLys[i]->set_node_bias((m_ppLys[i]->get_node_bias_idx(j) - (m_fLearningRate * temp)), j);
             }
@@ -579,7 +568,7 @@ float NeuralNet::find_delta_of_all_nodes_and_correct_biases(float* pfExpOut)
                     temp += m_ppLys[i + 1]->get_node_delta_idx(k) * m_ppWtMtcs[i]->get_weight(j, k);
                 }
                 //temp *= m_lys[i - 1]->get_num_nodes();
-                temp *= apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
+                temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
                 m_ppLys[i]->set_node_delta(temp, j);
                 m_ppLys[i]->set_node_bias((m_ppLys[i]->get_node_bias_idx(j) - (m_fLearningRate * temp)), j);
             }
