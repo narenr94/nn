@@ -47,6 +47,16 @@ struct nnInitData{
     float fLearningRate = 0.5f;
     uint ID = 0;
 
+    nnInitData(uint m_unNumLys)
+    {
+        unSzLys = new uint [m_unNumLys];
+    };
+
+    ~nnInitData()
+    {
+        delete [] unSzLys;
+    }
+
 };
 
 class NeuralNet{
@@ -88,7 +98,7 @@ class NeuralNet{
     /*
         Constructor
     */
-    NeuralNet();
+    NeuralNet(nnInitData* initData);
 
     // Copy constructor
     NeuralNet(NeuralNet* other);
@@ -101,14 +111,6 @@ class NeuralNet{
     void Get_Init_Data(nnInitData *ret);
 
     void Init_Batch_Training(uint batchSz);
-
-    /*
-        init() : sets neural network
-
-        @no_lys : total number of layers, including input and output layer
-        @sz_lys : array containing size of each layer, size of this array must be equal to total number of layers
-    */
-    bool init(nnInitData* initData);
 
     /*
         do_forward_pass() : perform 1 iteration of forward pass
@@ -208,14 +210,14 @@ class NeuralNet{
 
         @return : total error
     */
-    float find_delta_of_all_nodes_and_correct_biases(float* pfExpOut);
-
-    // float find_delta_of_all_nodes_batch_training(float* pfExpOut, float*deltaArr);
+    float find_delta_of_all_nodes(float* pfExpOut);
 
     /*
         correct_weights() : corrects all weights
     */
     void correct_weights();
+
+    void correct_biases();
 
     /*
         isCorrectPrediction() : compares neural net output with expected output and return true is correct.
