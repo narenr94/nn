@@ -30,19 +30,18 @@ static Batch_Training_Args ** args = nullptr;
 
 
 
-NeuralNet::NeuralNet()
+NeuralNet::NeuralNet(nnInitData* initData)
 {
-    m_eActFunc = SIGMOID;
-    m_ppWtMtcs = NULL;
-    m_ppLys = NULL;
+    srand(time(NULL));
 
-    m_bInitialized = false;
+    Set_Init_Data(initData);
+
+    SetupLayersAndWeightMatrices(initData->unSzLys);
 }
 
 NeuralNet::NeuralNet(NeuralNet* other)
 {
-    nnInitData *ret = new nnInitData();
-    ret->unSzLys = new uint [m_unNumLys];
+    nnInitData *ret = new nnInitData(m_unNumLys);
 
     //debug
     static uint i = 1;
@@ -54,8 +53,6 @@ NeuralNet::NeuralNet(NeuralNet* other)
 
     Set_Init_Data(ret);
     populateWeightsAndBiasesWithExistingNN(other);
-
-    delete [] ret->unSzLys;
 
     delete ret;
 }
@@ -176,72 +173,6 @@ void NeuralNet::SetupLayersAndWeightMatrices(uint *sz)
 
 }
 
-
-bool NeuralNet::init(nnInitData* initData)
-{
-    bool bRet = false;
-    //minimum layers is 3
-    if(initData->unNoLys < 3)
-    {
-        return bRet;
-    }
-
-    if(initData->fLearningRate > 1.0 || initData->fLearningRate <= 0.0)
-    {
-        return bRet;
-    }
-
-    srand(time(NULL));
-
-    m_eActFunc = initData->eAct_Func;
-
-    //setup Activation function
-    switch(m_eActFunc)
-    {
-        case eAct_func::SIGMOID:
-            m_pActFunc = new SigmoidActFunc();
-            break;
-        case eAct_func::RELU:
-            m_pActFunc = new ReluActFunc();
-            break;
-        case eAct_func::LEAKY_RELU:
-            m_pActFunc = new LeakyReluActFunc();
-            break;
-        case eAct_func::TANH:
-            m_pActFunc = new TanhActFunc();
-            break;
-        default:
-            m_pActFunc = new SigmoidActFunc();
-    }
-
-    m_fLearningRate = initData->fLearningRate;
-
-    m_unNumLys = initData->unNoLys;
-
-    m_unTotalCorrectableNodes = 0;
-
-    //debug
-    nn_id = initData->ID;
-
-    //allocate layers
-    m_ppLys = new nn_layer*[m_unNumLys];
-
-    //allocate weight matrices
-    m_ppWtMtcs = new nn_l2l_weight_matrix*[(m_unNumLys - 1)];
-
-    SetupLayersAndWeightMatrices(initData->unSzLys);
-
-    
-
-    
-    m_bInitialized = true;
-
-    bRet = true;
-
-    return bRet;
-    
-
-}
 
 bool NeuralNet::do_forward_pass(float* pfInputArr)
 {
@@ -509,7 +440,9 @@ bool NeuralNet::do_backward_pass(float* pfExpOut)
             error = der_act_func(actual value) * (sum(weights_leading_out_of_node * error_of_node_it_is_reaching))
     */
 
-    find_delta_of_all_nodes_and_correct_biases(pfExpOut);
+    find_delta_of_all_nodes(pfExpOut);
+
+    correct_biases();
 
     correct_weights();
 
@@ -519,7 +452,7 @@ bool NeuralNet::do_backward_pass(float* pfExpOut)
 
 }
 
-float NeuralNet::find_delta_of_all_nodes_and_correct_biases(float* pfExpOut)
+float NeuralNet::find_delta_of_all_nodes(float* pfExpOut)
 {
 
     if(!m_bInitialized)
@@ -554,7 +487,7 @@ float NeuralNet::find_delta_of_all_nodes_and_correct_biases(float* pfExpOut)
                 //temp *= m_lys[i - 1]->get_num_nodes();
                 temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
                 m_ppLys[i]->set_node_delta(temp, j);
-                m_ppLys[i]->set_node_bias((m_ppLys[i]->get_node_bias_idx(j) - (m_fLearningRate * temp)), j);
+                // m_ppLys[i]->set_node_bias((m_ppLys[i]->get_node_bias_idx(j) - (m_fLearningRate * temp)), j);
             }
         }
         else //hidden layer
@@ -570,7 +503,7 @@ float NeuralNet::find_delta_of_all_nodes_and_correct_biases(float* pfExpOut)
                 //temp *= m_lys[i - 1]->get_num_nodes();
                 temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
                 m_ppLys[i]->set_node_delta(temp, j);
-                m_ppLys[i]->set_node_bias((m_ppLys[i]->get_node_bias_idx(j) - (m_fLearningRate * temp)), j);
+                // m_ppLys[i]->set_node_bias((m_ppLys[i]->get_node_bias_idx(j) - (m_fLearningRate * temp)), j);
             }
         }
         
@@ -580,6 +513,28 @@ float NeuralNet::find_delta_of_all_nodes_and_correct_biases(float* pfExpOut)
     delete [] error;
 
     return total_error;
+
+}
+
+void NeuralNet::correct_biases()
+{
+    if(!m_bInitialized)
+    {
+        return;
+    }
+
+    
+    uint i; //in layer index, out layer index is always in layer index + 1
+    uint j; //in layer node index
+
+    for(i = INPUT_LAYER_ID; i < m_unNumLys - 1; i++)
+    {
+        for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
+        {
+            m_ppLys[i]->set_node_bias(m_ppLys[i]->get_node_bias_idx(j) - (m_fLearningRate * m_ppLys[i]->get_node_delta_idx(j)), j);
+            
+        }
+    }    
 
 }
 

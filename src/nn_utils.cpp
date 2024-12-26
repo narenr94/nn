@@ -1,4 +1,4 @@
-#include "nn_logger.h"
+#include "nn_utils.h"
 
 
 nn_progress_bar::~nn_progress_bar()
@@ -119,7 +119,7 @@ void nn_progress_bar::update_progress_bar(uint cVal)
 
 void nn_progress_bar::reset()
 {
-    while(m_bUpdating); //wait until current update of progress bar completes
+    while(m_bUpdating); //KLUDGE: wait until current update of progress bar completes
 
     std::unique_lock<std::mutex>lock(m_mtx);
     m_unCurrVal = 0;

@@ -11,7 +11,7 @@
 #define NORM_FACTOR 254.0 //max value in data set for normalization
 #define VAL_SIZE 784 //input layer size
 #define EPOCH_MAX 20 //number epochs of training and testing 
-#define BATCH_SIZE 4
+#define BATCH_SIZE 8
 #define LEARNING_RATE 0.5
 
 /*
@@ -74,8 +74,6 @@ int main()
         out_arr[l] = (float*)malloc(VAL_SIZE*sizeof(float));
     }
 
-    NeuralNet *nn = new NeuralNet();
-
     std::string linestr = "Line";
 
     nn_progress_bar *pb = new nn_progress_bar(linestr.c_str(),TRAIN_MAX);
@@ -87,7 +85,7 @@ int main()
 
     float accuracy = 0.0;   
 
-    nnInitData * initData = new nnInitData(); 
+    nnInitData * initData = new nnInitData(4); 
     /*
     struct nnInitData{
 
@@ -102,11 +100,14 @@ int main()
     */
 
     initData->unNoLys = 4;
-    initData->unSzLys = sz;
+    for(uint l = 0; l < initData->unNoLys; l++)
+    {
+        initData->unSzLys[l] = sz[l];
+    }
     initData->eAct_Func = eAct_func::SIGMOID;
     initData->fLearningRate = LEARNING_RATE;
     
-    nn->init(initData);
+    NeuralNet *nn = new NeuralNet(initData);
 
     nn->populateWeightsAndBiasesWithRandomNumbers();
 

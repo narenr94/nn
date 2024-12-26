@@ -1,5 +1,5 @@
-#ifndef NN_LOGGER
-#define NN_LOGGER
+#ifndef NN_UTILS_H
+#define NN_UTILS_H
 
 #include <stdio.h>
 #include <stdlib.h>

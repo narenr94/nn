@@ -61,8 +61,6 @@ int main()
 
     float* norm_values = (float*)malloc(VAL_SIZE*sizeof(float));
 
-    NeuralNet *nn = new NeuralNet();
-
     std::string linestr = "Line";
 
     nn_progress_bar *pb = new nn_progress_bar(linestr.c_str(),TRAIN_MAX);
@@ -77,10 +75,14 @@ int main()
 
         float accuracy = 0.0;   
 
-        nnInitData * initData = new nnInitData(); 
+        nnInitData * initData = new nnInitData(4);
+
         
         initData->unNoLys = 4;
-        initData->unSzLys = sz;
+        for(uint l = 0; l < initData->unNoLys; l++)
+        {
+            initData->unSzLys[l] = sz[l];
+        }
         initData->eAct_Func = actVal;
         initData->fLearningRate = 0.01f;
 
@@ -101,7 +103,7 @@ int main()
 
         }
 
-        nn->init(initData);
+         NeuralNet *nn = new NeuralNet(initData);
 
         nn->populateWeightsAndBiasesWithRandomNumbers();
 

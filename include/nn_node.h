@@ -2,7 +2,7 @@
 
 #define NN_NODE
 
-#include "nn_logger.h"
+#include "nn_utils.h"
 
 class nn_node{
 
