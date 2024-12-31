@@ -8,14 +8,9 @@
 #include "nn_math.h"
 #include "nn_l2l_weight_matrix.h"
 
-//activation functions
-#include "sigmoidActFunc.h"
-#include "reluActFunc.h"
-#include "leakyReluActFunc.h"
-#include "tanhActFunc.h"
+#include "activationFunction.h"
 
-//debug
-// #include <iostream>
+#include "optimizer.h"
 
 
 #define INPUT_LAYER_ID 0 //input layer is the first layer
@@ -24,8 +19,6 @@
 
 #define MAX_DUMP_FILE_NAME_STR_SIZE 20 //size of dump file name str including '\0' terminator
 
-#define BATCH_PROC_NO_THREADS_PER_CPU 2 //number of threads per cpu to be created during batch processing
-
 #define MAX_DUMP_FILE_SIZE 10000000 //10Mbytes
 
 
@@ -33,10 +26,19 @@
     list of activation functions
 */
 enum eAct_func{
-    SIGMOID,
     RELU,
     LEAKY_RELU,
-    TANH
+    TANH,
+    SIGMOID
+};
+
+/*
+    list of activation functions
+*/
+enum eOptimizers{
+    SGD,
+    RMSPROP,
+    ADAM
 };
 
 struct nnInitData{
@@ -46,7 +48,11 @@ struct nnInitData{
     eAct_func eAct_Func = eAct_func::SIGMOID;
     float fLearningRate = 0.5f;
     uint ID = 0;
+    eOptimizers eOpt = eOptimizers::SGD;
+    float optParam3 = 0.0f;
 
+    //ToDo: parameters for actFunc and Optimizers
+    
     nnInitData(uint m_unNumLys)
     {
         unSzLys = new uint [m_unNumLys];
@@ -75,6 +81,10 @@ class NeuralNet{
 
     uint m_unTotalCorrectableNodes;
 
+    eOptimizers m_eOpt = eOptimizers::SGD;
+
+    Optimizer* m_pOptimizer;
+
     //Activation Function
     ActivationFunction* m_pActFunc;
 
@@ -86,7 +96,7 @@ class NeuralNet{
     uint m_batchSz = 0;
 
     //debug
-    uint nn_id = 0;
+    // uint nn_id = 0;
 
 
     
@@ -185,17 +195,34 @@ class NeuralNet{
         @out : expected output array
     */
     bool Test(float* pfIn, float* pfOut);
-    
 
-    private:
-
-    float GetBias(uint LayerID, uint NodeID);
+    uint GetNumLys();
 
     uint GetSzLayer(uint LayerID);
+
+    float GetBias(uint LayerID, uint NodeID);
 
     uint GetSzMtx(uint MtxID);
 
     float GetWeight(uint MtxID, uint Idx);
+
+    float GetWeight(uint MtxID, uint inIdx, uint outIdx);
+
+    void SetBias(uint LayerID, uint NodeID, float val);
+
+    float GetLearningRate();
+
+    float GetDelta(uint LayerID, uint NodeID);
+
+    float GetNodeVal(uint LayerID, uint NodeID);
+
+    void SetWeight(uint MtxId, uint inIdx, uint outIdx, float val); 
+
+
+    
+
+    private:
+    
     /*
         forwardpass_to_next_layer() : perform forward pass from (in_layer_idx)th layer to (in_layer_idx + 1)th layer
 
@@ -212,13 +239,7 @@ class NeuralNet{
     */
     float find_delta_of_all_nodes(float* pfExpOut);
 
-    /*
-        correct_weights() : corrects all weights
-    */
-    void correct_weights();
-
-    void correct_biases();
-
+    
     /*
         isCorrectPrediction() : compares neural net output with expected output and return true is correct.
 
