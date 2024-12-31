@@ -92,6 +92,7 @@ int main()
         initData->unSzLys[l] = sz[l];
     }
     initData->eAct_Func = eAct_func::SIGMOID;
+    initData->eOpt = eOptimizers::ADAM;
     initData->fLearningRate = 0.5f;
 
     NeuralNet *nn = new NeuralNet(initData);

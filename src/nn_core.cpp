@@ -1,4 +1,16 @@
 #include "nn_core.h"
+
+//activation functions
+#include "sigmoidActFunc.h"
+#include "reluActFunc.h"
+#include "leakyReluActFunc.h"
+#include "tanhActFunc.h"
+
+//Optimizers
+#include "stochasticGradientDescent.h"
+#include "rmsprop.h"
+#include "adam.h"
+
 #include <vector>
 
 static const char* static_NNDumpFilePath = "./"; //dump file path
@@ -10,7 +22,10 @@ static int static_nDumpFileNum = 0; //number postfix fro dump files
 */
 static const char * static_const_parrActFuncStr[SIGMOID+1] =
 {
-	"SIGMOID" //Sigmoid
+    "RELU",
+    "LEAKY_RELU",
+    "TANH",
+    "SIGMOID"
 };
 
 struct Batch_Training_Instance_data{
@@ -66,7 +81,8 @@ void NeuralNet::Get_Init_Data(nnInitData *ret)
     }
     ret->eAct_Func = m_eActFunc;
     ret->fLearningRate = m_fLearningRate;
-    ret->ID = nn_id;
+    ret->eOpt = m_eOpt;
+    // ret->ID = nn_id;
 
 }
 
@@ -93,7 +109,12 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
             m_pActFunc = new SigmoidActFunc();
     }
     m_fLearningRate = other_initData->fLearningRate;
-    nn_id = other_initData->ID;
+    // nn_id = other_initData->ID;
+    m_eOpt = other_initData->eOpt;
+
+    
+
+    
 
     if(m_bInitialized)
     {
@@ -104,6 +125,22 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
     
 
     SetupLayersAndWeightMatrices(other_initData->unSzLys);
+
+    switch(m_eOpt)
+    {
+        case eOptimizers::SGD:
+            m_pOptimizer = new StochasticGradientDescent(this);
+            break;
+        case eOptimizers::RMSPROP:
+            m_pOptimizer = new RMSProp(this);
+            break;
+        case eOptimizers::ADAM:
+            m_pOptimizer = new ADAMOPT(this);
+            break;
+        default:
+            m_pOptimizer = new StochasticGradientDescent(this);
+            break;
+    }
 
     m_bInitialized = true;
 
@@ -138,6 +175,11 @@ NeuralNet::~NeuralNet()
 
         }
         delete [] m_batch_nns;
+    }
+
+    if(m_pOptimizer)
+    {
+        delete m_pOptimizer;
     }
 }
 
@@ -442,9 +484,7 @@ bool NeuralNet::do_backward_pass(float* pfExpOut)
 
     find_delta_of_all_nodes(pfExpOut);
 
-    correct_biases();
-
-    correct_weights();
+    m_pOptimizer->correct_weights_biases();
 
     bRet = true;
 
@@ -513,60 +553,6 @@ float NeuralNet::find_delta_of_all_nodes(float* pfExpOut)
     delete [] error;
 
     return total_error;
-
-}
-
-void NeuralNet::correct_biases()
-{
-    if(!m_bInitialized)
-    {
-        return;
-    }
-
-    
-    uint i; //in layer index, out layer index is always in layer index + 1
-    uint j; //in layer node index
-
-    for(i = INPUT_LAYER_ID; i < m_unNumLys - 1; i++)
-    {
-        for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
-        {
-            m_ppLys[i]->set_node_bias(m_ppLys[i]->get_node_bias_idx(j) - (m_fLearningRate * m_ppLys[i]->get_node_delta_idx(j)), j);
-            
-        }
-    }    
-
-}
-
-void NeuralNet::correct_weights()
-{
-    if(!m_bInitialized)
-    {
-        return;
-    }
-
-    
-    uint i; //in layer index, out layer index is always in layer index + 1
-    uint j; //in layer node index
-    uint k; //out layer node index
-
-    float delta_wt = 0.0;
-
-    for(i = INPUT_LAYER_ID; i < m_unNumLys - 1; i++)
-    {
-        for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
-        {
-            for(k = 0; k < m_ppLys[i + 1]->get_num_nodes(); k++)
-            {
-                delta_wt = m_ppLys[i + 1]->get_node_delta_idx(k) * m_ppLys[i]->get_node_value_idx(j);
-                delta_wt *= m_fLearningRate;
-
-                m_ppWtMtcs[i]->set_weight(j, k, (m_ppWtMtcs[i]->get_weight(j, k) - delta_wt));
-            }
-            
-
-        }
-    }    
 
 }
 
@@ -735,8 +721,7 @@ uint NeuralNet::Train_batch(float** in, float** out, uint numIn)
 
     // apply_delats_to_weights_and_biases_batch_training(deltas);
        
-
-    correct_weights();
+    m_pOptimizer->correct_weights_biases();
     
     delete [] threads; 
     Release_Args(numIn);
@@ -851,5 +836,40 @@ bool NeuralNet::Test(float* pfIn, float* pfOut)
 
     return ret;
 
+}
+
+uint NeuralNet::GetNumLys()
+{
+    return m_unNumLys;
+}
+
+void NeuralNet::SetBias(uint LayerID, uint NodeID, float val)
+{
+    m_ppLys[LayerID]->set_node_bias(val, NodeID);
+}
+
+float NeuralNet::GetLearningRate()
+{
+    return m_fLearningRate;
+}
+
+float NeuralNet::GetDelta(uint LayerID, uint NodeID)
+{
+    return m_ppLys[LayerID]->get_node_delta_idx(NodeID);
+}
+
+float NeuralNet::GetNodeVal(uint LayerID, uint NodeID)
+{
+    return m_ppLys[LayerID]->get_node_value_idx(NodeID);
+}
+
+void NeuralNet::SetWeight(uint MtxId, uint inIdx, uint outIdx, float val)
+{
+    m_ppWtMtcs[MtxId]->set_weight(inIdx, outIdx, val);
+}
+
+float NeuralNet::GetWeight(uint MtxID, uint inIdx, uint outIdx)
+{
+    return m_ppWtMtcs[MtxID]->get_weight(inIdx, outIdx);
 }
 
