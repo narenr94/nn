@@ -1,12 +1,11 @@
 # nn
 Artifical Neural Network library in C++
 
-## Running MNIST example
+## Running examples
 
-run build_run.sh
+mkdir build
+cd build
+cmake ../
+make
 
-```
-bash ./examples/build_run.sh
-```
-
-Data will only be downloaded first time script is run.
+executables will be available within build/examples
