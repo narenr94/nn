@@ -2,7 +2,7 @@
 
 #define NN_NODE
 
-#include "nn_utils.h"
+#include "nn_math.h"
 
 class nn_node{
 

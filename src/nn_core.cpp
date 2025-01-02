@@ -11,7 +11,8 @@
 #include "rmsprop.h"
 #include "adam.h"
 
-#include <vector>
+#include <string.h>
+#include <stdio.h>
 
 static const char* static_NNDumpFilePath = "./"; //dump file path
 
