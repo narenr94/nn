@@ -73,6 +73,75 @@ NeuralNet::NeuralNet(NeuralNet* other)
     delete ret;
 }
 
+NeuralNet::NeuralNet(const char* fileName)
+{
+    FILE* file = fopen(fileName, "r"); 
+	if (file == nullptr) 
+	{ 
+		perror("Failed to open file for reading"); 
+		return; 
+	} 
+	
+    uint i = 0;
+    uint j = 0;
+
+    uint temp_numLys = 0;
+    int temp_int = 0;
+
+    //load init data
+    fscanf(file, "%d", &temp_numLys);
+
+    nnInitData* temp_initData = new nnInitData(temp_numLys);
+
+    temp_initData->unNoLys = temp_numLys;
+
+    for(i = 0; i < temp_numLys; i++)
+    {
+        fscanf(file, "%d", &(temp_initData->unSzLys[i]));
+    }
+
+    fscanf(file, "%d", &temp_int);
+    temp_initData->eAct_Func = (eAct_func)temp_int;
+    fscanf(file, "%f", &temp_initData->fLearningRate);
+    fscanf(file, "%d", &temp_int);
+    temp_initData->eOpt = (eOptimizers)temp_int;
+
+    //set nn with temp init data
+    Set_Init_Data(temp_initData);
+
+    SetupLayersAndWeightMatrices(temp_initData->unSzLys);
+
+    delete temp_initData;
+
+    float temp_float = 0.0f;
+
+
+    //store bias values
+	for(i = 0; i < temp_numLys; ++i) 
+	{ 
+        for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
+        {
+            fscanf(file, "%f", &temp_float);
+            m_ppLys[i]->set_node_bias(temp_float, j);
+        }
+		 
+	} 
+
+    //store weight values
+    for(i = 0; i < (m_unNumLys - 1); ++i) 
+	{ 
+        for(j = 0; j < m_ppWtMtcs[i]->get_size(); j++)
+        {
+            fscanf(file, "%f", &temp_float);
+            m_ppWtMtcs[i]->set_weight(j, temp_float);
+        }
+		 
+	} 
+
+
+	fclose(file);
+}
+
 void NeuralNet::Get_Init_Data(nnInitData *ret)
 {
     ret->unNoLys = m_unNumLys;
@@ -89,7 +158,6 @@ void NeuralNet::Get_Init_Data(nnInitData *ret)
 
 void NeuralNet::Set_Init_Data(nnInitData* other_initData)
 {
-
     m_unNumLys = other_initData->unNoLys;
     m_eActFunc = other_initData->eAct_Func;
     switch(m_eActFunc)
@@ -116,14 +184,12 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
     
 
     
-
     if(m_bInitialized)
     {
         delete [] m_ppLys;
         delete [] m_ppWtMtcs;
     }
 
-    
 
     SetupLayersAndWeightMatrices(other_initData->unSzLys);
 
@@ -142,7 +208,7 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
             m_pOptimizer = new StochasticGradientDescent(this);
             break;
     }
-
+    
     m_bInitialized = true;
 
 
@@ -189,6 +255,7 @@ void NeuralNet::SetupLayersAndWeightMatrices(uint *sz)
 {
     m_ppLys = new nn_layer*[m_unNumLys];
     m_ppWtMtcs = new nn_l2l_weight_matrix*[m_unNumLys - 1];
+    
     for(uint i = 0; i < m_unNumLys; i++)
     {
         m_ppLys[i] = new nn_layer(sz[i]);
@@ -208,12 +275,12 @@ void NeuralNet::SetupLayersAndWeightMatrices(uint *sz)
         }
 
     }
-
+    
     for(uint i = 0; i < (m_unNumLys - 1); i++)
     {
          m_ppWtMtcs[i] = new nn_l2l_weight_matrix(m_ppLys[i], m_ppLys[i + 1]);
     }
-
+    
 }
 
 
@@ -293,109 +360,6 @@ bool NeuralNet::do_forwardpass_to_next_layer(uint unInLayerIdx)
     return bRet;
 }
 
-void NeuralNet::dump_nn()
-{
-
-    //todo corner conditions to be checked .... prone to crashes
-
-    //setup and open dump file
-    char fileName[MAX_DUMP_FILE_NAME_STR_SIZE];
-    char dump_file_num_str[MAX_DUMP_FILE_NUM_STR_SIZE];
-
-    dump_file_num_str[0] = (char)static_nDumpFileNum/10;
-    dump_file_num_str[0] += '0';
-    dump_file_num_str[1] = (char)static_nDumpFileNum%10;
-    dump_file_num_str[1] += '0';
-    dump_file_num_str[2] = '\0';
-
-    strcpy(fileName, static_NNDumpFilePath);
-    strcat(fileName, "nn");
-    strcat(fileName, dump_file_num_str);
-    strcat(fileName, ".dmp");
-
-    
-    if(!m_bInitialized)
-    {
-        return;
-    }
-
-    char * nn_str = new char[MAX_DUMP_FILE_SIZE];
-
-    char temp[500];
-
-    strcpy(nn_str, "NN Begin\n");
-
-    //act func
-    strcat(nn_str, "act func=");
-    strcat(nn_str, static_const_parrActFuncStr[m_eActFunc]);
-    strcat(nn_str, "\n");
-
-    //number of layers
-    strcat(nn_str, "num_lys=");
-    sprintf(temp, "%d\n", m_unNumLys);
-    strcat(nn_str, temp);
-
-    
-
-    //print layer node and bias values
-    uint i = 0;
-    uint j = 0;
-    for(i = 0; i < m_unNumLys; i++)
-    {
-        sprintf(temp, "layer[%d] size=%d\n", i, m_ppLys[i]->get_num_nodes());
-        strcat(nn_str, temp);
-        for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
-        {
-            if(m_ppLys[i]->get_layer_type() == INPUT_LYR)
-            {
-                sprintf(temp, "node[%d] : value=%f\n", j, m_ppLys[i]->get_node_value_idx(j));
-                strcat(nn_str, temp);
-            }
-            else
-            {
-                sprintf(temp, "node[%d] : value=%f bias=%f\n", j, m_ppLys[i]->get_node_value_idx(j), m_ppLys[i]->get_node_bias_idx(j));
-                strcat(nn_str, temp);
-            }
-        }
-
-    }
-
-    
-    //print matrices
-    for(i = 0; i < (m_unNumLys - 1); i++)
-    {
-        sprintf(temp, "matrix[%d]\n", i);
-        strcat(nn_str, temp);
-        for(j = 0; j < m_ppWtMtcs[i]->get_size(); j++)
-        {
-            uint x = j / m_ppLys[i + 1]->get_num_nodes();
-            uint y = j % m_ppLys[i + 1]->get_num_nodes();
-            sprintf(temp, "[%d][%d]%f ", x, y, m_ppWtMtcs[i]->get_weight(x, y));
-            strcat(nn_str, temp);
-        }
-        strcat(nn_str, "\n");
-    }
-
-    strcat(nn_str, "NN END\n");
-
-    FILE* dump_file;
-    
-    dump_file = fopen(fileName, "w");
-
-    //write nn content into dump file
-
-    fprintf(dump_file, "%s", nn_str);
-
-    fclose(dump_file);
-
-    delete [] nn_str;
-
-    //increment dump_file_num for next dump
-    static_nDumpFileNum++;
-
-    
-
-}
 
 bool NeuralNet::populate_weights(uint unIdx, float* pfValues)
 {
@@ -872,5 +836,50 @@ void NeuralNet::SetWeight(uint MtxId, uint inIdx, uint outIdx, float val)
 float NeuralNet::GetWeight(uint MtxID, uint inIdx, uint outIdx)
 {
     return m_ppWtMtcs[MtxID]->get_weight(inIdx, outIdx);
+}
+
+void NeuralNet::SaveNN(const char* fileName)
+{
+    FILE* file = fopen(fileName, "w"); 
+	if (file == nullptr) 
+	{ 
+		perror("Failed to open file for writing"); 
+		return; 
+	}
+
+    uint i = 0;
+    uint j = 0;
+
+    //store init data
+    fprintf(file, "%d ", m_unNumLys);
+    for(i = 0; i < m_unNumLys; i++)
+    {
+        fprintf(file, "%d ", m_ppLys[i]->get_num_nodes());
+    }
+
+    fprintf(file, "%d ", (int)m_eActFunc);
+    fprintf(file, "%f ", m_fLearningRate);
+    fprintf(file, "%d ", (int)m_eOpt);
+
+    //store bias values
+	for(i = 0; i < m_unNumLys; ++i) 
+	{ 
+        for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
+        {
+            fprintf(file, "%f ", m_ppLys[i]->get_node_bias_idx(j));
+        }
+		 
+	} 
+
+    //store weight values
+    for(i = 0; i < (m_unNumLys - 1); ++i) 
+	{ 
+        for(j = 0; j < m_ppWtMtcs[i]->get_size(); j++)
+        {
+            fprintf(file, "%f ", m_ppWtMtcs[i]->get_weight(j));
+        }
+		 
+	} 
+	fclose(file);
 }
 
