@@ -3,7 +3,8 @@
 set(TESTS mnist_basic_test.cpp 
     mnist_copy_test.cpp 
     mnist_batch_test.cpp 
-    mnist_actFunc_test.cpp ) 
+    mnist_actFunc_test.cpp
+    mnist_save_load_test.cpp) 
 
 set(EXECUTABLE_TARGETS)
 

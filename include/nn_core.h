@@ -15,12 +15,6 @@
 
 #define INPUT_LAYER_ID 0 //input layer is the first layer
 
-#define MAX_DUMP_FILE_NUM_STR_SIZE 3 //size of dump file num str including '\0' terminator
-
-#define MAX_DUMP_FILE_NAME_STR_SIZE 20 //size of dump file name str including '\0' terminator
-
-#define MAX_DUMP_FILE_SIZE 10000000 //10Mbytes
-
 
 /*
     list of activation functions
@@ -113,6 +107,9 @@ class NeuralNet{
     // Copy constructor
     NeuralNet(NeuralNet* other);
 
+    // Constructor to load pre-existing data
+    NeuralNet(const char* fileName);
+
     /* 
         Destructor
     */
@@ -129,10 +126,6 @@ class NeuralNet{
     */
     bool do_forward_pass(float* pfInputArr);
 
-    /*
-        dump_nn() : dumps current nn contents into dmp file
-    */
-    void dump_nn();
 
     /*
         populate_weights() : populates weight matrix of particular index with specific values. Useful during initialization
@@ -218,8 +211,7 @@ class NeuralNet{
 
     void SetWeight(uint MtxId, uint inIdx, uint outIdx, float val); 
 
-
-    
+    void SaveNN(const char* fileName);    
 
     private:
     

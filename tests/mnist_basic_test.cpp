@@ -203,18 +203,7 @@ int main()
     pbThread.join();
     
 
-    printf("start dump\n");
-    start = std::chrono::high_resolution_clock::now();
-
-    nn->dump_nn();
-
-    end = std::chrono::high_resolution_clock::now();
-
-        time_taken = end - start;
-
-    printf("Time taken to dump file:%fSeconds\n", time_taken.count());
     
-    printf("done dump\n");
 
     delete nn;
 

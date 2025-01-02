@@ -11,7 +11,7 @@
 #define TEST_MAX 10000 //max number of lines in testing set
 #define NORM_FACTOR 254.0 //max value in data set for normalization
 #define VAL_SIZE 784 //input layer size
-#define EPOCH_MAX 5 //number epochs of training and testing 
+#define EPOCH_MAX 1 //number epochs of training and testing 
 
 /*
 getLineNumber : gets particular line from file
@@ -92,8 +92,8 @@ int main()
     {
         initData->unSzLys[l] = sz[l];
     }
-    initData->eAct_Func = eAct_func::SIGMOID;
-    initData->fLearningRate = 0.5f;
+    initData->eAct_Func = eAct_func::RELU;
+    initData->fLearningRate = 0.01f;
 
     NeuralNet *nn = new NeuralNet(initData);
 
@@ -198,7 +198,33 @@ int main()
 
     }
 
-    NeuralNet *nn2 = new NeuralNet(nn);
+    printf("start save\n");
+    start = std::chrono::high_resolution_clock::now();
+
+    nn->SaveNN("MNIST_EPOCH5.sav");
+
+    end = std::chrono::high_resolution_clock::now();
+
+    time_taken = end - start;
+
+    printf("Time taken to save file:%fSeconds\n", time_taken.count());
+
+    printf("done save\n");
+
+    
+    printf("start load and init\n");
+    start = std::chrono::high_resolution_clock::now();
+
+    NeuralNet *nn2 = new NeuralNet("MNIST_EPOCH5.sav");
+
+    end = std::chrono::high_resolution_clock::now();
+
+    time_taken = end - start;
+
+    printf("Time taken to load and init nn from file:%fSeconds\n", time_taken.count());
+
+    printf("done load and init\n");
+    
 
     start = std::chrono::high_resolution_clock::now();
 
@@ -236,7 +262,7 @@ int main()
 
     accuracy = correct_count / ((float)TEST_MAX);
 
-    printf("\nTest copy Accuracy:%f\n", accuracy);
+    printf("\nTest loaded nn Accuracy:%f\n", accuracy);
     end = std::chrono::high_resolution_clock::now();
 
     time_taken = end - start;
@@ -250,6 +276,9 @@ int main()
     pb->stop();
     
     pbThread.join();
+    
+
+    
 
     delete nn;
 
