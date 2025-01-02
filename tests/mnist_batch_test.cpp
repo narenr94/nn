@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "nn_core.h"
+#include "nn_utils.h"
 #include <chrono>
 
 #define BUFF_SIZE 3500 //buffer size for line of mnist data
@@ -12,7 +13,7 @@
 #define VAL_SIZE 784 //input layer size
 #define EPOCH_MAX 20 //number epochs of training and testing 
 #define BATCH_SIZE 8
-#define LEARNING_RATE 0.5
+#define LEARNING_RATE 0.001
 
 /*
 getLineNumber : gets particular line from file
@@ -104,8 +105,9 @@ int main()
     {
         initData->unSzLys[l] = sz[l];
     }
-    initData->eAct_Func = eAct_func::SIGMOID;
+    initData->eAct_Func = eAct_func::RELU;
     initData->fLearningRate = LEARNING_RATE;
+    initData->eOpt = eOptimizers::ADAM;
     
     NeuralNet *nn = new NeuralNet(initData);
 

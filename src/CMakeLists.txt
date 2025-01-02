@@ -1,6 +1,6 @@
 # Source files in src 
 set(SRC_FILES nn_core.cpp nn_l2l_weight_matrix.cpp 
-    nn_layer.cpp nn_math.cpp nn_node.cpp nn_utils.cpp)
+    nn_layer.cpp nn_math.cpp nn_node.cpp)
 set(ACT_FUNC_FILES ActivationFunctions/activationFunction.cpp 
     ActivationFunctions/leakyReluActFunc.cpp 
     ActivationFunctions/reluActFunc.cpp 

@@ -1,11 +1,15 @@
 # nn
 Artifical Neural Network library in C++
 
-## Running examples
+## Running tests
 
 mkdir build
+
 cd build
+
 cmake ../
+
 make
 
-executables will be available within build/examples
+
+executables will be available within build/tests

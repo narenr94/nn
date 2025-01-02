@@ -1,16 +1,12 @@
 #ifndef NN_UTILS_H
 #define NN_UTILS_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
 #include <iostream>
-#include <unistd.h>
+#include <string.h>
 #include <thread>
+#include <unistd.h>
 #include <mutex>
 #include <condition_variable>
-#include "nn_math.h"
 
 
 class nn_progress_bar{

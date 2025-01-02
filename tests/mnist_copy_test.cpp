@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "nn_core.h"
+#include "nn_utils.h"
 #include <chrono>
 
 #define BUFF_SIZE 3500 //buffer size for line of mnist data
