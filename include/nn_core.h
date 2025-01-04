@@ -59,7 +59,11 @@ struct nnInitData{
     uint ID = 0;
     eOptimizers eOpt = eOptimizers::SGD;
     eLossFuncs eLossFunc = eLossFuncs::MSE;
-
+    float optParam1 = 0.0f; //RMS_PROP : beta, ADAM : beta1
+    float optParam2 = 0.0f; //RMS_PROP : epsilon, ADAM : beta2
+    float optParam3 = 0.0f; //ADAM : epsilon
+    float actParam1 = 0.0f; //LEAKY_RELU : delta
+    float lossParam1 = 0.0f; //HUBER : delta
     //ToDo: parameters for actFunc and Optimizers
     
     nnInitData(uint NumLys)
@@ -94,14 +98,19 @@ class NeuralNet{
     //Optimizer
     eOptimizers m_eOpt = eOptimizers::SGD;
     Optimizer* m_pOptimizer;
+    float m_optParam1;
+    float m_optParam2;
+    float m_optParam3;
 
     //Activation Function
     eAct_func m_eActFunc; //activation funcation to be used
     ActivationFunction* m_pActFunc;
+    float m_actParam1;
 
     //Loss Function
     eLossFuncs m_eLossFunc;
     LossFunction* m_pLossFunc;
+    float m_lossParam1;
 
     //Batch Training Specific 
     bool initBatchTrain = false;

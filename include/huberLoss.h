@@ -3,13 +3,15 @@
 
 #include "lossFunction.h"
 
+#define HUBER_DEFAULT_DELTA 1.0f
+
 class HuberLoss : public LossFunction
 {
     private:
         float m_fDelta;
 
     public:
-    HuberLoss(NeuralNet* nn, float delta = 1.0f);
+    HuberLoss(NeuralNet* nn, float delta = HUBER_DEFAULT_DELTA);
 
     float apply_loss_func(float* fExpOut);
 

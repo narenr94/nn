@@ -14,6 +14,12 @@
 #define EPOCH_MAX 5 //number epochs of training and testing 
 
 /*
+Observation
+Adam doesnt seem to be working with default values for beta1, beta2 and epsilon
+from trial and error found that beta1=0.9f, beta2 = 0.9f and epsilon = 0.1f works
+*/
+
+/*
 getLineNumber : gets particular line from file
 fdr : file descriptor to read from
 line_buff : buffer tos tore output
@@ -94,6 +100,9 @@ int main()
     }
     initData->eAct_Func = eAct_func::SIGMOID;
     initData->eOpt = eOptimizers::ADAM;
+    initData->optParam1 = 0.9f;
+    initData->optParam2 = 0.9f;
+    initData->optParam3 = 0.1f;
     initData->fLearningRate = 0.5f;
 
     NeuralNet *nn = new NeuralNet(initData);

@@ -92,6 +92,7 @@ NeuralNet::NeuralNet(const char* fileName)
 
     uint temp_numLys = 0;
     int temp_int = 0;
+    float temp_float = 0.0f;
 
     //load init data
     fscanf(file, "%d", &temp_numLys);
@@ -113,6 +114,19 @@ NeuralNet::NeuralNet(const char* fileName)
     fscanf(file, "%d", &temp_int);
     temp_initData->eLossFunc = (eLossFuncs)temp_int;
 
+    fscanf(file, "%f", &temp_float);
+    temp_initData->optParam1 = temp_float;
+    fscanf(file, "%f", &temp_float);
+    temp_initData->optParam2 = temp_float;
+    fscanf(file, "%f", &temp_float);
+    temp_initData->optParam3 = temp_float;
+
+    fscanf(file, "%f", &temp_float);
+    temp_initData->actParam1 = temp_float;
+
+    fscanf(file, "%f", &temp_float);
+    temp_initData->lossParam1 = temp_float;
+
     //set nn with temp init data
     Set_Init_Data(temp_initData);
 
@@ -120,7 +134,7 @@ NeuralNet::NeuralNet(const char* fileName)
 
     delete temp_initData;
 
-    float temp_float = 0.0f;
+    
 
 
     //store bias values
@@ -160,6 +174,14 @@ void NeuralNet::Get_Init_Data(nnInitData *ret)
     ret->fLearningRate = m_fLearningRate;
     ret->eOpt = m_eOpt;
     ret->eLossFunc = m_eLossFunc;
+
+    ret->optParam1 = m_optParam1;
+    ret->optParam2 = m_optParam2;
+    ret->optParam3 = m_optParam3;
+
+    ret->actParam1 = m_actParam1;
+    
+    ret->lossParam1 = m_lossParam1;
     // ret->ID = nn_id;
 
 }
@@ -177,7 +199,7 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
             m_pActFunc = new ReluActFunc();
             break;
         case eAct_func::LEAKY_RELU:
-            m_pActFunc = new LeakyReluActFunc();
+            m_pActFunc = new LeakyReluActFunc(other_initData->actParam1 != 0.0f ? other_initData->actParam1 : LEAKY_RELU_DEFAULT_ALPHA);
             break;
         case eAct_func::TANH:
             m_pActFunc = new TanhActFunc();
@@ -211,10 +233,10 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
             m_pOptimizer = new StochasticGradientDescent(this);
             break;
         case eOptimizers::RMSPROP:
-            m_pOptimizer = new RMSProp(this);
+            m_pOptimizer = new RMSProp(this, other_initData->optParam1 != 0.0f ? other_initData->optParam1 : RMS_PROP_DEFAULT_BETA, other_initData->optParam2 != 0.0f ? other_initData->optParam2 : RMS_PROP_DEFAULT_EPSILON);
             break;
         case eOptimizers::ADAM:
-            m_pOptimizer = new ADAMOPT(this);
+            m_pOptimizer = new ADAMOPT(this, other_initData->optParam1 != 0.0f ? other_initData->optParam1 : ADAM_DEFAULT_BETA1, other_initData->optParam2 != 0.0f ? other_initData->optParam2 : ADAM_DEFAULT_BETA1, other_initData->optParam3 != 0.0f ? other_initData->optParam3 : ADAM_DEFAULT_EPSILON);
             break;
         default:
             m_pOptimizer = new StochasticGradientDescent(this);
@@ -230,13 +252,21 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
             m_pLossFunc = new MeanAbsoluteError(this);
             break;
         case eLossFuncs::HUBER:
-            m_pLossFunc = new HuberLoss(this);
+            m_pLossFunc = new HuberLoss(this, other_initData->lossParam1 != 0.0f ? other_initData->lossParam1 : HUBER_DEFAULT_DELTA);
             break;
         default:
             m_pLossFunc = new MeanSquaredError(this);
             break;
     }
 
+    //store param values locally
+    m_optParam1 = other_initData->optParam1;
+    m_optParam2 = other_initData->optParam2;
+    m_optParam3 = other_initData->optParam3;
+
+    m_actParam1 = other_initData->actParam1;
+
+    m_lossParam1 = other_initData->lossParam1;
 
     
     m_bInitialized = true;
@@ -887,6 +917,15 @@ void NeuralNet::SaveNN(const char* fileName)
     fprintf(file, "%f ", m_fLearningRate);
     fprintf(file, "%d ", (int)m_eOpt);
     fprintf(file, "%d ", (int)m_eLossFunc);
+
+    fprintf(file, "%f ", m_optParam1);
+    fprintf(file, "%f ", m_optParam2);
+    fprintf(file, "%f ", m_optParam3);
+
+    fprintf(file, "%f ", m_actParam1);
+
+    fprintf(file, "%f ", m_lossParam1);
+
 
     //store bias values
 	for(i = 0; i < m_unNumLys; ++i) 
