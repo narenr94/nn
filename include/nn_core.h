@@ -12,6 +12,8 @@
 
 #include "optimizer.h"
 
+#include "lossFunction.h"
+
 
 #define INPUT_LAYER_ID 0 //input layer is the first layer
 
@@ -35,6 +37,17 @@ enum eOptimizers{
     ADAM
 };
 
+/*
+    list of activation functions
+*/
+enum eLossFuncs{
+    MSE, //mean squared error
+    MAE, //mean absolute error
+    HUBER, //huber loss
+    BCE, //binary cross entropy loss
+    CCE //competitive cross entropy loss
+};
+
 struct nnInitData{
 
     uint unNoLys = 0;
@@ -43,13 +56,14 @@ struct nnInitData{
     float fLearningRate = 0.5f;
     uint ID = 0;
     eOptimizers eOpt = eOptimizers::SGD;
-    float optParam3 = 0.0f;
+    eLossFuncs eLossFunc = eLossFuncs::MSE;
 
     //ToDo: parameters for actFunc and Optimizers
     
-    nnInitData(uint m_unNumLys)
+    nnInitData(uint NumLys)
     {
-        unSzLys = new uint [m_unNumLys];
+        unNoLys = NumLys;
+        unSzLys = new uint [NumLys];
     };
 
     ~nnInitData()
@@ -61,7 +75,7 @@ struct nnInitData{
 
 class NeuralNet{
 
-    eAct_func m_eActFunc; //activation funcation to be used
+    
 
     nn_l2l_weight_matrix** m_ppWtMtcs; //starting address of weight matrixes
 
@@ -75,12 +89,17 @@ class NeuralNet{
 
     uint m_unTotalCorrectableNodes;
 
+    //Optimizer
     eOptimizers m_eOpt = eOptimizers::SGD;
-
     Optimizer* m_pOptimizer;
 
     //Activation Function
+    eAct_func m_eActFunc; //activation funcation to be used
     ActivationFunction* m_pActFunc;
+
+    //Loss Function
+    eLossFuncs m_eLossFunc;
+    LossFunction* m_pLossFunc;
 
     //Batch Training Specific 
     bool initBatchTrain = false;

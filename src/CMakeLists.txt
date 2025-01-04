@@ -10,7 +10,11 @@ set(OPT_FUNC_FILES Optimizers/optimizer.cpp
     Optimizers/adam.cpp 
     Optimizers/rmsprop.cpp 
     Optimizers/stochasticGradientDescent.cpp ) 
+set(LOSS_FUNC_FILES LossFunctions/lossFunction.cpp
+    LossFunctions/huberLoss.cpp
+    LossFunctions/meanAbsoluteError.cpp
+    LossFunctions/meanSquaredError.cpp)
  
 # Create the main library from src 
-add_library(nncore SHARED ${SRC_FILES} ${ACT_FUNC_FILES} ${OPT_FUNC_FILES})
+add_library(nncore SHARED ${SRC_FILES} ${ACT_FUNC_FILES} ${OPT_FUNC_FILES} ${LOSS_FUNC_FILES})
 target_include_directories(nncore PUBLIC ${CMAKE_SOURCE_DIR}/include)

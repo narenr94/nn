@@ -4,7 +4,8 @@ set(TESTS mnist_basic_test.cpp
     mnist_copy_test.cpp 
     mnist_batch_test.cpp 
     mnist_actFunc_test.cpp
-    mnist_save_load_test.cpp) 
+    mnist_save_load_test.cpp
+    mnist_regLossFunc_test.cpp) 
 
 set(EXECUTABLE_TARGETS)
 
@@ -18,13 +19,13 @@ foreach(TEST ${TESTS})
 endforeach()
 
 # Add a custom target that depends on all executables 
-add_custom_target( RunAfterBuild ALL 
-    DEPENDS ${EXECUTABLE_TARGETS} 
-    COMMENT "Running download.sh script after all executables are built" )
+# add_custom_target( RunAfterBuild ALL 
+#     DEPENDS ${EXECUTABLE_TARGETS} 
+#     COMMENT "Running download.sh script after all executables are built" )
 
-# Add a custom command to run the script after the custom target is built 
-add_custom_command( TARGET RunAfterBuild POST_BUILD 
-    COMMAND ${CMAKE_COMMAND} -E echo "Running download.sh" 
-    COMMAND ${CMAKE_COMMAND} -E env bash ${CMAKE_SOURCE_DIR}/tests/download_mnist.sh 
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests 
-    COMMENT "Running download.sh script" )
+# # Add a custom command to run the script after the custom target is built 
+# add_custom_command( TARGET RunAfterBuild POST_BUILD 
+#     COMMAND ${CMAKE_COMMAND} -E echo "Running download.sh" 
+#     COMMAND ${CMAKE_COMMAND} -E env bash ${CMAKE_SOURCE_DIR}/tests/download_mnist.sh 
+#     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests 
+#     COMMENT "Running download.sh script" )

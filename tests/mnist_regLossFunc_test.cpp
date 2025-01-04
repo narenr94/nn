@@ -11,12 +11,26 @@
 #define TEST_MAX 10000 //max number of lines in testing set
 #define NORM_FACTOR 254.0 //max value in data set for normalization
 #define VAL_SIZE 784 //input layer size
-#define EPOCH_MAX 5 //number epochs of training and testing 
+#define EPOCH_MAX 3 //number epochs of training and testing 
 
 /*
-Observations: sigmoid does well with learning rate 0.5
-and relu, leaky_relu and tanh do well with 0.01
+Observations: MAE doesnt work with RELU work with TANH
+initData->unNoLys = 4;
+        for(uint l = 0; l < initData->unNoLys; l++)
+        {
+            initData->unSzLys[l] = sz[l];
+        }
+        initData->eAct_Func = eAct_func::TANH;
+        initData->fLearningRate = 0.01f;
+        initData->eLossFunc = lossVal;
+        initData->eOpt = eOptimizers::SGD;
+    
+    MAE alone might require a lower learning rate : 0.001f
 
+above works fine for MSE, MAE and HUBER
+
+ToDo setup fro BCE : single node output , just find if number is 5 or not
+                CCE : implement softmax, should be runnable in existing setup
 */
 
 /*
@@ -74,43 +88,60 @@ int main()
 
     std::chrono::high_resolution_clock::time_point start, end;
     std::chrono::duration<double> time_taken;
+    eLossFuncs lossVal;
     
-    for(uint k = 0; k <= (uint)(eAct_func::TANH); k++)
+    
+    for(uint k = 0; k < 3; k++)
     {
-        eAct_func actVal = (eAct_func)k;
+
+        nnInitData * initData = new nnInitData(4);
+
+        switch(k)
+        {
+            case 0:
+                lossVal = eLossFuncs::MSE;
+                break;
+            case 1:
+                lossVal = eLossFuncs::MAE;
+                break;
+            case 2:
+                lossVal = eLossFuncs::HUBER;
+                break;
+            default:
+                lossVal = eLossFuncs::MSE;
+                break;
+        }
+        
         float correct_count = 0;
 
         float accuracy = 0.0;   
 
-        nnInitData * initData = new nnInitData(4);
 
         
-        initData->unNoLys = 4;
         for(uint l = 0; l < initData->unNoLys; l++)
         {
             initData->unSzLys[l] = sz[l];
         }
-        initData->eAct_Func = actVal;
+        initData->eAct_Func = eAct_func::TANH;
         initData->fLearningRate = 0.01f;
+        initData->eLossFunc = lossVal;
+        initData->eOpt = eOptimizers::SGD;
 
-        switch(actVal)
+        switch(lossVal)
         {
-            case eAct_func::SIGMOID:
-                printf("\n Act Func SIGMOID \n");
+            case eLossFuncs::MSE:
+                printf("\n Loss Func MSE \n");
                 break;
-            case eAct_func::RELU:
-                printf("\n Act Func RELU \n");
+            case eLossFuncs::MAE:
+                printf("\n Loss Func MAE \n");
                 break;
-            case eAct_func::LEAKY_RELU:
-                printf("\n Act Func LEAKY_RELU \n");
-                break;
-            case eAct_func::TANH:
-                printf("\n Act Func TANH \n");
+            case eLossFuncs::HUBER:
+                printf("\n Loss Func HUBER \n");
                 break;
 
         }
 
-         NeuralNet *nn = new NeuralNet(initData);
+        NeuralNet *nn = new NeuralNet(initData);
 
         nn->populateWeightsAndBiasesWithRandomNumbers();
 
