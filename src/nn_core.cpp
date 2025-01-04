@@ -11,6 +11,11 @@
 #include "rmsprop.h"
 #include "adam.h"
 
+//Loss functions
+#include "meanSquaredError.h"
+#include "meanAbsoluteError.h"
+#include "huberLoss.h"
+
 #include <string.h>
 #include <stdio.h>
 
@@ -181,6 +186,10 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
     // nn_id = other_initData->ID;
     m_eOpt = other_initData->eOpt;
 
+    m_eLossFunc = other_initData->eLossFunc;
+
+    
+
     
 
     
@@ -208,6 +217,24 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
             m_pOptimizer = new StochasticGradientDescent(this);
             break;
     }
+
+    switch(m_eLossFunc)
+    {
+        case eLossFuncs::MSE:
+            m_pLossFunc = new MeanSquaredError(this);
+            break;
+        case eLossFuncs::MAE:
+            m_pLossFunc = new MeanAbsoluteError(this);
+            break;
+        case eLossFuncs::HUBER:
+            m_pLossFunc = new HuberLoss(this);
+            break;
+        default:
+            m_pLossFunc = new MeanSquaredError(this);
+            break;
+    }
+
+
     
     m_bInitialized = true;
 
@@ -408,22 +435,24 @@ float NeuralNet::calculate_error(float* pfExpOut, float* pfError)
         return fRet;
     }
 
-    nn_layer* output_lyr = m_ppLys[m_unNumLys - 1];
+    // nn_layer* output_lyr = m_ppLys[m_unNumLys - 1];
 
-    uint i = 0;
+    // uint i = 0;
 
-    for(i = 0; i < output_lyr->get_num_nodes(); i++)
-    {
-        //todo: make generic to use other type of error functions
-        //1/2 * squared error
-        pfError[i] = pfExpOut[i] - output_lyr->get_node_value_idx(i);
+    // for(i = 0; i < output_lyr->get_num_nodes(); i++)
+    // {
+    //     //todo: make generic to use other type of error functions
+    //     //1/2 * squared error
+    //     pfError[i] = pfExpOut[i] - output_lyr->get_node_value_idx(i);
 
-        pfError[i] *= pfError[i];
+    //     pfError[i] *= pfError[i];
 
-        fRet += pfError[i];
-    }
+    //     fRet += pfError[i];
+    // }
 
-    fRet /= output_lyr->get_num_nodes();
+    // fRet /= output_lyr->get_num_nodes();
+
+    fRet = m_pLossFunc->apply_loss_func(pfExpOut);
 
     return fRet;
 
@@ -475,20 +504,14 @@ float NeuralNet::find_delta_of_all_nodes(float* pfExpOut)
 
     float temp = 0.0;
 
-    // sigma += out_lyr->get_node_bias_idx(j);
-    // sigma /= in_lyr->get_num_nodes();
-    // NNLOG_DEBUG("layer [%d]: node[%d]:net=%f", in_layer_idx + 1, j, sigma);
-    // sigma = apply_act_func(sigma);
-    // NNLOG_DEBUG("layer [%d]: node[%d]=%f", in_layer_idx + 1, j, sigma);
-    // out_lyr->set_node_value(sigma, j);
-
     for(i = (m_unNumLys - 1); i > INPUT_LAYER_ID; i--)
     {
         if(m_ppLys[i]->get_layer_type() == OUTPUT_LYR)//output layer
         {
             for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
             {
-                temp = -1.0 * (pfExpOut[j] - m_ppLys[i]->get_node_value_idx(j)); //deivative of error function
+                // temp = -1.0 * (pfExpOut[j] - m_ppLys[i]->get_node_value_idx(j)); //deivative of error function
+                temp = m_pLossFunc->apply_loss_func_derv(pfExpOut[j], j);
                 //temp *= m_lys[i - 1]->get_num_nodes();
                 temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
                 m_ppLys[i]->set_node_delta(temp, j);
