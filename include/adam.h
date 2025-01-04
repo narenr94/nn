@@ -3,6 +3,10 @@
 
 #include "optimizer.h"
 
+#define ADAM_DEFAULT_BETA1 0.9f
+#define ADAM_DEFAULT_BETA2 0.999f
+#define ADAM_DEFAULT_EPSILON 0.00000001f
+
 struct ADAMLayerRep{
     float* M_Val = nullptr;
     float* V_Val = nullptr;
@@ -78,7 +82,7 @@ class ADAMOPT : public Optimizer
 
     public:
         //KLUDGE : default beta1:0.9 beta2:0.999 epsilon0.00000001, currently set to work for mnist example
-        ADAMOPT(NeuralNet* nn, float beta1 = 0.9f, float beta2 = 0.9f,float epslion = 0.1f);
+        ADAMOPT(NeuralNet* nn, float beta1 = ADAM_DEFAULT_BETA1, float beta2 = ADAM_DEFAULT_BETA2,float epslion = ADAM_DEFAULT_EPSILON);
         
         void correct_weights_biases();
 

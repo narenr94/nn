@@ -3,6 +3,8 @@
 
 #include "activationFunction.h"
 
+#define LEAKY_RELU_DEFAULT_ALPHA 0.01f
+
 class LeakyReluActFunc : public ActivationFunction
 {
 
@@ -10,7 +12,7 @@ class LeakyReluActFunc : public ActivationFunction
 
     public:
 
-        LeakyReluActFunc(float alpha = 0.01f){m_alpha = alpha;}
+        LeakyReluActFunc(float alpha = LEAKY_RELU_DEFAULT_ALPHA){m_alpha = alpha;}
 
         float apply_act_func(float n);
 

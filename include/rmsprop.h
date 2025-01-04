@@ -3,6 +3,9 @@
 
 #include "optimizer.h"
 
+#define RMS_PROP_DEFAULT_BETA 0.9f
+#define RMS_PROP_DEFAULT_EPSILON 0.00000001f
+
 struct RMSPropLayerRep{
     float* E_Val = nullptr;
 
@@ -61,7 +64,7 @@ class RMSProp : public Optimizer
 
     public:
     
-        RMSProp(NeuralNet* nn, float beta = 0.9f, float epslion = 0.00000001f);
+        RMSProp(NeuralNet* nn, float beta = RMS_PROP_DEFAULT_BETA, float epslion = RMS_PROP_DEFAULT_EPSILON);
 
         void correct_weights_biases();
 
