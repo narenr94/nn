@@ -110,6 +110,8 @@ NeuralNet::NeuralNet(const char* fileName)
     fscanf(file, "%f", &temp_initData->fLearningRate);
     fscanf(file, "%d", &temp_int);
     temp_initData->eOpt = (eOptimizers)temp_int;
+    fscanf(file, "%d", &temp_int);
+    temp_initData->eLossFunc = (eLossFuncs)temp_int;
 
     //set nn with temp init data
     Set_Init_Data(temp_initData);
@@ -157,6 +159,7 @@ void NeuralNet::Get_Init_Data(nnInitData *ret)
     ret->eAct_Func = m_eActFunc;
     ret->fLearningRate = m_fLearningRate;
     ret->eOpt = m_eOpt;
+    ret->eLossFunc = m_eLossFunc;
     // ret->ID = nn_id;
 
 }
@@ -883,6 +886,7 @@ void NeuralNet::SaveNN(const char* fileName)
     fprintf(file, "%d ", (int)m_eActFunc);
     fprintf(file, "%f ", m_fLearningRate);
     fprintf(file, "%d ", (int)m_eOpt);
+    fprintf(file, "%d ", (int)m_eLossFunc);
 
     //store bias values
 	for(i = 0; i < m_unNumLys; ++i) 

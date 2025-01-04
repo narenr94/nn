@@ -48,6 +48,8 @@ enum eLossFuncs{
     CCE //competitive cross entropy loss
 };
 
+
+//when below changed make sure to update get set save and load in nn_core
 struct nnInitData{
 
     uint unNoLys = 0;
