@@ -8,8 +8,6 @@
 #include "nn_math.h"
 #include "nn_l2l_weight_matrix.h"
 
-#include "activationFunction.h"
-
 #include "optimizer.h"
 
 #include "lossFunction.h"
@@ -18,15 +16,7 @@
 #define INPUT_LAYER_ID 0 //input layer is the first layer
 
 
-/*
-    list of activation functions
-*/
-enum eAct_func{
-    RELU,
-    LEAKY_RELU,
-    TANH,
-    SIGMOID
-};
+
 
 /*
     list of activation functions
@@ -54,7 +44,7 @@ struct nnInitData{
 
     uint unNoLys = 0;
     uint* unSzLys = nullptr;
-    eAct_func eAct_Func = eAct_func::SIGMOID;
+    eAct_func *eAct_Funcs;
     float fLearningRate = 0.5f;
     uint ID = 0;
     eOptimizers eOpt = eOptimizers::SGD;
@@ -62,7 +52,7 @@ struct nnInitData{
     float optParam1 = 0.0f; //RMS_PROP : beta, ADAM : beta1
     float optParam2 = 0.0f; //RMS_PROP : epsilon, ADAM : beta2
     float optParam3 = 0.0f; //ADAM : epsilon
-    float actParam1 = 0.0f; //LEAKY_RELU : delta
+    float* actParam1; //LEAKY_RELU : delta
     float lossParam1 = 0.0f; //HUBER : delta
     //ToDo: parameters for actFunc and Optimizers
     
@@ -70,11 +60,24 @@ struct nnInitData{
     {
         unNoLys = NumLys;
         unSzLys = new uint [NumLys];
+        eAct_Funcs = new eAct_func[NumLys];
+        actParam1 = new float[NumLys];
+
+        //initialize
+        for(uint i = 0; i < NumLys; i++)
+        {
+            unSzLys[i] = 0;
+            eAct_Funcs[i] = eAct_func::TANH;
+            actParam1[i] = 0.0f;
+        }
+
     };
 
     ~nnInitData()
     {
         delete [] unSzLys;
+        delete [] eAct_Funcs;
+        delete [] actParam1;
     }
 
 };
@@ -102,11 +105,7 @@ class NeuralNet{
     float m_optParam2;
     float m_optParam3;
 
-    //Activation Function
-    eAct_func m_eActFunc; //activation funcation to be used
-    ActivationFunction* m_pActFunc;
-    float m_actParam1;
-
+    
     //Loss Function
     eLossFuncs m_eLossFunc;
     LossFunction* m_pLossFunc;
@@ -278,7 +277,7 @@ class NeuralNet{
 
     void Set_Init_Data(nnInitData* other_initData);
 
-    void SetupLayersAndWeightMatrices(uint *sz);
+    void SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, float* actParam1);
 
     void MergeBiasAndWeights(uint i);
 

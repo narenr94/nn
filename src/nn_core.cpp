@@ -57,7 +57,7 @@ NeuralNet::NeuralNet(nnInitData* initData)
 
     Set_Init_Data(initData);
 
-    SetupLayersAndWeightMatrices(initData->unSzLys);
+    SetupLayersAndWeightMatrices(initData->unSzLys, initData->eAct_Funcs, initData->actParam1);
 }
 
 NeuralNet::NeuralNet(NeuralNet* other)
@@ -106,8 +106,15 @@ NeuralNet::NeuralNet(const char* fileName)
         fscanf(file, "%d", &(temp_initData->unSzLys[i]));
     }
 
-    fscanf(file, "%d", &temp_int);
-    temp_initData->eAct_Func = (eAct_func)temp_int;
+    for(i = 0; i < temp_numLys; i++)
+    {
+        // fscanf(file, "%d", &(temp_initData->eAct_Funcs[i]));
+        fscanf(file, "%d", &temp_int);
+        temp_initData->eAct_Funcs[i] = (eAct_func)temp_int;
+    }
+
+    // fscanf(file, "%d", &temp_int);
+    // temp_initData->eAct_Func = (eAct_func)temp_int;
     fscanf(file, "%f", &temp_initData->fLearningRate);
     fscanf(file, "%d", &temp_int);
     temp_initData->eOpt = (eOptimizers)temp_int;
@@ -121,8 +128,13 @@ NeuralNet::NeuralNet(const char* fileName)
     fscanf(file, "%f", &temp_float);
     temp_initData->optParam3 = temp_float;
 
-    fscanf(file, "%f", &temp_float);
-    temp_initData->actParam1 = temp_float;
+    for(i = 0; i < temp_numLys; i++)
+    {
+        fscanf(file, "%f", &(temp_initData->actParam1[i]));
+    }
+
+    // fscanf(file, "%f", &temp_float);
+    // temp_initData->actParam1 = temp_float;
 
     fscanf(file, "%f", &temp_float);
     temp_initData->lossParam1 = temp_float;
@@ -130,7 +142,7 @@ NeuralNet::NeuralNet(const char* fileName)
     //set nn with temp init data
     Set_Init_Data(temp_initData);
 
-    SetupLayersAndWeightMatrices(temp_initData->unSzLys);
+    SetupLayersAndWeightMatrices(temp_initData->unSzLys, temp_initData->eAct_Funcs, temp_initData->actParam1);
 
     delete temp_initData;
 
@@ -169,8 +181,10 @@ void NeuralNet::Get_Init_Data(nnInitData *ret)
     for(uint i = 0; i < m_unNumLys; i++)
     {
         ret->unSzLys[i] = m_ppLys[i]->get_num_nodes();
+        ret->eAct_Funcs[i] = m_ppLys[i]->get_act_func();
+        ret->actParam1[i] = m_ppLys[i]->get_act_param();
     }
-    ret->eAct_Func = m_eActFunc;
+    
     ret->fLearningRate = m_fLearningRate;
     ret->eOpt = m_eOpt;
     ret->eLossFunc = m_eLossFunc;
@@ -178,8 +192,6 @@ void NeuralNet::Get_Init_Data(nnInitData *ret)
     ret->optParam1 = m_optParam1;
     ret->optParam2 = m_optParam2;
     ret->optParam3 = m_optParam3;
-
-    ret->actParam1 = m_actParam1;
     
     ret->lossParam1 = m_lossParam1;
     // ret->ID = nn_id;
@@ -189,24 +201,7 @@ void NeuralNet::Get_Init_Data(nnInitData *ret)
 void NeuralNet::Set_Init_Data(nnInitData* other_initData)
 {
     m_unNumLys = other_initData->unNoLys;
-    m_eActFunc = other_initData->eAct_Func;
-    switch(m_eActFunc)
-    {
-        case eAct_func::SIGMOID:
-            m_pActFunc = new SigmoidActFunc();
-            break;
-        case eAct_func::RELU:
-            m_pActFunc = new ReluActFunc();
-            break;
-        case eAct_func::LEAKY_RELU:
-            m_pActFunc = new LeakyReluActFunc(other_initData->actParam1 != 0.0f ? other_initData->actParam1 : LEAKY_RELU_DEFAULT_ALPHA);
-            break;
-        case eAct_func::TANH:
-            m_pActFunc = new TanhActFunc();
-            break;
-        default:
-            m_pActFunc = new SigmoidActFunc();
-    }
+    
     m_fLearningRate = other_initData->fLearningRate;
     // nn_id = other_initData->ID;
     m_eOpt = other_initData->eOpt;
@@ -225,7 +220,7 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
     }
 
 
-    SetupLayersAndWeightMatrices(other_initData->unSzLys);
+    SetupLayersAndWeightMatrices(other_initData->unSzLys, other_initData->eAct_Funcs, other_initData->actParam1);
 
     switch(m_eOpt)
     {
@@ -263,8 +258,6 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
     m_optParam1 = other_initData->optParam1;
     m_optParam2 = other_initData->optParam2;
     m_optParam3 = other_initData->optParam3;
-
-    m_actParam1 = other_initData->actParam1;
 
     m_lossParam1 = other_initData->lossParam1;
 
@@ -308,17 +301,22 @@ NeuralNet::~NeuralNet()
     {
         delete m_pOptimizer;
     }
+
+    if(m_pLossFunc)
+    {
+        delete m_pLossFunc;
+    }
 }
 
 
-void NeuralNet::SetupLayersAndWeightMatrices(uint *sz)
+void NeuralNet::SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, float* actParam1)
 {
     m_ppLys = new nn_layer*[m_unNumLys];
     m_ppWtMtcs = new nn_l2l_weight_matrix*[m_unNumLys - 1];
     
     for(uint i = 0; i < m_unNumLys; i++)
     {
-        m_ppLys[i] = new nn_layer(sz[i]);
+        m_ppLys[i] = new nn_layer(sz[i], actFuncs[i], actParam1[i]);
         if(i == INPUT_LAYER_ID)
         {
             m_ppLys[i]->set_layer_type(INPUT_LYR);
@@ -410,10 +408,12 @@ bool NeuralNet::do_forwardpass_to_next_layer(uint unInLayerIdx)
         }
         sigma += out_lyr->get_node_bias_idx(j);
         sigma /= in_lyr->get_num_nodes();
-        sigma = m_pActFunc->apply_act_func(sigma);
+        // sigma = m_pActFunc->apply_act_func(sigma);
         out_lyr->set_node_value(sigma, j);
         sigma = 0;
     }
+
+    out_lyr->apply_act_func_all_nodes();
 
     bRet = true;
 
@@ -543,12 +543,10 @@ float NeuralNet::find_delta_of_all_nodes(float* pfExpOut)
         {
             for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
             {
-                // temp = -1.0 * (pfExpOut[j] - m_ppLys[i]->get_node_value_idx(j)); //deivative of error function
                 temp = m_pLossFunc->apply_loss_func_derv(pfExpOut[j], j);
-                //temp *= m_lys[i - 1]->get_num_nodes();
-                temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
+                // temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
+                temp *= m_ppLys[i]->get_act_func_dervs(m_ppLys[i]->get_node_value_idx(j));
                 m_ppLys[i]->set_node_delta(temp, j);
-                // m_ppLys[i]->set_node_bias((m_ppLys[i]->get_node_bias_idx(j) - (m_fLearningRate * temp)), j);
             }
         }
         else //hidden layer
@@ -561,10 +559,9 @@ float NeuralNet::find_delta_of_all_nodes(float* pfExpOut)
                 {
                     temp += m_ppLys[i + 1]->get_node_delta_idx(k) * m_ppWtMtcs[i]->get_weight(j, k);
                 }
-                //temp *= m_lys[i - 1]->get_num_nodes();
-                temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
+                // temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
+                temp *= m_ppLys[i]->get_act_func_dervs(m_ppLys[i]->get_node_value_idx(j));
                 m_ppLys[i]->set_node_delta(temp, j);
-                // m_ppLys[i]->set_node_bias((m_ppLys[i]->get_node_bias_idx(j) - (m_fLearningRate * temp)), j);
             }
         }
         
@@ -913,7 +910,12 @@ void NeuralNet::SaveNN(const char* fileName)
         fprintf(file, "%d ", m_ppLys[i]->get_num_nodes());
     }
 
-    fprintf(file, "%d ", (int)m_eActFunc);
+    for(i = 0; i < m_unNumLys; i++)
+    {
+        fprintf(file, "%d ", m_ppLys[i]->get_act_func());
+    }
+
+    // fprintf(file, "%d ", (int)m_eActFunc);
     fprintf(file, "%f ", m_fLearningRate);
     fprintf(file, "%d ", (int)m_eOpt);
     fprintf(file, "%d ", (int)m_eLossFunc);
@@ -922,7 +924,12 @@ void NeuralNet::SaveNN(const char* fileName)
     fprintf(file, "%f ", m_optParam2);
     fprintf(file, "%f ", m_optParam3);
 
-    fprintf(file, "%f ", m_actParam1);
+    for(i = 0; i < m_unNumLys; i++)
+    {
+        fprintf(file, "%f ", m_ppLys[i]->get_act_param());
+    }
+
+    // fprintf(file, "%f ", m_actParam1);
 
     fprintf(file, "%f ", m_lossParam1);
 
