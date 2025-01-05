@@ -1,5 +1,10 @@
 #include "nn_layer.h"
 
+#include "sigmoidActFunc.h"
+#include "reluActFunc.h"
+#include "leakyReluActFunc.h"
+#include "tanhActFunc.h"
+
 
 uint nn_layer::get_num_nodes()
 {
@@ -18,11 +23,20 @@ nn_layer::~nn_layer()
         }
         delete [] m_ppNodes;
     }
+
+    if(m_pActFunc)
+    {
+        delete m_pActFunc;
+    }
 }
 
-nn_layer::nn_layer(uint unNumNodesnodes)
+nn_layer::nn_layer(uint unNumNodesnodes, eAct_func eActFunc, float actParam1)
 {
     m_unNumNodes = unNumNodesnodes;
+
+    m_eActFunc = eActFunc;
+
+    m_actParam1 = actParam1;
 
     m_ppNodes = new nn_node*[m_unNumNodes];
 
@@ -31,6 +45,24 @@ nn_layer::nn_layer(uint unNumNodesnodes)
     for(i = 0; i < m_unNumNodes; i++)
     {
         m_ppNodes[i] = new nn_node();
+    }
+
+    switch(m_eActFunc)
+    {
+        case eAct_func::SIGMOID:
+            m_pActFunc = new SigmoidActFunc();
+            break;
+        case eAct_func::RELU:
+            m_pActFunc = new ReluActFunc();
+            break;
+        case eAct_func::LEAKY_RELU:
+            m_pActFunc = new LeakyReluActFunc(m_actParam1 != 0.0f ? m_actParam1 : LEAKY_RELU_DEFAULT_ALPHA);
+            break;
+        case eAct_func::TANH:
+            m_pActFunc = new TanhActFunc();
+            break;
+        default:
+            m_pActFunc = new SigmoidActFunc();
     }
 
     m_bInitialized = true;
@@ -176,4 +208,27 @@ void nn_layer::populateBiasesWithRandomNumbers()
     }
 
 
+}
+
+eAct_func nn_layer::get_act_func()
+{
+    return m_eActFunc;
+}
+
+float nn_layer::get_act_param()
+{
+    return m_actParam1;
+}
+
+void nn_layer::apply_act_func_all_nodes()
+{
+    for(uint i = 0; i < m_unNumNodes; i++)
+    {
+        m_ppNodes[i]->set_value(m_pActFunc->apply_act_func(m_ppNodes[i]->get_value()));
+    }
+}
+
+float nn_layer::get_act_func_dervs(float fVal)
+{
+    return m_pActFunc->apply_act_func_derv(fVal);
 }

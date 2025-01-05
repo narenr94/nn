@@ -78,6 +78,8 @@ int main()
 
     uint sz[4] = {784,32,32,10};
 
+    eAct_func actFuncs[4] = {eAct_func::TANH, eAct_func::TANH, eAct_func::TANH, eAct_func::TANH};
+
     float* out = (float*)malloc(10*sizeof(float));
 
     float* norm_values = (float*)malloc(VAL_SIZE*sizeof(float));
@@ -121,8 +123,9 @@ int main()
         for(uint l = 0; l < initData->unNoLys; l++)
         {
             initData->unSzLys[l] = sz[l];
+            initData->eAct_Funcs[l] = actFuncs[l];
         }
-        initData->eAct_Func = eAct_func::TANH;
+        // initData->eAct_Func = eAct_func::TANH;
         initData->fLearningRate = 0.01f;
         initData->eLossFunc = lossVal;
         initData->eOpt = eOptimizers::SGD;
@@ -134,6 +137,7 @@ int main()
                 break;
             case eLossFuncs::MAE:
                 printf("\n Loss Func MAE \n");
+                initData->fLearningRate = 0.001f;
                 break;
             case eLossFuncs::HUBER:
                 printf("\n Loss Func HUBER \n");

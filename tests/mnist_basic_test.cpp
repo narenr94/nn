@@ -63,6 +63,7 @@ int main()
     uint j = 0;
 
     uint sz[4] = {784,32,32,10};
+    eAct_func actFuncs[4] = {eAct_func::TANH, eAct_func::TANH, eAct_func::TANH, eAct_func::TANH};
 
     float* out = (float*)malloc(10*sizeof(float));
 
@@ -97,13 +98,13 @@ int main()
     for(uint l = 0; l < initData->unNoLys; l++)
     {
         initData->unSzLys[l] = sz[l];
+        initData->eAct_Funcs[l] = actFuncs[l];
     }
-    initData->eAct_Func = eAct_func::SIGMOID;
     initData->eOpt = eOptimizers::ADAM;
     initData->optParam1 = 0.9f;
     initData->optParam2 = 0.9f;
     initData->optParam3 = 0.1f;
-    initData->fLearningRate = 0.5f;
+    initData->fLearningRate = 0.01f;
 
     NeuralNet *nn = new NeuralNet(initData);
 

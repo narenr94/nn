@@ -64,6 +64,8 @@ int main()
 
     uint sz[4] = {784,32,32,10};
 
+    // eAct_func actFuncs[4] = {eAct_func::TANH, eAct_func::TANH, eAct_func::TANH, eAct_func::TANH};
+
     float* out = (float*)malloc(10*sizeof(float));
 
     float* norm_values = (float*)malloc(VAL_SIZE*sizeof(float));
@@ -89,8 +91,9 @@ int main()
         for(uint l = 0; l < initData->unNoLys; l++)
         {
             initData->unSzLys[l] = sz[l];
+            initData->eAct_Funcs[l] = actVal;
         }
-        initData->eAct_Func = actVal;
+        
         initData->fLearningRate = 0.01f;
 
         switch(actVal)

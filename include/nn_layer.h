@@ -2,6 +2,7 @@
 #define NN_LAYER
 
 #include "nn_node.h"
+#include "activationFunction.h"
 
 /*
     list of layer types
@@ -16,12 +17,27 @@ enum eLyr_type{
 
 #define RAND_MAX_WEIGHT_BIAS 9
 
+/*
+    list of activation functions
+*/
+enum eAct_func{
+    RELU,
+    LEAKY_RELU,
+    TANH,
+    SIGMOID
+};
+
 class nn_layer{
 
     uint m_unNumNodes; //total number of nodes
     nn_node** m_ppNodes; //starting address from nodes can be accessed
     bool m_bInitialized; //is layer initialized?
     eLyr_type eLyrType; //layer type
+
+    //Activation Function
+    eAct_func m_eActFunc; //activation function to be used
+    ActivationFunction* m_pActFunc;
+    float m_actParam1;
 
 
     
@@ -31,12 +47,20 @@ class nn_layer{
         nn_layer() : constructor for layer
         @n_nodes : number of nodes in layer
     */
-    nn_layer(uint n_nodes);
+    nn_layer(uint n_nodes, eAct_func eActFunc, float actParam1);
 
     /*
         ~nn_layer() : destruct and frees layer resources
     */
     ~nn_layer();
+
+    eAct_func get_act_func();
+
+    float get_act_param();
+
+    void apply_act_func_all_nodes();
+
+    float get_act_func_dervs(float fVal);
 
     /*
         get_num_nodes() : returns total number of nodes in layer
