@@ -41,31 +41,29 @@ float HuberLoss::apply_loss_func(float* fExpOut)
     return (fRet/m_unOutputLyrSz);
 }
 
-float HuberLoss::apply_loss_func_derv(float fExpOut, uint idx)
+
+
+void HuberLoss::get_loss_func_derv(float* fExpOut, float* fVal)
 {
-    float ret = 0.0f;
-    // double diff = y_true[i] - y_pred[i]; 
-    // if (std::abs(diff) <= delta) 
-    // { 
-    //     grad[i] = diff; 
-    // } 
-    // else 
-    // { 
-    //     grad[i] = delta * (diff < 0 ? -1 : 1); 
-    // }
-    double diff = fExpOut - m_pNN->GetNodeVal(m_unOutputLyrID, idx);
-    if(std::abs(diff) <= m_fDelta)
+
+    // printf("\ndiff:%f\n", (fExpOut - m_pNN->GetNodeVal(m_unOutputLyrID, idx)));
+    // fflush(stdout);
+    float diff = 0.0f;
+    for(uint i = 0; i < m_unOutputLyrSz; i++)
     {
-        // ret = diff;
-        ret = -1.0f * diff;
-    }
-    else
-    {
-        // ret = m_fDelta * (diff < 0.0f ? -1.0f : 1.0f);
-        ret = m_fDelta * (diff < 0.0f ? 1.0f : -1.0f);
+        diff = fExpOut[i] - m_pNN->GetNodeVal(m_unOutputLyrID, i);
+        if(std::abs(diff) <= m_fDelta)
+        {
+            // ret = diff;
+            fVal[i] = -1.0f * diff;
+        }
+        else
+        {
+            // ret = m_fDelta * (diff < 0.0f ? -1.0f : 1.0f);
+            fVal[i] = m_fDelta * (diff < 0.0f ? 1.0f : -1.0f);
+        }
     }
 
-    return ret;
 }
 
 HuberLoss::~HuberLoss(){}

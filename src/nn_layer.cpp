@@ -4,6 +4,7 @@
 #include "reluActFunc.h"
 #include "leakyReluActFunc.h"
 #include "tanhActFunc.h"
+#include "softmaxActFunc.h"
 
 
 uint nn_layer::get_num_nodes()
@@ -50,19 +51,22 @@ nn_layer::nn_layer(uint unNumNodesnodes, eAct_func eActFunc, float actParam1)
     switch(m_eActFunc)
     {
         case eAct_func::SIGMOID:
-            m_pActFunc = new SigmoidActFunc();
+            m_pActFunc = new SigmoidActFunc(this);
             break;
         case eAct_func::RELU:
-            m_pActFunc = new ReluActFunc();
+            m_pActFunc = new ReluActFunc(this);
             break;
         case eAct_func::LEAKY_RELU:
-            m_pActFunc = new LeakyReluActFunc(m_actParam1 != 0.0f ? m_actParam1 : LEAKY_RELU_DEFAULT_ALPHA);
+            m_pActFunc = new LeakyReluActFunc(this, m_actParam1 != 0.0f ? m_actParam1 : LEAKY_RELU_DEFAULT_ALPHA);
+            break;
+        case eAct_func::SOFTMAX:
+            m_pActFunc = new SoftmaxActFunc(this);
             break;
         case eAct_func::TANH:
-            m_pActFunc = new TanhActFunc();
+            m_pActFunc = new TanhActFunc(this);
             break;
         default:
-            m_pActFunc = new SigmoidActFunc();
+            m_pActFunc = new SigmoidActFunc(this);
     }
 
     m_bInitialized = true;
@@ -222,13 +226,17 @@ float nn_layer::get_act_param()
 
 void nn_layer::apply_act_func_all_nodes()
 {
-    for(uint i = 0; i < m_unNumNodes; i++)
-    {
-        m_ppNodes[i]->set_value(m_pActFunc->apply_act_func(m_ppNodes[i]->get_value()));
-    }
+    
+    m_pActFunc->apply_act_func();
+
+    
 }
 
-float nn_layer::get_act_func_dervs(float fVal)
+void nn_layer::get_delta_all_nodes(float * fVal)
 {
-    return m_pActFunc->apply_act_func_derv(fVal);
+    
+    m_pActFunc->get_delta(fVal);
+
+    
 }
+

@@ -5,7 +5,8 @@ set(ACT_FUNC_FILES ActivationFunctions/activationFunction.cpp
     ActivationFunctions/leakyReluActFunc.cpp 
     ActivationFunctions/reluActFunc.cpp 
     ActivationFunctions/sigmoidActFunc.cpp 
-    ActivationFunctions/tanhActFunc.cpp )
+    ActivationFunctions/tanhActFunc.cpp
+    ActivationFunctions/softmaxActFunc.cpp)
 set(OPT_FUNC_FILES Optimizers/optimizer.cpp 
     Optimizers/adam.cpp 
     Optimizers/rmsprop.cpp 
@@ -13,7 +14,9 @@ set(OPT_FUNC_FILES Optimizers/optimizer.cpp
 set(LOSS_FUNC_FILES LossFunctions/lossFunction.cpp
     LossFunctions/huberLoss.cpp
     LossFunctions/meanAbsoluteError.cpp
-    LossFunctions/meanSquaredError.cpp)
+    LossFunctions/meanSquaredError.cpp
+    LossFunctions/competitiveCrossEntropyLoss.cpp
+    LossFunctions/binaryCrossEntropyLoss.cpp)
  
 # Create the main library from src 
 add_library(nncore SHARED ${SRC_FILES} ${ACT_FUNC_FILES} ${OPT_FUNC_FILES} ${LOSS_FUNC_FILES})

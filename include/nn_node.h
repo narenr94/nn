@@ -4,6 +4,9 @@
 
 #include "nn_math.h"
 
+
+//debug
+#include <cstdio>
 class nn_node{
 
     float m_fValue; //value of node

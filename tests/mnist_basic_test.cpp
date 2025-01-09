@@ -100,10 +100,8 @@ int main()
         initData->unSzLys[l] = sz[l];
         initData->eAct_Funcs[l] = actFuncs[l];
     }
-    initData->eOpt = eOptimizers::ADAM;
-    initData->optParam1 = 0.9f;
-    initData->optParam2 = 0.9f;
-    initData->optParam3 = 0.1f;
+    initData->eOpt = eOptimizers::SGD;
+    initData->eLossFunc = eLossFuncs::HUBER;
     initData->fLearningRate = 0.01f;
 
     NeuralNet *nn = new NeuralNet(initData);

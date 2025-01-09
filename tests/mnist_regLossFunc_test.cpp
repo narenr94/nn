@@ -93,7 +93,7 @@ int main()
     eLossFuncs lossVal;
     
     
-    for(uint k = 0; k < 3; k++)
+    for(uint k = 0; k < 4; k++)
     {
 
         nnInitData * initData = new nnInitData(4);

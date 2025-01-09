@@ -281,6 +281,8 @@ class NeuralNet{
 
     void MergeBiasAndWeights(uint i);
 
+    uint find_correct_pred_idx(float* ExpOut, uint sz);
+
 };
 
 #endif

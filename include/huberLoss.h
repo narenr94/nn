@@ -15,7 +15,7 @@ class HuberLoss : public LossFunction
 
     float apply_loss_func(float* fExpOut);
 
-    float apply_loss_func_derv(float fExpOut, uint idx);
+    void get_loss_func_derv(float* fExpOut, float* fVal);
 
     ~HuberLoss();
 

@@ -26,4 +26,10 @@ float get_tanhf(float fValue);
 
 float find_derivative_tanhf(float fValue);
 
+float get_softmaxf(float fValue, float fMax);
+
+float find_derivative_softmaxf(float fValue);
+
+float find_derivative_softmaxf_wrong_pred(float fValue, float fValCorr);
+
 #endif

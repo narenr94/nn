@@ -1,11 +1,19 @@
 #include "leakyReluActFunc.h"
+#include "nn_layer.h"
 
-float LeakyReluActFunc::apply_act_func(float n)
+void LeakyReluActFunc::apply_act_func()
 {
-    return get_leakyReluf(n, m_alpha);
+    for(uint i = 0; i < m_pNN_Layer->get_num_nodes(); i++)
+    {
+        m_pNN_Layer->set_node_value(get_leakyReluf(m_pNN_Layer->get_node_value_idx(i ), m_alpha), i);
+    }
+    
 }
 
-float LeakyReluActFunc::apply_act_func_derv(float fVal)
+void LeakyReluActFunc::get_delta(float* fVal)
 {
-    return find_derivative_leakyReluf(fVal, m_alpha);
+    for(uint i = 0; i < m_pNN_Layer->get_num_nodes(); i++)
+    {
+        fVal[i] *= find_derivative_leakyReluf(m_pNN_Layer->get_node_value_idx(i), m_alpha);
+    }
 }

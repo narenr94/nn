@@ -1,11 +1,18 @@
 #include "tanhActFunc.h"
+#include "nn_layer.h"
 
-float TanhActFunc::apply_act_func(float n)
+void TanhActFunc::apply_act_func()
 {
-    return get_tanhf(n);
+    for(uint i = 0; i < m_pNN_Layer->get_num_nodes(); i++)
+    {
+        m_pNN_Layer->set_node_value(get_tanhf(m_pNN_Layer->get_node_value_idx(i)), i);
+    }
 }
 
-float TanhActFunc::apply_act_func_derv(float fVal)
+void TanhActFunc::get_delta(float* fVal)
 {
-    return find_derivative_tanhf(fVal);
+    for(uint i = 0; i < m_pNN_Layer->get_num_nodes(); i++)
+    {
+        fVal[i] *= find_derivative_tanhf(m_pNN_Layer->get_node_value_idx(i));
+    }
 }

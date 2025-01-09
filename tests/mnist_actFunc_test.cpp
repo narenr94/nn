@@ -11,7 +11,7 @@
 #define TEST_MAX 10000 //max number of lines in testing set
 #define NORM_FACTOR 254.0 //max value in data set for normalization
 #define VAL_SIZE 784 //input layer size
-#define EPOCH_MAX 5 //number epochs of training and testing 
+#define EPOCH_MAX 20 //number epochs of training and testing 
 
 /*
 Observations: sigmoid does well with learning rate 0.5
@@ -62,7 +62,7 @@ int main()
 
     uint j = 0;
 
-    uint sz[4] = {784,32,32,10};
+    uint sz[5] = {784,32,32,10};
 
     // eAct_func actFuncs[4] = {eAct_func::TANH, eAct_func::TANH, eAct_func::TANH, eAct_func::TANH};
 
@@ -91,10 +91,20 @@ int main()
         for(uint l = 0; l < initData->unNoLys; l++)
         {
             initData->unSzLys[l] = sz[l];
-            initData->eAct_Funcs[l] = actVal;
+            initData->eAct_Funcs[l] = eAct_func::TANH;
+            if(l == (initData->unNoLys - 1))
+            {
+                initData->eAct_Funcs[l] = actVal;
+            }
         }
         
         initData->fLearningRate = 0.01f;
+        initData->eOpt = eOptimizers::SGD;
+
+        initData->eLossFunc = eLossFuncs::MSE;
+        
+
+
 
         switch(actVal)
         {
@@ -110,10 +120,14 @@ int main()
             case eAct_func::TANH:
                 printf("\n Act Func TANH \n");
                 break;
+            case eAct_func::SOFTMAX:
+                printf("\n Act Func SOFTMAX \n");
+                initData->eLossFunc = eLossFuncs::CCE;
+                break;
 
         }
 
-         NeuralNet *nn = new NeuralNet(initData);
+        NeuralNet *nn = new NeuralNet(initData);
 
         nn->populateWeightsAndBiasesWithRandomNumbers();
 

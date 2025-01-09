@@ -1,11 +1,18 @@
 #include "sigmoidActFunc.h"
+#include "nn_layer.h"
 
-float SigmoidActFunc::apply_act_func(float n)
+void SigmoidActFunc::apply_act_func()
 {
-    return get_sigmoidf(n);
+    for(uint i = 0; i < m_pNN_Layer->get_num_nodes(); i++)
+    {
+        m_pNN_Layer->set_node_value(get_sigmoidf(m_pNN_Layer->get_node_value_idx(i)), i);
+    }
 }
 
-float SigmoidActFunc::apply_act_func_derv(float fVal)
+void SigmoidActFunc::get_delta(float* fVal)
 {
-    return find_derivative_sigmoidf(fVal);
+    for(uint i = 0; i < m_pNN_Layer->get_num_nodes(); i++)
+    {
+        fVal[i] *= find_derivative_sigmoidf(m_pNN_Layer->get_node_value_idx(i));
+    }
 }
