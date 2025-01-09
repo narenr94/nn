@@ -12,11 +12,11 @@ class LeakyReluActFunc : public ActivationFunction
 
     public:
 
-        LeakyReluActFunc(float alpha = LEAKY_RELU_DEFAULT_ALPHA){m_alpha = alpha;}
+        LeakyReluActFunc(nn_layer* pNN_Layer, float alpha = LEAKY_RELU_DEFAULT_ALPHA){m_pNN_Layer = pNN_Layer, m_alpha = alpha;}
 
-        float apply_act_func(float n);
+        void apply_act_func();
 
-        float apply_act_func_derv(float fVal);
+        void get_delta(float* fVal);
 
         ~LeakyReluActFunc(){}
 

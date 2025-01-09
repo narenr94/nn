@@ -8,11 +8,11 @@ class TanhActFunc : public ActivationFunction
 
     public:
 
-        TanhActFunc(){}
+        TanhActFunc(nn_layer* pNN_Layer){m_pNN_Layer = pNN_Layer;}
 
-        float apply_act_func(float n);
+        void apply_act_func();
 
-        float apply_act_func_derv(float fVal);
+        void get_delta(float* fVal);
 
         ~TanhActFunc(){}
 

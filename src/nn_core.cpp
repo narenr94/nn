@@ -15,6 +15,8 @@
 #include "meanSquaredError.h"
 #include "meanAbsoluteError.h"
 #include "huberLoss.h"
+#include "binaryCrossEntropyLoss.h"
+#include "competitiveCrossEntropyLoss.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -23,16 +25,7 @@ static const char* static_NNDumpFilePath = "./"; //dump file path
 
 static int static_nDumpFileNum = 0; //number postfix fro dump files
 
-/*
-    list of activation functions
-*/
-static const char * static_const_parrActFuncStr[SIGMOID+1] =
-{
-    "RELU",
-    "LEAKY_RELU",
-    "TANH",
-    "SIGMOID"
-};
+
 
 struct Batch_Training_Instance_data{
     float* deltas;
@@ -249,6 +242,12 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
         case eLossFuncs::HUBER:
             m_pLossFunc = new HuberLoss(this, other_initData->lossParam1 != 0.0f ? other_initData->lossParam1 : HUBER_DEFAULT_DELTA);
             break;
+        case eLossFuncs::CCE:
+            m_pLossFunc = new CompetitiveCrossEntropyLoss(this);
+            break;
+        case eLossFuncs::BCE:
+            m_pLossFunc = new BinaryCrossEntropyLoss(this);
+            break;
         default:
             m_pLossFunc = new MeanSquaredError(this);
             break;
@@ -413,6 +412,7 @@ bool NeuralNet::do_forwardpass_to_next_layer(uint unInLayerIdx)
         sigma = 0;
     }
 
+    //apply activation function
     out_lyr->apply_act_func_all_nodes();
 
     bRet = true;
@@ -519,6 +519,22 @@ bool NeuralNet::do_backward_pass(float* pfExpOut)
 
 }
 
+uint NeuralNet::find_correct_pred_idx(float* ExpOut, uint sz)
+{
+    uint ret = 0;
+    float max = ExpOut[0];
+    for(uint i = 1; i < sz; i++)
+    {
+        if(max < ExpOut[i])
+        {
+            max = ExpOut[i];
+            ret = i;
+        }
+    }
+
+    return ret;
+}
+
 float NeuralNet::find_delta_of_all_nodes(float* pfExpOut)
 {
 
@@ -535,35 +551,59 @@ float NeuralNet::find_delta_of_all_nodes(float* pfExpOut)
 
     float total_error = calculate_error(pfExpOut, error);
 
-    float temp = 0.0;
-
+    //find correct pred for softmax
     for(i = (m_unNumLys - 1); i > INPUT_LAYER_ID; i--)
     {
+        float * temp = new float[m_ppLys[i]->get_num_nodes()];
         if(m_ppLys[i]->get_layer_type() == OUTPUT_LYR)//output layer
         {
+            
+           
+            //redesign to pass a array which will be populated with lossFuncDervs, loop inside function in layer .. input -> Expected output array , output lossFuncDerv
+            m_pLossFunc->get_loss_func_derv(pfExpOut, temp);
+            // for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
+            // {
+            //     printf("\nloss_derv:%f", temp[j]);
+            //     fflush(stdout);
+            // }
+            // printf("\nloss_derv:%f", temp);
+            // fflush(stdout);
+            //Todo : similar to get_act_func move loop into nn_layer, rename func to get_delta ... input ->lossFuncDerv output array of delta
+            m_ppLys[i]->get_delta_all_nodes(temp);
+
+            // printf("\n\n\n\n");
+            // fflush(stdout);
+            
             for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
             {
-                temp = m_pLossFunc->apply_loss_func_derv(pfExpOut[j], j);
-                // temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
-                temp *= m_ppLys[i]->get_act_func_dervs(m_ppLys[i]->get_node_value_idx(j));
-                m_ppLys[i]->set_node_delta(temp, j);
+                // printf("\nloss_derv*act_derv:%f, j :%d\n, act_val:%f exp_val:%f", temp[j], j, m_ppLys[i]->get_node_value_idx(j), pfExpOut[j]);
+                // fflush(stdout);
+                // printf("\npi-yi:%f\n", m_ppLys[i]->get_node_value_idx(j) - pfExpOut[j]);
+                // fflush(stdout);
+                // temp[j] = m_ppLys[i]->get_node_value_idx(j) - pfExpOut[j];
+                m_ppLys[i]->set_node_delta(temp[j], j);
             }
         }
         else //hidden layer
         {
             for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
             {
-                temp = 0.0;
+                temp[j] = 0.0f;
 
                 for(k = 0; k < m_ppLys[i + 1]->get_num_nodes(); k++)
                 {
-                    temp += m_ppLys[i + 1]->get_node_delta_idx(k) * m_ppWtMtcs[i]->get_weight(j, k);
+                    temp[j] += m_ppLys[i + 1]->get_node_delta_idx(k) * m_ppWtMtcs[i]->get_weight(j, k);
                 }
+            }
                 // temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
-                temp *= m_ppLys[i]->get_act_func_dervs(m_ppLys[i]->get_node_value_idx(j));
-                m_ppLys[i]->set_node_delta(temp, j);
+            m_ppLys[i]->get_delta_all_nodes(temp);
+            for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
+            {
+                m_ppLys[i]->set_node_delta(temp[j], j);
             }
         }
+
+        delete [] temp;
         
 
     }

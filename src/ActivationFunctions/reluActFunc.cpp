@@ -1,11 +1,18 @@
 #include "reluActFunc.h"
+#include "nn_layer.h"
 
-float ReluActFunc::apply_act_func(float n)
+void ReluActFunc::apply_act_func()
 {
-    return get_reluf(n);
+    for(uint i = 0; i < m_pNN_Layer->get_num_nodes(); i++)
+    {
+        m_pNN_Layer->set_node_value(get_reluf(m_pNN_Layer->get_node_value_idx(i)), i);
+    }
 }
 
-float ReluActFunc::apply_act_func_derv(float fVal)
+void ReluActFunc::get_delta(float* fVal)
 {
-    return find_derivative_reluf(fVal);
+    for(uint i = 0; i < m_pNN_Layer->get_num_nodes(); i++)
+    {
+        fVal[i] *= find_derivative_reluf(m_pNN_Layer->get_node_value_idx(i));
+    }
 }

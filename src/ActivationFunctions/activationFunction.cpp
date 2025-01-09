@@ -1,5 +1,5 @@
 #include "activationFunction.h"
 
-float ActivationFunction::apply_act_func(float n){return 0.0f;}
+void ActivationFunction::apply_act_func(){}
 
-float ActivationFunction::apply_act_func_derv(float fVal){return 0.0f;}
+void ActivationFunction::get_delta(float* fVal){}

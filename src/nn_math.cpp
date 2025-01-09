@@ -62,3 +62,23 @@ float find_derivative_tanhf(float fValue)
 {
     return (1 - (fValue * fValue));
 }
+
+float get_softmaxf(float fValue, float fMax)
+{
+    return std::exp(fValue - fMax);
+    // return std::exp(fValue);
+}
+
+float find_derivative_softmaxf(float fValue)
+{
+
+    return (fValue * (1 - fValue));
+    
+}
+
+float find_derivative_softmaxf_wrong_pred(float fValue, float fValCorr)
+{
+
+    return (-1.0f * fValue * fValCorr);
+    
+}

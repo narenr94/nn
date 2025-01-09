@@ -21,10 +21,11 @@ enum eLyr_type{
     list of activation functions
 */
 enum eAct_func{
+    SIGMOID,
     RELU,
     LEAKY_RELU,
-    TANH,
-    SIGMOID
+    SOFTMAX,
+    TANH    
 };
 
 class nn_layer{
@@ -59,8 +60,8 @@ class nn_layer{
     float get_act_param();
 
     void apply_act_func_all_nodes();
-
-    float get_act_func_dervs(float fVal);
+    
+    void get_delta_all_nodes(float * fVal);
 
     /*
         get_num_nodes() : returns total number of nodes in layer
