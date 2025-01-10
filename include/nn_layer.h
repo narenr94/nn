@@ -19,6 +19,7 @@ enum eLyr_type{
 
 /*
     list of activation functions
+    Note: keep TANH at last to keep test scripts intact
 */
 enum eAct_func{
     SIGMOID,

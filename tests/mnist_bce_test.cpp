@@ -11,9 +11,9 @@
 #define TEST_MAX 10000 //max number of lines in testing set
 #define NORM_FACTOR 254.0 //max value in data set for normalization
 #define VAL_SIZE 784 //input layer size
-#define EPOCH_MAX 5 //number epochs of training and testing
+#define EPOCH_MAX 3 //number epochs of training and testing
 #define NUMBER_TO_IDENTIFY 5
-#define TEST_SAMPLE_COUNT 10
+#define TEST_SAMPLE_COUNT 20
 
 /*
 Observation
@@ -79,10 +79,6 @@ int main()
 
     std::chrono::high_resolution_clock::time_point start, end;
     std::chrono::duration<double> time_taken;
-
-    float correct_count = 0;
-
-    float accuracy = 0.0;   
 
     nnInitData * initData = new nnInitData(4); 
 
@@ -158,18 +154,12 @@ int main()
             {
                 for(uint a = 0; a < 9; a++)
                 {
-                    if(nn->Train(norm_values, out))
-                    {
-                        correct_count += 1.0;
-                    }
+                    nn->Train(norm_values, out);
                 }
             }
             else
             {
-                if(nn->Train(norm_values, out))
-                {
-                    correct_count += 1.0;
-                }
+                nn->Train(norm_values, out);
             }
             
 
@@ -181,17 +171,12 @@ int main()
 
         pb->reset();
 
-        accuracy = correct_count / ((float)TRAIN_MAX);
-
-        printf("\nTrain Accuracy:%f\n", accuracy);
         end = std::chrono::high_resolution_clock::now();
 
         time_taken = end - start;
 
-        printf("Time taken for Train Epoch[%d]:%fSeconds\n", j + 1, time_taken.count());
+        printf("\nTime taken for Train Epoch[%d]:%fSeconds\n", j + 1, time_taken.count());
         
-        correct_count = 0.0;
-
         pb->setMax(TEST_MAX);
 
         start = std::chrono::high_resolution_clock::now();
@@ -214,10 +199,7 @@ int main()
 
             setOutArrayBCE(label, out);            
 
-            if(nn->Test(norm_values, out))
-            {
-                correct_count += 1.0;
-            }
+            nn->Test(norm_values, out);
 
             pb->update_progress_bar(i + 1);
         }
@@ -226,17 +208,12 @@ int main()
 
         pb->reset();
 
-        accuracy = correct_count / ((float)TEST_MAX);
-
-        printf("\nTest Accuracy:%f\n", accuracy);
         end = std::chrono::high_resolution_clock::now();
 
         time_taken = end - start;
 
-        printf("Time taken for test Epoch[%d]:%fSeconds\n", j + 1, time_taken.count());
+        printf("\nTime taken for test Epoch[%d]:%fSeconds\n", j + 1, time_taken.count());
         
-        correct_count = 0.0;
-
         fdr = fopen("MNIST/mnist_test.csv","r");
         //test for 10 NUMBER_TO_IDENTIFY and 10 non NUMBER_TO_IDENTIFY
         do

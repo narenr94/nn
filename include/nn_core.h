@@ -20,6 +20,7 @@
 
 /*
     list of activation functions
+    Note : keep ADAM in bottom to keep tests intact
 */
 enum eOptimizers{
     SGD,
@@ -29,6 +30,7 @@ enum eOptimizers{
 
 /*
     list of activation functions
+    Note : keep CCE in bottom to keep tests intact
 */
 enum eLossFuncs{
     MSE, //mean squared error
@@ -282,8 +284,6 @@ class NeuralNet{
     void SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, float* actParam1);
 
     void MergeBiasAndWeights(uint i);
-
-    bool isCorrectPredictionBCE(float* pfOut);
 
 };
 

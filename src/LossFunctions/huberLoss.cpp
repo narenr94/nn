@@ -46,8 +46,6 @@ float HuberLoss::apply_loss_func(float* fExpOut)
 void HuberLoss::get_loss_func_derv(float* fExpOut, float* fVal)
 {
 
-    // printf("\ndiff:%f\n", (fExpOut - m_pNN->GetNodeVal(m_unOutputLyrID, idx)));
-    // fflush(stdout);
     float diff = 0.0f;
     for(uint i = 0; i < m_unOutputLyrSz; i++)
     {
