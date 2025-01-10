@@ -46,11 +46,11 @@ static Batch_Training_Args ** args = nullptr;
 
 NeuralNet::NeuralNet(nnInitData* initData)
 {
+
     srand(time(NULL));
 
     Set_Init_Data(initData);
 
-    SetupLayersAndWeightMatrices(initData->unSzLys, initData->eAct_Funcs, initData->actParam1);
 }
 
 NeuralNet::NeuralNet(NeuralNet* other)
@@ -135,12 +135,7 @@ NeuralNet::NeuralNet(const char* fileName)
     //set nn with temp init data
     Set_Init_Data(temp_initData);
 
-    SetupLayersAndWeightMatrices(temp_initData->unSzLys, temp_initData->eAct_Funcs, temp_initData->actParam1);
-
     delete temp_initData;
-
-    
-
 
     //store bias values
 	for(i = 0; i < temp_numLys; ++i) 
@@ -519,22 +514,6 @@ bool NeuralNet::do_backward_pass(float* pfExpOut)
 
 }
 
-uint NeuralNet::find_correct_pred_idx(float* ExpOut, uint sz)
-{
-    uint ret = 0;
-    float max = ExpOut[0];
-    for(uint i = 1; i < sz; i++)
-    {
-        if(max < ExpOut[i])
-        {
-            max = ExpOut[i];
-            ret = i;
-        }
-    }
-
-    return ret;
-}
-
 float NeuralNet::find_delta_of_all_nodes(float* pfExpOut)
 {
 
@@ -557,30 +536,11 @@ float NeuralNet::find_delta_of_all_nodes(float* pfExpOut)
         float * temp = new float[m_ppLys[i]->get_num_nodes()];
         if(m_ppLys[i]->get_layer_type() == OUTPUT_LYR)//output layer
         {
-            
-           
-            //redesign to pass a array which will be populated with lossFuncDervs, loop inside function in layer .. input -> Expected output array , output lossFuncDerv
             m_pLossFunc->get_loss_func_derv(pfExpOut, temp);
-            // for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
-            // {
-            //     printf("\nloss_derv:%f", temp[j]);
-            //     fflush(stdout);
-            // }
-            // printf("\nloss_derv:%f", temp);
-            // fflush(stdout);
-            //Todo : similar to get_act_func move loop into nn_layer, rename func to get_delta ... input ->lossFuncDerv output array of delta
             m_ppLys[i]->get_delta_all_nodes(temp);
 
-            // printf("\n\n\n\n");
-            // fflush(stdout);
-            
             for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
             {
-                // printf("\nloss_derv*act_derv:%f, j :%d\n, act_val:%f exp_val:%f", temp[j], j, m_ppLys[i]->get_node_value_idx(j), pfExpOut[j]);
-                // fflush(stdout);
-                // printf("\npi-yi:%f\n", m_ppLys[i]->get_node_value_idx(j) - pfExpOut[j]);
-                // fflush(stdout);
-                // temp[j] = m_ppLys[i]->get_node_value_idx(j) - pfExpOut[j];
                 m_ppLys[i]->set_node_delta(temp[j], j);
             }
         }
@@ -620,7 +580,15 @@ bool NeuralNet::Train(float* in, float* out)
 
     do_forward_pass(in);
 
-    bRet = isCorrectPrediction(out);
+    //KLUDGE: looks combine below both into single function
+    if(m_eLossFunc == eLossFuncs::BCE)
+    {
+        bRet = isCorrectPredictionBCE(out);
+    }
+    else
+    {
+        bRet = isCorrectPrediction(out);
+    }    
 
     do_backward_pass(out);
 
@@ -651,7 +619,17 @@ void NeuralNet::Batch_Training(uint i)
 { 
     do_forward_pass(args[i]->in);
 
-    args[i]->sBData->bCorrectPredict = isCorrectPrediction(args[i]->out);
+    //KLUDGE
+    if(m_eLossFunc == eLossFuncs::BCE)
+    {
+        args[i]->sBData->bCorrectPredict = isCorrectPredictionBCE(args[i]->out);
+    }
+    else
+    {
+        args[i]->sBData->bCorrectPredict = isCorrectPrediction(args[i]->out);
+    }
+
+    
 
     do_backward_pass(args[i]->out);
     
@@ -847,6 +825,28 @@ void NeuralNet::populateWeightsAndBiasesWithExistingNN(NeuralNet* other)
     }
 }
 
+bool NeuralNet::isCorrectPredictionBCE(float* pfOut)
+{
+    bool bRet = false;
+
+    if(pfOut[0] >= 0.5)
+    {
+        if(m_ppLys[m_unNumLys - 1]->get_node_value_idx(0) >= 0.5)
+        {
+            bRet = true;
+        }
+        
+    }
+    else
+    {
+        if(m_ppLys[m_unNumLys - 1]->get_node_value_idx(0) < 0.5)
+        {
+            bRet = true;
+        }
+    }
+    return bRet;
+}
+
 bool NeuralNet::isCorrectPrediction(float* pfOut)
 {
     bool bRet = false;
@@ -890,7 +890,16 @@ bool NeuralNet::Test(float* pfIn, float* pfOut)
 
     do_forward_pass(pfIn);
 
-    ret = isCorrectPrediction(pfOut);
+    //KLUDGE
+    if(m_eLossFunc == eLossFuncs::BCE)
+    {
+        ret = isCorrectPredictionBCE(pfOut);
+    }
+    else
+    {
+        ret = isCorrectPrediction(pfOut);
+    }
+    
 
     return ret;
 
@@ -994,5 +1003,13 @@ void NeuralNet::SaveNN(const char* fileName)
 		 
 	} 
 	fclose(file);
+}
+
+void NeuralNet::Get_OutputLayer_Data(float* fVal)
+{
+    for(uint i = 0; i < m_ppLys[m_unNumLys - 1]->get_num_nodes(); i++)
+    {
+        fVal[i] = m_ppLys[m_unNumLys - 1]->get_node_value_idx(i);
+    }
 }
 

@@ -144,6 +144,8 @@ class NeuralNet{
     */
     ~NeuralNet();
 
+    void Get_OutputLayer_Data(float* fVal);
+
     void Get_Init_Data(nnInitData *ret);
 
     void Init_Batch_Training(uint batchSz);
@@ -281,7 +283,7 @@ class NeuralNet{
 
     void MergeBiasAndWeights(uint i);
 
-    uint find_correct_pred_idx(float* ExpOut, uint sz);
+    bool isCorrectPredictionBCE(float* pfOut);
 
 };
 
