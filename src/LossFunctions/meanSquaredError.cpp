@@ -27,9 +27,6 @@ float MeanSquaredError::apply_loss_func(float* fExpOut)
 void MeanSquaredError::get_loss_func_derv(float* fExpOut, float* fVal)
 {
 
-    // printf("\ndiff:%f\n", (fExpOut - m_pNN->GetNodeVal(m_unOutputLyrID, idx)));
-    // fflush(stdout);
-
     for(uint i = 0; i < m_unOutputLyrSz; i++)
     {
         fVal[i] = (-2.0f * ((fExpOut[i] - m_pNN->GetNodeVal(m_unOutputLyrID, i)) / m_unOutputLyrSz));

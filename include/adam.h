@@ -81,7 +81,6 @@ class ADAMOPT : public Optimizer
         void correct_weights();
 
     public:
-        //KLUDGE : default beta1:0.9 beta2:0.999 epsilon0.00000001, currently set to work for mnist example
         ADAMOPT(NeuralNet* nn, float beta1 = ADAM_DEFAULT_BETA1, float beta2 = ADAM_DEFAULT_BETA2,float epslion = ADAM_DEFAULT_EPSILON);
         
         void correct_weights_biases();

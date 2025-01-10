@@ -580,15 +580,7 @@ bool NeuralNet::Train(float* in, float* out)
 
     do_forward_pass(in);
 
-    //KLUDGE: looks combine below both into single function
-    if(m_eLossFunc == eLossFuncs::BCE)
-    {
-        bRet = isCorrectPredictionBCE(out);
-    }
-    else
-    {
-        bRet = isCorrectPrediction(out);
-    }    
+    bRet = isCorrectPrediction(out);
 
     do_backward_pass(out);
 
@@ -619,17 +611,7 @@ void NeuralNet::Batch_Training(uint i)
 { 
     do_forward_pass(args[i]->in);
 
-    //KLUDGE
-    if(m_eLossFunc == eLossFuncs::BCE)
-    {
-        args[i]->sBData->bCorrectPredict = isCorrectPredictionBCE(args[i]->out);
-    }
-    else
-    {
-        args[i]->sBData->bCorrectPredict = isCorrectPrediction(args[i]->out);
-    }
-
-    
+    args[i]->sBData->bCorrectPredict = isCorrectPrediction(args[i]->out);    
 
     do_backward_pass(args[i]->out);
     
@@ -825,59 +807,62 @@ void NeuralNet::populateWeightsAndBiasesWithExistingNN(NeuralNet* other)
     }
 }
 
-bool NeuralNet::isCorrectPredictionBCE(float* pfOut)
-{
-    bool bRet = false;
 
-    if(pfOut[0] >= 0.5)
-    {
-        if(m_ppLys[m_unNumLys - 1]->get_node_value_idx(0) >= 0.5)
-        {
-            bRet = true;
-        }
-        
-    }
-    else
-    {
-        if(m_ppLys[m_unNumLys - 1]->get_node_value_idx(0) < 0.5)
-        {
-            bRet = true;
-        }
-    }
-    return bRet;
-}
 
 bool NeuralNet::isCorrectPrediction(float* pfOut)
 {
     bool bRet = false;
 
-    uint out_correct_label = 0;
-
-    uint highest_out_label = 0;
-
-    float highest_value = 0.0;
-
-    uint i = 0;
-
-    for(i = 0; i < m_ppLys[m_unNumLys - 1]->get_num_nodes(); i++)
+    if(m_ppLys[m_unNumLys - 1]->get_num_nodes() == 1) //cant get max if only one output exists, compare with 0.5f instead
     {
-        if(pfOut[i] == 1.0)
+        if(pfOut[0] >= 0.5)
         {
-            out_correct_label = i;
+            if(m_ppLys[m_unNumLys - 1]->get_node_value_idx(0) >= 0.5)
+            {
+                bRet = true;
+            }
+            
+        }
+        else
+        {
+            if(m_ppLys[m_unNumLys - 1]->get_node_value_idx(0) < 0.5)
+            {
+                bRet = true;
+            }
+        }
+    }
+    else
+    {
+        uint out_correct_label = 0;
+
+        uint highest_out_label = 0;
+
+        float highest_value = 0.0;
+
+        uint i = 0;
+
+        for(i = 0; i < m_ppLys[m_unNumLys - 1]->get_num_nodes(); i++)
+        {
+            if(pfOut[i] == 1.0)
+            {
+                out_correct_label = i;
+            }
+
+            if(m_ppLys[m_unNumLys - 1]->get_node_value_idx(i) > highest_value)
+            {
+                highest_value = m_ppLys[m_unNumLys - 1]->get_node_value_idx(i);
+                highest_out_label = i;
+            }
+
         }
 
-        if(m_ppLys[m_unNumLys - 1]->get_node_value_idx(i) > highest_value)
+        if(highest_out_label == out_correct_label)
         {
-            highest_value = m_ppLys[m_unNumLys - 1]->get_node_value_idx(i);
-            highest_out_label = i;
+            bRet = true;
         }
-
     }
 
-    if(highest_out_label == out_correct_label)
-    {
-        bRet = true;
-    }
+    
 
     return bRet;
 
@@ -890,16 +875,7 @@ bool NeuralNet::Test(float* pfIn, float* pfOut)
 
     do_forward_pass(pfIn);
 
-    //KLUDGE
-    if(m_eLossFunc == eLossFuncs::BCE)
-    {
-        ret = isCorrectPredictionBCE(pfOut);
-    }
-    else
-    {
-        ret = isCorrectPrediction(pfOut);
-    }
-    
+    ret = isCorrectPrediction(pfOut);    
 
     return ret;
 
