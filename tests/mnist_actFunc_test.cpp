@@ -109,6 +109,7 @@ int main()
         switch(actVal)
         {
             case eAct_func::SIGMOID:
+                initData->fLearningRate = 0.5f;
                 printf("\n Act Func SIGMOID \n");
                 break;
             case eAct_func::RELU:
