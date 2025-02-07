@@ -13,6 +13,8 @@
 #include "lossFunction.h"
 
 
+
+
 #define INPUT_LAYER_ID 0 //input layer is the first layer
 
 
@@ -84,6 +86,8 @@ struct nnInitData{
 
 };
 
+class BaseAccelerator; //Forward Declaration
+
 class NeuralNet{
 
     
@@ -122,6 +126,8 @@ class NeuralNet{
 
     //debug
     // uint nn_id = 0;
+
+    BaseAccelerator* m_pAccelerator;
 
 
     
@@ -244,27 +250,19 @@ class NeuralNet{
 
     void SetWeight(uint MtxId, uint inIdx, uint outIdx, float val); 
 
-    void SaveNN(const char* fileName);    
+    void SaveNN(const char* fileName);   
+
+    nn_layer* GetLayer(uint idx);
+
+    nn_l2l_weight_matrix* GetMatrix(uint idx);
+
+    LossFunction* GetLossFunc();
+
+
+
 
     private:
-    
-    /*
-        forwardpass_to_next_layer() : perform forward pass from (in_layer_idx)th layer to (in_layer_idx + 1)th layer
-
-        @in_layer_idx : input (relative) layer index
-    */
-    bool do_forwardpass_to_next_layer(uint unInLayerIdx);
-
-    /*
-        find_delta_of_all_nodes() : calculates and updates delta of all nodes in nn, also corrects biases
-
-        @exp_out : array containing expected output for nn
-
-        @return : total error
-    */
-    float find_delta_of_all_nodes(float* pfExpOut);
-
-    
+     
     /*
         isCorrectPrediction() : compares neural net output with expected output and return true is correct.
 
@@ -285,6 +283,7 @@ class NeuralNet{
 
     void MergeBiasAndWeights(uint i);
 
+    
 };
 
 #endif
