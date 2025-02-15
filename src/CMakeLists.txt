@@ -32,4 +32,6 @@ endif()
 # Create the main library from src 
 add_library(nncore SHARED ${SRC_FILES} ${ACT_FUNC_FILES} ${OPT_FUNC_FILES} ${LOSS_FUNC_FILES} ${ACC_FUNC_FILES})
 target_include_directories(nncore PUBLIC ${CMAKE_SOURCE_DIR}/include)
-target_link_libraries(nncore OpenCL::OpenCL)
+if(OPENCL_ACC)
+    target_link_libraries(nncore OpenCL::OpenCL)
+endif()

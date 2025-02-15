@@ -1,0 +1,1 @@
+/usr/bin/g++ -g CMakeFiles/mnist_regLossFunc_test.dir/mnist_regLossFunc_test.cpp.o -o mnist_regLossFunc_test   -L/home/naren/Code/NN/nn/build/src  -L/home/naren/Code/NN/nn/build/utils  -Wl,-rpath,/home/naren/Code/NN/nn/build/src:/home/naren/Code/NN/nn/build/utils -lnncore -lnnutils

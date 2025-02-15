@@ -1,0 +1,1 @@
+/usr/bin/g++ -g CMakeFiles/mnist_save_load_test.dir/mnist_save_load_test.cpp.o -o mnist_save_load_test   -L/home/naren/Code/NN/nn/build/src  -L/home/naren/Code/NN/nn/build/utils  -Wl,-rpath,/home/naren/Code/NN/nn/build/src:/home/naren/Code/NN/nn/build/utils -lnncore -lnnutils

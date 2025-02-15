@@ -1,0 +1,1 @@
+/usr/bin/g++ -fPIC -g -shared -Wl,-soname,libnnutils.so -o libnnutils.so CMakeFiles/nnutils.dir/nn_utils.cpp.o

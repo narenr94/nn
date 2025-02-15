@@ -1,0 +1,189 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3
+					],
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "utils",
+					"jsonFile" : "directory-utils-Debug-ecc62ddb27eede1f7ffa.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "utils",
+					"targetIndexes" : 
+					[
+						9
+					]
+				},
+				{
+					"build" : "src",
+					"jsonFile" : "directory-src-Debug-b6cf2213fc5053b67c22.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "src",
+					"targetIndexes" : 
+					[
+						8
+					]
+				},
+				{
+					"build" : "tests",
+					"jsonFile" : "directory-tests-Debug-b01f6abb0ab61427ef3b.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "tests",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					],
+					"name" : "NNProject",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 3,
+					"id" : "RunAfterBuild::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-RunAfterBuild-Debug-768eaddada9b60d4a196.json",
+					"name" : "RunAfterBuild",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "mnist_actFunc_test::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-mnist_actFunc_test-Debug-8e5d5ae7bc2d87e9d5cb.json",
+					"name" : "mnist_actFunc_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "mnist_basic_test::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-mnist_basic_test-Debug-c67f5d7d1d9d8c7dc693.json",
+					"name" : "mnist_basic_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "mnist_batch_test::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-mnist_batch_test-Debug-33f25de439164ad261fa.json",
+					"name" : "mnist_batch_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "mnist_bce_test::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-mnist_bce_test-Debug-7b9d54bdbb46c2307d0b.json",
+					"name" : "mnist_bce_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "mnist_copy_test::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-mnist_copy_test-Debug-d3344511742a002350de.json",
+					"name" : "mnist_copy_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "mnist_regLossFunc_test::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-mnist_regLossFunc_test-Debug-da242a421d0efe6a45d1.json",
+					"name" : "mnist_regLossFunc_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "mnist_save_load_test::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-mnist_save_load_test-Debug-7dede912ac641c79259e.json",
+					"name" : "mnist_save_load_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "nncore::@145eef247bfb46b6828c",
+					"jsonFile" : "target-nncore-Debug-ae5c29308ae5c54d263d.json",
+					"name" : "nncore",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "nnutils::@c810615cce0f7acb82dc",
+					"jsonFile" : "target-nnutils-Debug-dc7117cf8d70c88e5901.json",
+					"name" : "nnutils",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/naren/Code/NN/nn/build",
+		"source" : "/home/naren/Code/NN/nn"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

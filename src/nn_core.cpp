@@ -20,8 +20,9 @@
 
 //Accelerators
 #include "baseAccelerator.h"
+#ifdef OPENCL_ACC
 #include "openclAccelerator.h"
-
+#endif
 #include <string.h>
 #include <stdio.h>
 

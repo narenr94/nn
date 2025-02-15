@@ -1,0 +1,90 @@
+{
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_custom_target"
+		],
+		"files" : 
+		[
+			"tests/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 24,
+				"parent" : 0
+			}
+		]
+	},
+	"dependencies" : 
+	[
+		{
+			"id" : "mnist_basic_test::@a44f0ac069e85531cdee"
+		},
+		{
+			"id" : "mnist_copy_test::@a44f0ac069e85531cdee"
+		},
+		{
+			"id" : "mnist_batch_test::@a44f0ac069e85531cdee"
+		},
+		{
+			"id" : "mnist_actFunc_test::@a44f0ac069e85531cdee"
+		},
+		{
+			"id" : "mnist_save_load_test::@a44f0ac069e85531cdee"
+		},
+		{
+			"id" : "mnist_regLossFunc_test::@a44f0ac069e85531cdee"
+		},
+		{
+			"id" : "mnist_bce_test::@a44f0ac069e85531cdee"
+		}
+	],
+	"id" : "RunAfterBuild::@a44f0ac069e85531cdee",
+	"name" : "RunAfterBuild",
+	"paths" : 
+	{
+		"build" : "tests",
+		"source" : "tests"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		},
+		{
+			"name" : "CMake Rules",
+			"sourceIndexes" : 
+			[
+				1
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "build/tests/CMakeFiles/RunAfterBuild",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/tests/CMakeFiles/RunAfterBuild.rule",
+			"sourceGroupIndex" : 1
+		}
+	],
+	"type" : "UTILITY"
+}
