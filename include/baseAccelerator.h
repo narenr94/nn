@@ -1,8 +1,12 @@
+#ifndef NN_BASE_ACC_H
+#define NN_BASE_ACC_H
 #include "nn_math.h"
 
 class NeuralNet;
 
 class BaseAccelerator{
+
+protected:
 
     NeuralNet* m_pNN;
 
@@ -25,3 +29,4 @@ public:
    virtual ~BaseAccelerator();
 
 };
+#endif

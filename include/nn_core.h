@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <thread>
+#include <cassert>
 #include "nn_math.h"
 #include "nn_l2l_weight_matrix.h"
 

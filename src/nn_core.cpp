@@ -20,6 +20,7 @@
 
 //Accelerators
 #include "baseAccelerator.h"
+#include "openclAccelerator.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -53,7 +54,7 @@ NeuralNet::NeuralNet(nnInitData* initData)
     srand(time(NULL));
 
     Set_Init_Data(initData);
-
+    
 }
 
 NeuralNet::NeuralNet(NeuralNet* other)
@@ -250,8 +251,11 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
             m_pLossFunc = new MeanSquaredError(this);
             break;
     }
-
+#ifdef OPENCL_ACC
+    m_pAccelerator = new OpenclAccelerator(this);
+#else
     m_pAccelerator = new BaseAccelerator(this);
+#endif
 
     //store param values locally
     m_optParam1 = other_initData->optParam1;
