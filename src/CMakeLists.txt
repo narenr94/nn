@@ -17,8 +17,21 @@ set(LOSS_FUNC_FILES LossFunctions/lossFunction.cpp
     LossFunctions/meanSquaredError.cpp
     LossFunctions/competitiveCrossEntropyLoss.cpp
     LossFunctions/binaryCrossEntropyLoss.cpp)
-set(ACC_FUNC_FILES Accelerators/baseAccelerator.cpp)
+set(ACC_FUNC_FILES Accelerators/baseAccelerator.cpp
+    Accelerators/openclAccelerator.cpp)
+
+option(OPENCL_ACC "Enable this feature" OFF)
+
+# Check if the option is enabled
+# cmake -DOPENCL_ACC=ON ..
+if(OPENCL_ACC)
+    add_definitions(-DOPENCL_ACC)
+    find_package(OpenCL REQUIRED)
+endif()
  
 # Create the main library from src 
 add_library(nncore SHARED ${SRC_FILES} ${ACT_FUNC_FILES} ${OPT_FUNC_FILES} ${LOSS_FUNC_FILES} ${ACC_FUNC_FILES})
 target_include_directories(nncore PUBLIC ${CMAKE_SOURCE_DIR}/include)
+if(OPENCL_ACC)
+    target_link_libraries(nncore OpenCL::OpenCL)
+endif()
