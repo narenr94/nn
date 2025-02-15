@@ -1,1 +1,0 @@
-/usr/bin/g++ -g CMakeFiles/mnist_batch_test.dir/mnist_batch_test.cpp.o -o mnist_batch_test   -L/home/naren/Code/NN/nn/build/src  -L/home/naren/Code/NN/nn/build/utils  -Wl,-rpath,/home/naren/Code/NN/nn/build/src:/home/naren/Code/NN/nn/build/utils -lnncore -lnnutils
