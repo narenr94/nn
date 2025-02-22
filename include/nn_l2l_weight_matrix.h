@@ -7,15 +7,16 @@ class nn_l2l_weight_matrix{
     
     nn_layer* m_pInputLayer; //input layer for matrix
     nn_layer* m_pOutputLayer; //output layer for matrix
-
+    float* m_pfWeightMatrix; //starting address from where weights of matrix are stored
     uint m_unSize; //size of matrix
 
-    float* m_pfWeightMatrix; //starting address from where weights of matrix are stored
+    
 
     bool m_bInitialized; //is weight matrix initialized?
 
     
     public:
+
 
     /*
         nn_l2l_weight_matrix() : constructor of layer to layer weight matrix
@@ -66,6 +67,8 @@ class nn_l2l_weight_matrix{
         populateWeightsWithRandomNumbers() : assign random numbers to weights
     */
     void populateWeightsWithRandomNumbers();
+
+    const float* getWtMtx();
 
 
 };

@@ -15,7 +15,7 @@ BaseAccelerator::~BaseAccelerator()
 
 void BaseAccelerator::do_forwardpass_to_next_layer(uint unInLayerIdx)
 {
-    nn_layer* in_lyr = m_pNN->GetLayer(unInLayerIdx);
+        nn_layer* in_lyr = m_pNN->GetLayer(unInLayerIdx);
     nn_layer* out_lyr = m_pNN->GetLayer(unInLayerIdx + 1);
 
     nn_l2l_weight_matrix* curr_mtx_ptr = m_pNN->GetMatrix(unInLayerIdx);
