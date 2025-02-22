@@ -147,3 +147,8 @@ void nn_l2l_weight_matrix::populateWeightsWithRandomNumbers()
     }
 }
 
+const float* nn_l2l_weight_matrix::getWtMtx()
+{
+    return m_pfWeightMatrix;
+}
+

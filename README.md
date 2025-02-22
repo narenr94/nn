@@ -9,6 +9,10 @@ cd build
 
 cmake ../
 
+or
+
+cmake -DOPENCL_ACC=ON ..
+
 make
 
 
