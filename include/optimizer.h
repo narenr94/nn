@@ -16,7 +16,7 @@ public:
 
     Optimizer(){}
 
-    virtual void correct_weights_biases();
+    virtual void correct_weights_biases() = 0;
 
     virtual ~Optimizer(){}
 

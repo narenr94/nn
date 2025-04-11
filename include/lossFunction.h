@@ -19,9 +19,9 @@ public:
 
     LossFunction(){}
 
-    virtual float apply_loss_func(float* fExpOut);
+    virtual float apply_loss_func(float* fExpOut) = 0;
 
-    virtual void get_loss_func_derv(float* fExpOut, float* fVal);
+    virtual void get_loss_func_derv(float* fExpOut, float* fVal) = 0;
 
     virtual ~LossFunction(){}
 
