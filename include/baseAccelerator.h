@@ -12,10 +12,10 @@ protected:
 
 public:
 
-    BaseAccelerator(NeuralNet* pNN);
+    BaseAccelerator(){}
 
-    virtual void do_forwardpass_to_next_layer(uint unInLayerIdx);
-    virtual void find_delta_of_all_nodes(float* pfExpOut);
+    virtual void do_forwardpass_to_next_layer(uint unInLayerIdx) = 0;
+    virtual void find_delta_of_all_nodes(float* pfExpOut) = 0;
 
     /*todo:
 
@@ -26,7 +26,7 @@ public:
         
     */ 
 
-   virtual ~BaseAccelerator();
+   virtual ~BaseAccelerator(){}
 
 };
 #endif
