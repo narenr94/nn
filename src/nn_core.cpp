@@ -363,9 +363,9 @@ bool NeuralNet::do_forward_pass(float* pfInputArr)
 
     uint i = 0;
 
-    for(i = 0; i < (m_unNumLys - 1); i++)
+    for(i = (INPUT_LAYER_ID + 1); i < m_unNumLys; i++)
     {
-        m_pAccelerator->do_forwardpass_to_next_layer(INPUT_LAYER_ID + i);
+        m_pAccelerator->do_forwardpass_to_current_layer(INPUT_LAYER_ID + i);
     }
     
     bRet = true;
@@ -464,8 +464,11 @@ bool NeuralNet::do_backward_pass(float* pfExpOut)
         for hidden layer nodes:
             error = der_act_func(actual value) * (sum(weights_leading_out_of_node * error_of_node_it_is_reaching))
     */
-
-    m_pAccelerator->find_delta_of_all_nodes(pfExpOut);
+    for(uint i = (m_unNumLys - 1); i > INPUT_LAYER_ID; i--)
+    {
+        m_pAccelerator->find_delta_of_current_layer_nodes(pfExpOut, i);
+    }
+    
 
     m_pOptimizer->correct_weights_biases();
 

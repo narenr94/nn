@@ -14,8 +14,8 @@ public:
 
     CpuAccelerator(NeuralNet* pNN);
 
-    void do_forwardpass_to_next_layer(uint unInLayerIdx) override;
-    void find_delta_of_all_nodes(float* pfExpOut) override;
+    void do_forwardpass_to_current_layer(uint unInLayerIdx) override;
+    void find_delta_of_current_layer_nodes(float* pfExpOut, uint idx) override;
 
     /*todo:
 

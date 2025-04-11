@@ -14,8 +14,8 @@ public:
 
     BaseAccelerator(){}
 
-    virtual void do_forwardpass_to_next_layer(uint unInLayerIdx) = 0;
-    virtual void find_delta_of_all_nodes(float* pfExpOut) = 0;
+    virtual void do_forwardpass_to_current_layer(uint unInLayerIdx) = 0;
+    virtual void find_delta_of_current_layer_nodes(float* pfExpOut, uint idx) = 0;
 
     /*todo:
 

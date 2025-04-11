@@ -2,6 +2,11 @@
 cmake_minimum_required(VERSION 3.10) 
 project(NNProject LANGUAGES CXX)
 
+#to build use
+#mkdir build
+#cd build
+#cmake ..
+#cmake --build .
 
 # Set policy CMP0079 to NEW 
 #cmake_policy(SET CMP0079 NEW)
