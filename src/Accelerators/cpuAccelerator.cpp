@@ -1,21 +1,21 @@
-#include "baseAccelerator.h"
+#include "cpuAccelerator.h"
 #include "nn_core.h"
 
-BaseAccelerator::BaseAccelerator(NeuralNet* pNN)
+CpuAccelerator::CpuAccelerator(NeuralNet* pNN)
 {
 
     m_pNN = pNN;
 
 }
 
-BaseAccelerator::~BaseAccelerator()
+CpuAccelerator::~CpuAccelerator()
 {
 
 }
 
-void BaseAccelerator::do_forwardpass_to_next_layer(uint unInLayerIdx)
+void CpuAccelerator::do_forwardpass_to_next_layer(uint unInLayerIdx)
 {
-        nn_layer* in_lyr = m_pNN->GetLayer(unInLayerIdx);
+    nn_layer* in_lyr = m_pNN->GetLayer(unInLayerIdx);
     nn_layer* out_lyr = m_pNN->GetLayer(unInLayerIdx + 1);
 
     nn_l2l_weight_matrix* curr_mtx_ptr = m_pNN->GetMatrix(unInLayerIdx);
@@ -46,7 +46,7 @@ void BaseAccelerator::do_forwardpass_to_next_layer(uint unInLayerIdx)
     out_lyr->apply_act_func_all_nodes();
 }
 
-void BaseAccelerator::find_delta_of_all_nodes(float* pfExpOut)
+void CpuAccelerator::find_delta_of_all_nodes(float* pfExpOut)
 {
     uint i = 0; //layer index
     uint j = 0; //current layer node index

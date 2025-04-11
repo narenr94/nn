@@ -14,7 +14,7 @@ set(LOSS_FUNC_FILES LossFunctions/huberLoss.cpp
     LossFunctions/meanSquaredError.cpp
     LossFunctions/competitiveCrossEntropyLoss.cpp
     LossFunctions/binaryCrossEntropyLoss.cpp)
-set(ACC_FUNC_FILES Accelerators/baseAccelerator.cpp)
+set(ACC_FUNC_FILES Accelerators/cpuAccelerator.cpp)
 
 option(OPENCL_ACC "Enable this feature" OFF)
 

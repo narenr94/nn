@@ -19,7 +19,7 @@
 #include "competitiveCrossEntropyLoss.h"
 
 //Accelerators
-#include "baseAccelerator.h"
+#include "cpuAccelerator.h"
 #ifdef OPENCL_ACC
 #include "openclAccelerator.h"
 #endif
@@ -256,7 +256,7 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
 #ifdef OPENCL_ACC
     m_pAccelerator = new OpenclAccelerator(this);
 #else
-    m_pAccelerator = new BaseAccelerator(this);
+    m_pAccelerator = new CpuAccelerator(this);
 #endif
 
     //store param values locally
@@ -362,11 +362,6 @@ bool NeuralNet::do_forward_pass(float* pfInputArr)
     m_ppLys[INPUT_LAYER_ID]->set_all_node_values(pfInputArr);
 
     uint i = 0;
-
-    // for(i = 0; i < 784; i++)
-    // {
-    //     NNLOG_MIL("[%d]%f", i, m_lys[INPUT_LAYER_ID]->get_node_value_idx(i));
-    // }
 
     for(i = 0; i < (m_unNumLys - 1); i++)
     {
