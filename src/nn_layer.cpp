@@ -68,15 +68,13 @@ nn_layer::nn_layer(uint unNumNodesnodes, eAct_func eActFunc, float actParam1)
         default:
             m_pActFunc = new SigmoidActFunc(this);
     }
-
-    m_bInitialized = true;
 }
 
 bool nn_layer::set_node_value(float fVal, uint unIdx)
 {
     bool bRet = false;
 
-    if(unIdx < m_unNumNodes && m_bInitialized)
+    if(unIdx < m_unNumNodes)
     {
         m_ppNodes[unIdx]->set_value(fVal);
 
@@ -90,11 +88,6 @@ bool nn_layer::set_node_value(float fVal, uint unIdx)
 bool nn_layer::set_all_node_values(float* pfValue)
 {
     bool bRet = false;
-
-    if(!m_bInitialized)
-    {
-        return bRet;
-    }
 
     bRet = true;
 
@@ -114,11 +107,6 @@ bool nn_layer::set_all_node_biases(float* pfBias)
 {
     bool bRet = false;
 
-    if(!m_bInitialized)
-    {
-        return bRet;
-    }
-
     bRet = true;
 
     uint i = 0;
@@ -137,7 +125,7 @@ bool nn_layer::set_node_bias(float fBias, uint unIdx)
 {
     bool bRet = false;
 
-    if((unIdx < m_unNumNodes) && m_bInitialized)
+    if((unIdx < m_unNumNodes))
     {
         m_ppNodes[unIdx]->set_bias(fBias);
 
@@ -152,7 +140,7 @@ bool nn_layer::set_node_delta(float fDelta, uint unIdx)
 {
     bool bRet = false;
 
-    if((unIdx < m_unNumNodes) && m_bInitialized)
+    if((unIdx < m_unNumNodes))
     {
         m_ppNodes[unIdx]->set_delta(fDelta);
 
@@ -161,11 +149,6 @@ bool nn_layer::set_node_delta(float fDelta, uint unIdx)
 
     
     return bRet;
-}
-
-bool nn_layer::is_initialized()
-{
-    return m_bInitialized;
 }
 
 float nn_layer::get_node_value_idx(uint unIdx)
@@ -196,11 +179,6 @@ eLyr_type nn_layer::get_layer_type()
 
 void nn_layer::populateBiasesWithRandomNumbers()
 {
-    if(!m_bInitialized)
-    {
-        return;
-    }
-
     uint i = 0;
     float tmp;
 

@@ -202,17 +202,8 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
 
     m_eLossFunc = other_initData->eLossFunc;
 
-    
-
-    
-
-    
-    if(m_bInitialized)
-    {
-        delete [] m_ppLys;
-        delete [] m_ppWtMtcs;
-    }
-
+    delete [] m_ppLys;
+    delete [] m_ppWtMtcs;
 
     SetupLayersAndWeightMatrices(other_initData->unSzLys, other_initData->eAct_Funcs, other_initData->actParam1);
 
@@ -265,10 +256,6 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
     m_optParam3 = other_initData->optParam3;
 
     m_lossParam1 = other_initData->lossParam1;
-
-    
-    m_bInitialized = true;
-
 
 }
 
@@ -352,12 +339,6 @@ bool NeuralNet::do_forward_pass(float* pfInputArr)
 
     bool bRet = false;
 
-    //check if NN is initalised
-    if(!m_bInitialized)
-    {
-        return bRet;
-    }
-
     //set input layer nodes
     m_ppLys[INPUT_LAYER_ID]->set_all_node_values(pfInputArr);
 
@@ -381,11 +362,6 @@ bool NeuralNet::populate_weights(uint unIdx, float* pfValues)
 {
     bool bRet = false;
 
-    if(!m_bInitialized)
-    {
-        return bRet;
-    }
-
     if(unIdx >= m_unNumLys - 1)
     {
         return bRet;
@@ -401,11 +377,6 @@ bool NeuralNet::populate_nodes_bias(uint unLyrIdx, float* pfBias)
 {
     bool bRet = false;
 
-    if(!m_bInitialized)
-    {
-        return bRet;
-    }
-
     if(unLyrIdx >= m_unNumLys)
     {
         return bRet;
@@ -419,10 +390,6 @@ bool NeuralNet::populate_nodes_bias(uint unLyrIdx, float* pfBias)
 float NeuralNet::calculate_error(float* pfExpOut, float* pfError)
 {
     float fRet = 0;
-    if(!m_bInitialized)
-    {
-        return fRet;
-    }
 
     // nn_layer* output_lyr = m_ppLys[m_unNumLys - 1];
 
@@ -450,11 +417,6 @@ float NeuralNet::calculate_error(float* pfExpOut, float* pfError)
 bool NeuralNet::do_backward_pass(float* pfExpOut)
 {
     bool bRet = false;
-
-    if(!m_bInitialized)
-    {
-        return bRet;
-    }
 
     //calculate error for every layer's node. except input layer
 

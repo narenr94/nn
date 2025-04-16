@@ -11,10 +11,6 @@ class nn_l2l_weight_matrix{
     uint m_unSize; //size of matrix
 
     
-
-    bool m_bInitialized; //is weight matrix initialized?
-
-    
     public:
 
 
