@@ -93,8 +93,6 @@ class NeuralNet{
 
     
 
-    nn_l2l_weight_matrix** m_ppWtMtcs; //starting address of weight matrixes
-
     nn_layer** m_ppLys; //starting address of layers
 
     uint m_unNumLys; //total number of layers in NN, including input and output layer
