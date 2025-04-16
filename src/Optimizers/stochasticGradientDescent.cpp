@@ -34,7 +34,7 @@ void StochasticGradientDescent::correct_weights()
 
                 delta_wt = m_pNN->GetDelta(i + 1, k) * m_pNN->GetNodeVal(i, j);
                 delta_wt *= m_pNN->GetLearningRate();
-                m_pNN->SetWeight(i, j, k, (m_pNN->GetWeight(i, j, k) - delta_wt));
+                m_pNN->SetWeight(i + 1, j, k, (m_pNN->GetWeight(i + 1, j, k) - delta_wt));
             }
             
 

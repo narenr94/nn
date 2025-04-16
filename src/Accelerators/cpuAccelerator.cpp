@@ -18,7 +18,7 @@ void CpuAccelerator::do_forwardpass_to_current_layer(uint unInLayerIdx)
     nn_layer* in_lyr = m_pNN->GetLayer(unInLayerIdx - 1);
     nn_layer* out_lyr = m_pNN->GetLayer(unInLayerIdx);
 
-    nn_l2l_weight_matrix* curr_mtx_ptr = m_pNN->GetMatrix(unInLayerIdx - 1);
+    nn_l2l_weight_matrix* curr_mtx_ptr = m_pNN->GetMatrix(unInLayerIdx);
 
     uint in_lyr_sz = in_lyr->get_num_nodes();
     uint out_lyr_sz = out_lyr->get_num_nodes();

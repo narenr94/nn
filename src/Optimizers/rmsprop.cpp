@@ -17,7 +17,7 @@ RMSProp::RMSProp(NeuralNet* nn, float beta, float epslion)
         m_ppLyrRep[i] = new RMSPropLayerRep(m_pNN->GetSzLayer(i));
         if(i < (numLys - 1))
         {
-            m_ppMtxRep[i] = new RMSPropMtxRep(m_pNN->GetSzMtx(i));
+            m_ppMtxRep[i] = new RMSPropMtxRep(m_pNN->GetSzMtx(i + 1));
         }
     }
     
@@ -83,7 +83,8 @@ void RMSProp::correct_weights()
                 m_ppMtxRep[i]->E_Val[eval_idx] = m_fBeta * m_ppMtxRep[i]->E_Val[eval_idx] + (1.0f - m_fBeta) * delta_wt * delta_wt;
 
                 delta_wt *= m_pNN->GetLearningRate();
-                m_pNN->SetWeight(i, j, k, (m_pNN->GetWeight(i, j, k) - (delta_wt/(std::sqrt(m_ppMtxRep[i]->E_Val[eval_idx]) + m_fEpsilon))));
+
+                m_pNN->SetWeight(i + 1, j, k, (m_pNN->GetWeight(i + 1, j, k) - (delta_wt/(std::sqrt(m_ppMtxRep[i]->E_Val[eval_idx]) + m_fEpsilon))));
             }
             
 

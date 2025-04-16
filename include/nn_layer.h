@@ -4,6 +4,8 @@
 #include "nn_node.h"
 #include "baseActivationFunction.h"
 
+class nn_l2l_weight_matrix; //forward declaration
+
 /*
     list of layer types
 */
@@ -40,15 +42,18 @@ class nn_layer{
     BaseActivationFunction* m_pActFunc;
     float m_actParam1;
 
+    nn_l2l_weight_matrix* m_pWtMtx;
 
+    nn_layer* m_pPrevLyr;
     
     public:
 
     /*
         nn_layer() : constructor for layer
         @n_nodes : number of nodes in layer
+        @prevLyr : pointer to previous layer, nullptr for input layer
     */
-    nn_layer(uint n_nodes, eAct_func eActFunc, float actParam1);
+    nn_layer(uint n_nodes, eAct_func eActFunc, float actParam1, nn_layer* prevLyr);
 
     /*
         ~nn_layer() : destruct and frees layer resources
@@ -145,6 +150,7 @@ class nn_layer{
     */
     void populateBiasesWithRandomNumbers();
 
+    nn_l2l_weight_matrix* GetWeightMatrix();
 
 };
 

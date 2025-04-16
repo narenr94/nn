@@ -18,7 +18,7 @@ ADAMOPT::ADAMOPT(NeuralNet* nn, float beta1, float beta2,float epslion)
         m_ppLyrRep[i] = new ADAMLayerRep(m_pNN->GetSzLayer(i));
         if(i < (numLys - 1))
         {
-            m_ppMtxRep[i] = new ADAMMtxRep(m_pNN->GetSzMtx(i));
+            m_ppMtxRep[i] = new ADAMMtxRep(m_pNN->GetSzMtx(i + 1));
         }
     }
 
@@ -94,7 +94,7 @@ void ADAMOPT::correct_weights()
                 m_ppMtxRep[i]->V_Val[eval_idx] = (m_fBeta2 * m_ppMtxRep[i]->V_Val[eval_idx]) + ((1.0f - m_fBeta2) * delta_wt * delta_wt);
                 m_hat = m_ppMtxRep[i]->M_Val[eval_idx] / (1.0f - std::pow(m_fBeta1, m_unTimeStep));
                 v_hat = m_ppMtxRep[i]->V_Val[eval_idx] / (1.0f - std::pow(m_fBeta2, m_unTimeStep));
-                m_pNN->SetWeight(i, j, k, (m_pNN->GetWeight(i, j, k) - ((m_pNN->GetLearningRate() * m_hat)/(std::sqrt(v_hat) + m_fEpsilon))));
+                m_pNN->SetWeight(i + 1, j, k, (m_pNN->GetWeight(i + 1, j, k) - ((m_pNN->GetLearningRate() * m_hat)/(std::sqrt(v_hat) + m_fEpsilon))));
                 
             }
             

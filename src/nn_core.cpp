@@ -155,12 +155,12 @@ NeuralNet::NeuralNet(const char* fileName)
 	} 
 
     //store weight values
-    for(i = 0; i < (m_unNumLys - 1); ++i) 
+    for(i = 1; i < m_unNumLys; ++i) 
 	{ 
-        for(j = 0; j < m_ppWtMtcs[i]->get_size(); j++)
+        for(j = 0; j < m_ppLys[i]->GetWeightMatrix()->get_size(); j++)
         {
             fscanf(file, "%f", &temp_float);
-            m_ppWtMtcs[i]->set_weight(j, temp_float);
+            m_ppLys[i]->GetWeightMatrix()->set_weight(j, temp_float);
         }
 		 
 	} 
@@ -203,7 +203,6 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
     m_eLossFunc = other_initData->eLossFunc;
 
     delete [] m_ppLys;
-    delete [] m_ppWtMtcs;
 
     SetupLayersAndWeightMatrices(other_initData->unSzLys, other_initData->eAct_Funcs, other_initData->actParam1);
 
@@ -261,14 +260,6 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
 
 NeuralNet::~NeuralNet()
 {
-    if(m_ppWtMtcs)
-    {
-        for(uint i = 0; i < (m_unNumLys - 1); i++)
-        {
-            delete m_ppWtMtcs[i];
-        }
-        delete [] m_ppWtMtcs;
-    }
     if(m_ppLys)
     {
         for(uint i = 0; i < m_unNumLys; i++)
@@ -304,11 +295,18 @@ NeuralNet::~NeuralNet()
 void NeuralNet::SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, float* actParam1)
 {
     m_ppLys = new nn_layer*[m_unNumLys];
-    m_ppWtMtcs = new nn_l2l_weight_matrix*[m_unNumLys - 1];
     
     for(uint i = 0; i < m_unNumLys; i++)
     {
-        m_ppLys[i] = new nn_layer(sz[i], actFuncs[i], actParam1[i]);
+        if(i != 0)
+        {
+            m_ppLys[i] = new nn_layer(sz[i], actFuncs[i], actParam1[i], m_ppLys[i - 1]);
+        }
+        else
+        {
+            m_ppLys[i] = new nn_layer(sz[i], actFuncs[i], actParam1[i], nullptr);
+        }
+        
         if(i == INPUT_LAYER_ID)
         {
             m_ppLys[i]->set_layer_type(INPUT_LYR);
@@ -324,11 +322,6 @@ void NeuralNet::SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, floa
             m_unTotalCorrectableNodes += sz[i];
         }
 
-    }
-    
-    for(uint i = 0; i < (m_unNumLys - 1); i++)
-    {
-         m_ppWtMtcs[i] = new nn_l2l_weight_matrix(m_ppLys[i], m_ppLys[i + 1]);
     }
     
 }
@@ -367,7 +360,7 @@ bool NeuralNet::populate_weights(uint unIdx, float* pfValues)
         return bRet;
     }
 
-    bRet = m_ppWtMtcs[unIdx]->set_all_weight(pfValues);
+    bRet = m_ppLys[unIdx]->GetWeightMatrix()->set_all_weight(pfValues);
 
     return bRet;
 
@@ -465,11 +458,11 @@ void NeuralNet::MergeBiasAndWeights(uint i)
         }
     }
     //merge weights
-    for(uint j = 0; j < m_unNumLys - 1 ; j++)
+    for(uint j = 1; j < m_unNumLys ; j++)
     {
-        for(uint k = 0; k < m_ppWtMtcs[j]->get_size(); k++)
+        for(uint k = 0; k < m_ppLys[j]->GetWeightMatrix()->get_size(); k++)
         {
-            m_ppWtMtcs[j]->set_weight(k, m_ppWtMtcs[j]->get_weight(k) + m_batch_nns[i]->GetWeight(j, k));
+            m_ppLys[j]->GetWeightMatrix()->set_weight(k, m_ppLys[j]->GetWeightMatrix()->get_weight(k) + m_batch_nns[i]->GetWeight(j, k));
         }
     }
 }
@@ -621,9 +614,9 @@ void NeuralNet::populateWeightsAndBiasesWithRandomNumbers()
 
     for(i = 0; i < m_unNumLys; i++)
     {
-        if(i != (m_unNumLys - 1))
+        if(i != 0)
         {
-            m_ppWtMtcs[i]->populateWeightsWithRandomNumbers();
+            m_ppLys[i]->GetWeightMatrix()->populateWeightsWithRandomNumbers();
         }
         m_ppLys[i]->populateBiasesWithRandomNumbers();
     }
@@ -641,12 +634,14 @@ uint NeuralNet::GetSzLayer(uint LayerID)
 
 uint NeuralNet::GetSzMtx(uint MtxID)
 {
-    return m_ppWtMtcs[MtxID]->get_size();
+    assert(MtxID > 0);
+    return m_ppLys[MtxID]->GetWeightMatrix()->get_size();
 }
 
 float NeuralNet::GetWeight(uint MtxID, uint Idx)
 {
-    return m_ppWtMtcs[MtxID]->get_weight(Idx);
+    assert(MtxID > 0);
+    return m_ppLys[MtxID]->GetWeightMatrix()->get_weight(Idx);
 }
 
 
@@ -664,12 +659,12 @@ void NeuralNet::populateWeightsAndBiasesWithExistingNN(NeuralNet* other)
             m_ppLys[i]->set_node_bias(other->GetBias(i, j), j);
         }
     }
-    for(i = 0; i < (m_unNumLys - 1); i++)
+    for(i = 1; i < m_unNumLys; i++)
     {
         sz = other->GetSzMtx(i);
         for(j = 0; j < sz; j++)
         {
-            m_ppWtMtcs[i]->set_weight(j, other->GetWeight(i, j));
+            m_ppLys[i]->GetWeightMatrix()->set_weight(j, other->GetWeight(i, j));
         }
     }
 }
@@ -775,12 +770,15 @@ float NeuralNet::GetNodeVal(uint LayerID, uint NodeID)
 
 void NeuralNet::SetWeight(uint MtxId, uint inIdx, uint outIdx, float val)
 {
-    m_ppWtMtcs[MtxId]->set_weight(inIdx, outIdx, val);
+    assert(MtxId > 0);
+    m_ppLys[MtxId]->GetWeightMatrix()->set_weight(inIdx, outIdx, val);
 }
 
 float NeuralNet::GetWeight(uint MtxID, uint inIdx, uint outIdx)
 {
-    return m_ppWtMtcs[MtxID]->get_weight(inIdx, outIdx);
+    assert(MtxID > 0);
+    
+    return m_ppLys[MtxID]->GetWeightMatrix()->get_weight(inIdx, outIdx);
 }
 
 void NeuralNet::SaveNN(const char* fileName)
@@ -837,11 +835,11 @@ void NeuralNet::SaveNN(const char* fileName)
 	} 
 
     //store weight values
-    for(i = 0; i < (m_unNumLys - 1); ++i) 
+    for(i = 1; i < m_unNumLys; ++i) 
 	{ 
-        for(j = 0; j < m_ppWtMtcs[i]->get_size(); j++)
+        for(j = 0; j < m_ppLys[i]->GetWeightMatrix()->get_size(); j++)
         {
-            fprintf(file, "%f ", m_ppWtMtcs[i]->get_weight(j));
+            fprintf(file, "%f ", m_ppLys[i]->GetWeightMatrix()->get_weight(j));
         }
 		 
 	} 
@@ -863,7 +861,8 @@ nn_layer* NeuralNet::GetLayer(uint idx)
 
 nn_l2l_weight_matrix* NeuralNet::GetMatrix(uint idx)
 {
-    return m_ppWtMtcs[idx];
+    assert(idx > 0);
+    return m_ppLys[idx]->GetWeightMatrix();
 }
 
 BaseLossFunction* NeuralNet::GetLossFunc()

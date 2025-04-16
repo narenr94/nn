@@ -1,5 +1,7 @@
 #include "nn_layer.h"
 
+#include "nn_l2l_weight_matrix.h"
+
 #include "sigmoidActFunc.h"
 #include "reluActFunc.h"
 #include "leakyReluActFunc.h"
@@ -29,9 +31,14 @@ nn_layer::~nn_layer()
     {
         delete m_pActFunc;
     }
+
+    if(m_pPrevLyr)
+    {
+        delete m_pPrevLyr;
+    }
 }
 
-nn_layer::nn_layer(uint unNumNodesnodes, eAct_func eActFunc, float actParam1)
+nn_layer::nn_layer(uint unNumNodesnodes, eAct_func eActFunc, float actParam1, nn_layer* prevLyr)
 {
     m_unNumNodes = unNumNodesnodes;
 
@@ -40,6 +47,13 @@ nn_layer::nn_layer(uint unNumNodesnodes, eAct_func eActFunc, float actParam1)
     m_actParam1 = actParam1;
 
     m_ppNodes = new nn_node*[m_unNumNodes];
+
+    m_pPrevLyr = prevLyr;
+
+    if(m_pPrevLyr)
+    {
+        m_pWtMtx = new nn_l2l_weight_matrix(m_pPrevLyr, this);
+    }
 
     uint i = 0;
 
@@ -216,5 +230,10 @@ void nn_layer::get_delta_all_nodes(float * fVal)
     m_pActFunc->get_delta(fVal);
 
     
+}
+
+nn_l2l_weight_matrix* nn_layer::GetWeightMatrix()
+{
+    return m_pWtMtx;
 }
 
