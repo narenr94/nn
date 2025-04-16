@@ -1,11 +1,11 @@
-#ifndef LOSSFUNC_H
-#define LOSSFUNC_H
+#ifndef BASE_LOSSFUNC_H
+#define BASE_LOSSFUNC_H
 
 #include "nn_math.h"
 
 class NeuralNet; //forward declaration, class defined in nn_core.h
 
-class LossFunction{
+class BaseLossFunction{
 
 protected:
 
@@ -17,13 +17,13 @@ protected:
 
 public:
 
-    LossFunction(){}
+    BaseLossFunction(){}
 
     virtual float apply_loss_func(float* fExpOut) = 0;
 
     virtual void get_loss_func_derv(float* fExpOut, float* fVal) = 0;
 
-    virtual ~LossFunction(){}
+    virtual ~BaseLossFunction(){}
 
 };
 

@@ -1,9 +1,9 @@
 #ifndef TANHACTFUNC_H
 #define TANHACTFUNC_H
 
-#include "activationFunction.h"
+#include "baseActivationFunction.h"
 
-class TanhActFunc : public ActivationFunction
+class TanhActFunc : public BaseActivationFunction
 {
 
     public:

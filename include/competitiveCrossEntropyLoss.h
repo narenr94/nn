@@ -1,9 +1,9 @@
 #ifndef COMPETITIVE_CROSS_ENTROPY_LOSS_H
 #define COMPETITIVE_CROSS_ENTROPY_LOSS_H
 
-#include "lossFunction.h"
+#include "baseLossFunction.h"
 
-class CompetitiveCrossEntropyLoss : public LossFunction
+class CompetitiveCrossEntropyLoss : public BaseLossFunction
 {
     public:
     CompetitiveCrossEntropyLoss(NeuralNet* nn);

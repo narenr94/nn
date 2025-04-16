@@ -2,7 +2,7 @@
 #define NN_LAYER
 
 #include "nn_node.h"
-#include "activationFunction.h"
+#include "baseActivationFunction.h"
 
 /*
     list of layer types
@@ -38,7 +38,7 @@ class nn_layer{
 
     //Activation Function
     eAct_func m_eActFunc; //activation function to be used
-    ActivationFunction* m_pActFunc;
+    BaseActivationFunction* m_pActFunc;
     float m_actParam1;
 
 

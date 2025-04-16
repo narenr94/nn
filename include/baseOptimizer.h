@@ -1,12 +1,12 @@
-#ifndef OPTIMIZER_H
-#define OPTIMIZER_H
+#ifndef BASE_OPTIMIZER_H
+#define BASE_OPTIMIZER_H
 
 #include "nn_math.h"
 
 class NeuralNet; //forward declaration, class defined in nn_core.h
 
 
-class Optimizer{
+class BaseOptimizer{
 
 protected:
 
@@ -14,11 +14,11 @@ NeuralNet* m_pNN;
 
 public:
 
-    Optimizer(){}
+    BaseOptimizer(){}
 
     virtual void correct_weights_biases() = 0;
 
-    virtual ~Optimizer(){}
+    virtual ~BaseOptimizer(){}
 
 };
 

@@ -904,7 +904,7 @@ nn_l2l_weight_matrix* NeuralNet::GetMatrix(uint idx)
     return m_ppWtMtcs[idx];
 }
 
-LossFunction* NeuralNet::GetLossFunc()
+BaseLossFunction* NeuralNet::GetLossFunc()
 {
     return m_pLossFunc;
 }

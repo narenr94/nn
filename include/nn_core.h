@@ -9,9 +9,9 @@
 #include "nn_math.h"
 #include "nn_l2l_weight_matrix.h"
 
-#include "optimizer.h"
+#include "baseOptimizer.h"
 
-#include "lossFunction.h"
+#include "baseLossFunction.h"
 
 
 
@@ -107,7 +107,7 @@ class NeuralNet{
 
     //Optimizer
     eOptimizers m_eOpt = eOptimizers::SGD;
-    Optimizer* m_pOptimizer;
+    BaseOptimizer* m_pOptimizer;
     float m_optParam1;
     float m_optParam2;
     float m_optParam3;
@@ -115,7 +115,7 @@ class NeuralNet{
     
     //Loss Function
     eLossFuncs m_eLossFunc;
-    LossFunction* m_pLossFunc;
+    BaseLossFunction* m_pLossFunc;
     float m_lossParam1;
 
     //Batch Training Specific 
@@ -257,7 +257,7 @@ class NeuralNet{
 
     nn_l2l_weight_matrix* GetMatrix(uint idx);
 
-    LossFunction* GetLossFunc();
+    BaseLossFunction* GetLossFunc();
 
 
 
