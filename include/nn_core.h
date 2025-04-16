@@ -99,8 +99,6 @@ class NeuralNet{
 
     uint m_unNumLys; //total number of layers in NN, including input and output layer
 
-    bool m_bInitialized = false; //is neural net initialized?
-
     float m_fLearningRate; //current learning rate of nn
 
     uint m_unTotalCorrectableNodes;

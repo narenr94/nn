@@ -33,7 +33,6 @@ class nn_layer{
 
     uint m_unNumNodes; //total number of nodes
     nn_node** m_ppNodes; //starting address from nodes can be accessed
-    bool m_bInitialized; //is layer initialized?
     eLyr_type eLyrType; //layer type
 
     //Activation Function
@@ -108,11 +107,6 @@ class nn_layer{
         @index : the index represnting the node where bias is to be set
     */
     bool set_node_delta(float bias, uint index);
-
-    /*
-        is_initialized() : returns if layer is initialized or not
-    */
-    bool is_initialized();
 
     /*
         get_node_value_idx() : returns value of node in specified index

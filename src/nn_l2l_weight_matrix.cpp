@@ -2,7 +2,7 @@
 
 nn_l2l_weight_matrix::nn_l2l_weight_matrix(nn_layer* pInL, nn_layer* pOutL)
 {
-    if(pInL->is_initialized() && pOutL->is_initialized())
+    if(pInL && pOutL)
     {
         m_pInputLayer = pInL;
         m_pOutputLayer = pOutL;
@@ -13,8 +13,6 @@ nn_l2l_weight_matrix::nn_l2l_weight_matrix(nn_layer* pInL, nn_layer* pOutL)
         m_unSize = in_l_size * out_l_size;
 
         m_pfWeightMatrix = new float [m_unSize];
-
-        m_bInitialized = true;
 
     }
 
@@ -37,15 +35,11 @@ bool nn_l2l_weight_matrix::set_weight(uint unInIdx, uint unOutIdx, float fWt)
 {
     bool bRet = false;
 
-    if(m_bInitialized)
+    if((unInIdx < m_pInputLayer->get_num_nodes()) && (unOutIdx < m_pOutputLayer->get_num_nodes()))
     {
-        if((unInIdx < m_pInputLayer->get_num_nodes()) && (unOutIdx < m_pOutputLayer->get_num_nodes()))
-        {
-            m_pfWeightMatrix[(unInIdx * m_pOutputLayer->get_num_nodes()) + unOutIdx] = fWt;
+        m_pfWeightMatrix[(unInIdx * m_pOutputLayer->get_num_nodes()) + unOutIdx] = fWt;
 
-            bRet = true;
-        }
-
+        bRet = true;
     }
     
 
@@ -57,15 +51,11 @@ bool nn_l2l_weight_matrix::set_weight(uint Idx, float fWt)
 {
     bool bRet = false;
 
-    if(m_bInitialized)
+    if(Idx < m_unSize)
     {
-        if(Idx < m_unSize)
-        {
-            m_pfWeightMatrix[Idx] = fWt;
+        m_pfWeightMatrix[Idx] = fWt;
 
-            bRet = true;
-        }
-
+        bRet = true;
     }
     
     return bRet;
@@ -78,21 +68,17 @@ bool nn_l2l_weight_matrix::set_all_weight(float* fWt)
 {
     bool bRet = false;
 
-    if(m_bInitialized)
+    uint i = 0;
+    uint j = 0;
+    for(i = 0; i < m_pInputLayer->get_num_nodes(); i++)
     {
-        uint i = 0;
-        uint j = 0;
-        for(i = 0; i < m_pInputLayer->get_num_nodes(); i++)
+        for(j = 0; j < m_pOutputLayer->get_num_nodes(); j++)
         {
-            for(j = 0; j < m_pOutputLayer->get_num_nodes(); j++)
-            {
-                m_pfWeightMatrix[(i * m_pOutputLayer->get_num_nodes()) + j] = fWt[(i * m_pOutputLayer->get_num_nodes()) + j];
-            }
+            m_pfWeightMatrix[(i * m_pOutputLayer->get_num_nodes()) + j] = fWt[(i * m_pOutputLayer->get_num_nodes()) + j];
         }
-
-        bRet = true;
-
     }
+
+    bRet = true;
     
     return bRet;
 }
@@ -100,11 +86,8 @@ bool nn_l2l_weight_matrix::set_all_weight(float* fWt)
 float nn_l2l_weight_matrix::get_weight(uint unInIdx, uint unOutIdx)
 {
     float bRet = 0;
-    if(m_bInitialized)
-    {
-        bRet = m_pfWeightMatrix[(unInIdx * m_pOutputLayer->get_num_nodes()) + unOutIdx];
-    }
     
+    bRet = m_pfWeightMatrix[(unInIdx * m_pOutputLayer->get_num_nodes()) + unOutIdx];
 
     return bRet;
 
@@ -113,13 +96,9 @@ float nn_l2l_weight_matrix::get_weight(uint unInIdx, uint unOutIdx)
 float nn_l2l_weight_matrix::get_weight(uint Idx)
 {
     float bRet = 0;
-    if(m_bInitialized)
+    if(Idx < m_unSize)
     {
-        if(Idx < m_unSize)
-        {
-            bRet = m_pfWeightMatrix[Idx];
-        }
-        
+        bRet = m_pfWeightMatrix[Idx];
     }
 
     return bRet;
@@ -133,11 +112,6 @@ uint nn_l2l_weight_matrix::get_size()
 
 void nn_l2l_weight_matrix::populateWeightsWithRandomNumbers()
 {
-    if(!m_bInitialized)
-    {
-        return;
-    }
-
     uint i = 0;
 
     for(i = 0; i < m_unSize; i++)
