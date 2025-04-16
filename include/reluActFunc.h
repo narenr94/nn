@@ -1,9 +1,9 @@
 #ifndef RELUACTFUNC_H
 #define RELUACTFUNC_H
 
-#include "activationFunction.h"
+#include "baseActivationFunction.h"
 
-class ReluActFunc : public ActivationFunction
+class ReluActFunc : public BaseActivationFunction
 {
     public:
 

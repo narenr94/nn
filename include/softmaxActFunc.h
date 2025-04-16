@@ -1,11 +1,11 @@
 #ifndef SOFTMAXACTFUNC_H
 #define SOFTMAXACTFUNC_H
 
-#include "activationFunction.h"
+#include "baseActivationFunction.h"
 
 class nn_layer;
 
-class SoftmaxActFunc : public ActivationFunction
+class SoftmaxActFunc : public BaseActivationFunction
 {
     private:
 

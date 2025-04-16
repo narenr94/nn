@@ -1,9 +1,9 @@
 #ifndef SIGMOIDACTFUNC_H
 #define SIGMOIDACTFUNC_H
 
-#include "activationFunction.h"
+#include "baseActivationFunction.h"
 
-class SigmoidActFunc : public ActivationFunction
+class SigmoidActFunc : public BaseActivationFunction
 {
 
     public:

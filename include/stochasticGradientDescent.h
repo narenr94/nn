@@ -1,10 +1,10 @@
 #ifndef SGD_H
 #define SGD_H
 
-#include "optimizer.h"
+#include "baseOptimizer.h"
 
 
-class StochasticGradientDescent : public Optimizer
+class StochasticGradientDescent : public BaseOptimizer
 {
     private:
         void correct_biases();

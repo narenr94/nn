@@ -1,9 +1,9 @@
 #ifndef BINARY_CROSS_ENTROPY_LOSS_H
 #define BINARY_CROSS_ENTROPY_LOSS_H
 
-#include "lossFunction.h"
+#include "baseLossFunction.h"
 
-class BinaryCrossEntropyLoss : public LossFunction
+class BinaryCrossEntropyLoss : public BaseLossFunction
 {
     public:
     BinaryCrossEntropyLoss(NeuralNet* nn);

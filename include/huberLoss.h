@@ -1,11 +1,11 @@
 #ifndef HUBER_LOSS_H
 #define HUBER_LOSS_H
 
-#include "lossFunction.h"
+#include "baseLossFunction.h"
 
 #define HUBER_DEFAULT_DELTA 1.0f
 
-class HuberLoss : public LossFunction
+class HuberLoss : public BaseLossFunction
 {
     private:
         float m_fDelta;

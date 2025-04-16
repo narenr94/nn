@@ -1,7 +1,7 @@
 #ifndef RMSPROP_H
 #define RMSPROP_H
 
-#include "optimizer.h"
+#include "baseOptimizer.h"
 
 #define RMS_PROP_DEFAULT_BETA 0.9f
 #define RMS_PROP_DEFAULT_EPSILON 0.00000001f
@@ -50,7 +50,7 @@ struct RMSPropMtxRep{
 };
 
 
-class RMSProp : public Optimizer
+class RMSProp : public BaseOptimizer
 {
     private:
         float m_fBeta;

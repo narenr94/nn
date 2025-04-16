@@ -1,9 +1,9 @@
 #ifndef MEAN_SQUARED_ERROR_H
 #define MEAN_SQUARED_ERROR_H
 
-#include "lossFunction.h"
+#include "baseLossFunction.h"
 
-class MeanSquaredError : public LossFunction
+class MeanSquaredError : public BaseLossFunction
 {
     public:
     MeanSquaredError(NeuralNet* nn);

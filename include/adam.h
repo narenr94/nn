@@ -1,7 +1,7 @@
 #ifndef ADAM_H
 #define ADAM_H
 
-#include "optimizer.h"
+#include "baseOptimizer.h"
 
 #define ADAM_DEFAULT_BETA1 0.9f
 #define ADAM_DEFAULT_BETA2 0.999f
@@ -66,7 +66,7 @@ struct ADAMMtxRep{
 };
 
 
-class ADAMOPT : public Optimizer
+class ADAMOPT : public BaseOptimizer
 {
     private:
         float m_fBeta1;

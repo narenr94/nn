@@ -1,11 +1,11 @@
 #ifndef LEAKYRELUACTFUNC_H
 #define LEAKYRELUACTFUNC_H
 
-#include "activationFunction.h"
+#include "baseActivationFunction.h"
 
 #define LEAKY_RELU_DEFAULT_ALPHA 0.01f
 
-class LeakyReluActFunc : public ActivationFunction
+class LeakyReluActFunc : public BaseActivationFunction
 {
 
     float m_alpha;

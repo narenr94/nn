@@ -1,9 +1,9 @@
 #ifndef MEAN_ABSOLUTE_ERROR_H
 #define MEAN_ABSOLUTE_ERROR_H
 
-#include "lossFunction.h"
+#include "baseLossFunction.h"
 
-class MeanAbsoluteError : public LossFunction
+class MeanAbsoluteError : public BaseLossFunction
 {
     public:
     MeanAbsoluteError(NeuralNet* nn);
