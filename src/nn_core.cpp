@@ -18,12 +18,6 @@
 #include "binaryCrossEntropyLoss.h"
 #include "competitiveCrossEntropyLoss.h"
 
-//Accelerators
-#include "cpuAccelerator.h"
-#ifdef OPENCL_ACC
-#include "openclAccelerator.h"
-#endif
-
 #include <string.h>
 #include <stdio.h>
 
@@ -243,11 +237,6 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
             m_pLossFunc = new MeanSquaredError(this);
             break;
     }
-#ifdef OPENCL_ACC
-    m_pAccelerator = new OpenclAccelerator(this);
-#else
-    m_pAccelerator = new CpuAccelerator(this);
-#endif
 
     //store param values locally
     m_optParam1 = other_initData->optParam1;
@@ -296,16 +285,10 @@ void NeuralNet::SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, floa
 {
     m_ppLys = new nn_layer*[m_unNumLys];
     
+    //create layers
     for(uint i = 0; i < m_unNumLys; i++)
     {
-        if(i != 0)
-        {
-            m_ppLys[i] = new nn_layer(sz[i], actFuncs[i], actParam1[i], m_ppLys[i - 1]);
-        }
-        else
-        {
-            m_ppLys[i] = new nn_layer(sz[i], actFuncs[i], actParam1[i], nullptr);
-        }
+        m_ppLys[i] = new nn_layer(sz[i], actFuncs[i], actParam1[i]);
         
         if(i == INPUT_LAYER_ID)
         {
@@ -323,6 +306,24 @@ void NeuralNet::SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, floa
         }
 
     }
+
+    //setup layers order
+    for(uint i = 0; i < m_unNumLys; i++)
+    {
+        if((i != 0) && (i != (m_unNumLys - 1)))
+        {
+            m_ppLys[i]->SetPreviousNextLayers(m_ppLys[i - 1], m_ppLys[i + 1]);
+        }
+        else if(i == 0)
+        {
+            m_ppLys[i]->SetPreviousNextLayers(nullptr, m_ppLys[i + 1]);
+        }
+        else// i == (m_unNumLys - 1)
+        {
+            m_ppLys[i]->SetPreviousNextLayers(m_ppLys[i - 1], nullptr);
+        }
+        
+    }
     
 }
 
@@ -339,7 +340,7 @@ bool NeuralNet::do_forward_pass(float* pfInputArr)
 
     for(i = (INPUT_LAYER_ID + 1); i < m_unNumLys; i++)
     {
-        m_pAccelerator->do_forwardpass_to_current_layer(INPUT_LAYER_ID + i);
+        m_ppLys[i]->do_forwardpass_to_current_layer();
     }
     
     bRet = true;
@@ -421,7 +422,14 @@ bool NeuralNet::do_backward_pass(float* pfExpOut)
     */
     for(uint i = (m_unNumLys - 1); i > INPUT_LAYER_ID; i--)
     {
-        m_pAccelerator->find_delta_of_current_layer_nodes(pfExpOut, i);
+        if(i != (m_unNumLys - 1))
+        {
+            m_ppLys[i]->do_backwardpass_to_previous_layer();
+        }
+        else
+        {
+            m_ppLys[i]->do_backwardpass_to_previous_layer_output_layer(pfExpOut, m_pLossFunc);
+        }
     }
     
 

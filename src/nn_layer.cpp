@@ -8,6 +8,13 @@
 #include "tanhActFunc.h"
 #include "softmaxActFunc.h"
 
+//Accelerators
+#include "cpuAccelerator.h"
+#ifdef OPENCL_ACC
+#include "openclAccelerator.h"
+#endif
+
+#include <cassert>
 
 uint nn_layer::get_num_nodes()
 {
@@ -38,7 +45,11 @@ nn_layer::~nn_layer()
     }
 }
 
-nn_layer::nn_layer(uint unNumNodesnodes, eAct_func eActFunc, float actParam1, nn_layer* prevLyr)
+nn_layer::nn_layer(uint unNumNodesnodes, eAct_func eActFunc, float actParam1)
+:m_pNextLyr(nullptr),
+m_pPrevLyr(nullptr),
+m_pWtMtx(nullptr),
+m_bPrevNxtLyrsSet(false)
 {
     m_unNumNodes = unNumNodesnodes;
 
@@ -47,13 +58,6 @@ nn_layer::nn_layer(uint unNumNodesnodes, eAct_func eActFunc, float actParam1, nn
     m_actParam1 = actParam1;
 
     m_ppNodes = new nn_node*[m_unNumNodes];
-
-    m_pPrevLyr = prevLyr;
-
-    if(m_pPrevLyr)
-    {
-        m_pWtMtx = new nn_l2l_weight_matrix(m_pPrevLyr, this);
-    }
 
     uint i = 0;
 
@@ -82,6 +86,13 @@ nn_layer::nn_layer(uint unNumNodesnodes, eAct_func eActFunc, float actParam1, nn
         default:
             m_pActFunc = new SigmoidActFunc(this);
     }
+
+#ifdef OPENCL_ACC
+    m_pAccelerator = new OpenclAccelerator(this);
+#else
+    m_pAccelerator = new CpuAccelerator(this);
+#endif
+
 }
 
 bool nn_layer::set_node_value(float fVal, uint unIdx)
@@ -235,5 +246,46 @@ void nn_layer::get_delta_all_nodes(float * fVal)
 nn_l2l_weight_matrix* nn_layer::GetWeightMatrix()
 {
     return m_pWtMtx;
+}
+
+void nn_layer::SetPreviousNextLayers(nn_layer* prevLyr, nn_layer* nxtLyr)
+{
+    m_pPrevLyr = prevLyr;
+    m_pNextLyr = nxtLyr;
+
+    if(m_pPrevLyr)
+    {
+        m_pWtMtx = new nn_l2l_weight_matrix(m_pPrevLyr, this);
+    }
+
+    m_bPrevNxtLyrsSet = true;
+}
+
+nn_layer* nn_layer::GetPreviousLayer()
+{
+    return m_pPrevLyr;
+}
+
+nn_layer* nn_layer::GetNextLayer()
+{
+    return m_pNextLyr;
+}
+
+void nn_layer::do_forwardpass_to_current_layer()
+{
+    assert(m_bPrevNxtLyrsSet == true);
+    m_pAccelerator->do_forwardpass_dense_layer();
+}
+
+void nn_layer::do_backwardpass_to_previous_layer_output_layer(float* fExpOut, BaseLossFunction* lossFunc)
+{
+    assert(m_bPrevNxtLyrsSet == true);
+    m_pAccelerator->do_backwardpass_dense_layer_output_layer(fExpOut, lossFunc);
+}
+
+void nn_layer::do_backwardpass_to_previous_layer()
+{
+    assert(m_bPrevNxtLyrsSet == true);
+    m_pAccelerator->do_backwardpass_dense_layer();
 }
 

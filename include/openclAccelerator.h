@@ -7,8 +7,6 @@
 #include <iostream>
 #include <vector>
 
-class NeuralNet;
-
 class OpenclAccelerator : public BaseAccelerator{
 
     cl::Platform platform;
@@ -20,10 +18,11 @@ class OpenclAccelerator : public BaseAccelerator{
 
 public:
 
-    OpenclAccelerator(NeuralNet* pNN);
+    OpenclAccelerator(nn_layer* pLayer);
 
-    void do_forwardpass_to_current_layer(uint unInLayerIdx) override;
-    void find_delta_of_current_layer_nodes(float* pfExpOut, uint idx) override;
+    void do_forwardpass_dense_layer() override;
+    void do_backwardpass_dense_layer_output_layer(float* pfExpOut, BaseLossFunction* lossFunc) override;
+    void do_backwardpass_dense_layer() override;
 
 
    ~OpenclAccelerator();

@@ -2,20 +2,17 @@
 #define NN_CPU_ACC_H
 #include "baseAccelerator.h"
 
-class NeuralNet;
 
 class CpuAccelerator : public BaseAccelerator{
 
-protected:
-
-    NeuralNet* m_pNN;
 
 public:
 
-    CpuAccelerator(NeuralNet* pNN);
+    CpuAccelerator(nn_layer* pNLyr);
 
-    void do_forwardpass_to_current_layer(uint unInLayerIdx) override;
-    void find_delta_of_current_layer_nodes(float* pfExpOut, uint idx) override;
+    void do_forwardpass_dense_layer() override;
+    void do_backwardpass_dense_layer_output_layer(float* pfExpOut, BaseLossFunction* lossFunc) override;
+    void do_backwardpass_dense_layer() override;
 
     /*todo:
 

@@ -4,7 +4,11 @@
 #include "nn_node.h"
 #include "baseActivationFunction.h"
 
+#include "baseLossFunction.h"
+
 class nn_l2l_weight_matrix; //forward declaration
+
+class BaseAccelerator; //Forward Declaration
 
 /*
     list of layer types
@@ -45,6 +49,12 @@ class nn_layer{
     nn_l2l_weight_matrix* m_pWtMtx;
 
     nn_layer* m_pPrevLyr;
+
+    nn_layer* m_pNextLyr;
+
+    bool m_bPrevNxtLyrsSet;
+
+    BaseAccelerator* m_pAccelerator;
     
     public:
 
@@ -53,7 +63,7 @@ class nn_layer{
         @n_nodes : number of nodes in layer
         @prevLyr : pointer to previous layer, nullptr for input layer
     */
-    nn_layer(uint n_nodes, eAct_func eActFunc, float actParam1, nn_layer* prevLyr);
+    nn_layer(uint n_nodes, eAct_func eActFunc, float actParam1);
 
     /*
         ~nn_layer() : destruct and frees layer resources
@@ -151,6 +161,18 @@ class nn_layer{
     void populateBiasesWithRandomNumbers();
 
     nn_l2l_weight_matrix* GetWeightMatrix();
+
+    void SetPreviousNextLayers(nn_layer* prevLyr, nn_layer* nxtLyr);
+
+    nn_layer* GetPreviousLayer();
+
+    nn_layer* GetNextLayer();
+
+    void do_forwardpass_to_current_layer();
+
+    void do_backwardpass_to_previous_layer();
+
+    void do_backwardpass_to_previous_layer_output_layer(float* fExpOut, BaseLossFunction* lossFunc);
 
 };
 
