@@ -87,7 +87,6 @@ struct nnInitData{
 
 };
 
-class BaseAccelerator; //Forward Declaration
 
 class NeuralNet{
 
@@ -123,13 +122,6 @@ class NeuralNet{
 
     //debug
     // uint nn_id = 0;
-
-    BaseAccelerator* m_pAccelerator;
-
-
-    
-
-
     
     public:
 
