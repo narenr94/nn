@@ -99,6 +99,9 @@ int main()
 Observation
 Adam doesnt seem to be working with default values for beta1, beta2 and epsilon
 from trial and error found that beta1=0.9f, beta2 = 0.9f and epsilon = 0.1f works
+RMF Prop sometimes works with default others it works with below
+beta = 0.999f epsilon = 0.00000001f
+idhu oru manda kolaru bro
 */
     initData->eOpt = eOptimizers::RMSPROP;
     //SGD
