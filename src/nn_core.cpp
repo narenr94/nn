@@ -290,19 +290,9 @@ void NeuralNet::SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, floa
     {
         m_ppLys[i] = new nn_layer(sz[i], actFuncs[i], actParam1[i]);
         
-        if(i == INPUT_LAYER_ID)
+        if(i != 0)
         {
-            m_ppLys[i]->set_layer_type(INPUT_LYR);
-        }
-        else if(i == (m_unNumLys -1))
-        {
-            m_ppLys[i]->set_layer_type(OUTPUT_LYR);
-            m_unTotalCorrectableNodes += sz[i];
-        }
-        else
-        {
-            m_ppLys[i]->set_layer_type(HIDDEN_LYR);
-            m_unTotalCorrectableNodes += sz[i];
+             m_unTotalCorrectableNodes += sz[i];
         }
 
     }

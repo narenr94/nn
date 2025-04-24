@@ -1,7 +1,6 @@
 #ifndef NN_LAYER
 #define NN_LAYER
 
-#include "nn_node.h"
 #include "baseActivationFunction.h"
 
 #include "baseLossFunction.h"
@@ -9,15 +8,6 @@
 class nn_l2l_weight_matrix; //forward declaration
 
 class BaseAccelerator; //Forward Declaration
-
-/*
-    list of layer types
-*/
-enum eLyr_type{
-    INPUT_LYR,
-    HIDDEN_LYR,
-    OUTPUT_LYR
-};
 
 #define RAND_MIN_WEIGHT_BIAS 1
 
@@ -37,9 +27,15 @@ enum eAct_func{
 
 class nn_layer{
 
+    //node stuff
+
+    float* m_pfValues; //value of node
+    float* m_pfBiases; //value of bias
+    float* m_pfDeltas; //delta value of node , used for back propogation
+
+    //end of node stuff
+
     uint m_unNumNodes; //total number of nodes
-    nn_node** m_ppNodes; //starting address from nodes can be accessed
-    eLyr_type eLyrType; //layer type
 
     //Activation Function
     eAct_func m_eActFunc; //activation function to be used
@@ -121,7 +117,7 @@ class nn_layer{
         @delta : delta to be set in node
         @index : the index represnting the node where bias is to be set
     */
-    bool set_node_delta(float bias, uint index);
+    bool set_node_delta(float delta, uint index);
 
     /*
         get_node_value_idx() : returns value of node in specified index
@@ -142,18 +138,6 @@ class nn_layer{
         @idx : the index represnting the node from where delta is to be got
     */
     float get_node_delta_idx(uint idx);
-
-    /*
-        set_layer_type() : sets layer type
-
-        @lt : layer type to be set
-    */
-    void set_layer_type(eLyr_type lt);
-
-    /*
-        get_layer_type() : gets layer's type
-    */
-    eLyr_type get_layer_type();
     
     /*
         populateBiasesWithRandomNumbers() : assign random numbers to biases
