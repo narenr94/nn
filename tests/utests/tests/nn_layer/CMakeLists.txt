@@ -33,5 +33,6 @@ add_executable(${EXEC_NAME}	${FAKE_SOURCES} ${TEST_SOURCES}	${NN_SOURCES})
 
 target_link_libraries(${EXEC_NAME} ${GMOCK_LINK_LIBRARIES} ${GMOCK_LINK_LIBRARIES})
 
+nn_utest_run_add(${EXEC_NAME})
 
 

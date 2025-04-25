@@ -53,4 +53,16 @@ cd ../../../
 #make tests
 PKG_CONFIG_PATH=${LOCAL_DEPS_BUILD_DIR}/lib/pkgconfig cmake .. -DCMAKE_INSTALL_PREFIX=${LOCAL_DEPS_BUILD_DIR} -DCMAKE_LIBRARY_PATH=${LOCAL_DEPS_BUILD_DIR}/lib
 make
-make install
+
+#run tests
+cmake_version=$(cmake --version | head -n 1 | awk '{print $3}')
+major_version=$(echo "$cmake_version" | cut -d. -f1)
+minor_version=$(echo "$cmake_version" | cut -d. -f2)
+if [[ "$major_version" -gt 3 ]] || [[ "$major_version" -eq 3 && "$minor_version" -ge 21 ]]; then
+  CT_TESTDIR="" 
+else
+  CT_TESTDIR="--testdir build" 
+    
+fi
+
+ctest -j 4 --output-on-failure --no-compress-output -T Test $CT_TESTDIR --output-junit ctest-results.xml
