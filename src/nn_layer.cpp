@@ -1,5 +1,7 @@
 #include "nn_layer.h"
 
+#include "nn_math.h"
+
 #include "nn_l2l_weight_matrix.h"
 
 #include "sigmoidActFunc.h"
