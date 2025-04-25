@@ -16,7 +16,7 @@ include_directories(${NN_INC})
 include_directories(${DEPS_INC})
 
 set(TEST_SOURCES    nn_layer_tests_main.cpp
-	setup_test.cpp)
+	nn_layer_tests.cpp)
 
 set(NN_SOURCES ${NN_SRC}/nn_layer.cpp)
 

@@ -1,3 +1,4 @@
+#setup file structure
 if [ ! -d "./build" ]; then
     mkdir build
 fi
@@ -50,7 +51,7 @@ make install
 
 cd ../../../
 
-#make tests
+#make/build tests
 PKG_CONFIG_PATH=${LOCAL_DEPS_BUILD_DIR}/lib/pkgconfig cmake .. -DCMAKE_INSTALL_PREFIX=${LOCAL_DEPS_BUILD_DIR} -DCMAKE_LIBRARY_PATH=${LOCAL_DEPS_BUILD_DIR}/lib
 make
 
