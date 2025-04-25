@@ -1,3 +1,5 @@
+set(CMAKE_BUILD_TYPE Debug)
+
 include(GoogleTest)
 
 set(EXEC_NAME nn_layer_tests)

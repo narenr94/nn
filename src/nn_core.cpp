@@ -292,7 +292,7 @@ void NeuralNet::SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, floa
         
         if(i != 0)
         {
-             m_unTotalCorrectableNodes += sz[i];
+            m_unTotalCorrectableNodes += sz[i];
         }
 
     }

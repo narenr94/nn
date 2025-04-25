@@ -11,7 +11,7 @@
 #define TEST_MAX 10000 //max number of lines in testing set
 #define NORM_FACTOR 254.0 //max value in data set for normalization
 #define VAL_SIZE 784 //input layer size
-#define EPOCH_MAX 5 //number epochs of training and testing 
+#define EPOCH_MAX 1 //number epochs of training and testing 
 
 /*
 Observation
@@ -210,9 +210,6 @@ int main()
     
     pbThread.join();
     
-
-    
-
     delete nn;
 
     delete pb;

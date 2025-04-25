@@ -89,17 +89,12 @@ nn_layer::~nn_layer()
 
     if(m_pfDeltas)
     {
-        delete [] m_pfBiases;
+        delete [] m_pfDeltas;
     }
 
     if(m_pActFunc)
     {
         delete m_pActFunc;
-    }
-
-    if(m_pPrevLyr)
-    {
-        delete m_pPrevLyr;
     }
 }
 

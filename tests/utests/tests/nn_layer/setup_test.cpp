@@ -10,4 +10,6 @@ TEST(NN_LAYER_TESTS, nn_layer_setup_test)
 	EXPECT_EQ(lyr->get_act_func(), eAct_func::RELU);
 	EXPECT_EQ(lyr->get_act_param(), 0.999f);
 
+    delete lyr;
+
 }
