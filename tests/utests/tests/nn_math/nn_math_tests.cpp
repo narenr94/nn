@@ -113,3 +113,41 @@ TEST(NN_MATH_TESTS, nn_math_derivative_tanhf)
     }
 }
 
+TEST(NN_MATH_TESTS, nn_math_softmaxf)
+{
+    float in[7] = {0.5f, 0.77f, 0.22f, -0.5f, -0.22f, -233.0f, 512.0f};
+    float out[7] = {1.0f, 0.852144f, 0.251579f, 0.332871f, 0.895834f, 0.0f, 1.0f};
+    float max[7] = {0.5f, 0.93f, 1.6f, 0.6f, -0.11f, 0.5f, 512.0f};
+
+    for(int i = 0; i < 7; i++)
+    {
+        float roundedValue = std::round(get_softmaxf(in[i], max[i]) * 1000000.0f) / 1000000.0f;
+        EXPECT_EQ(roundedValue, out[i]);
+    }
+}
+
+TEST(NN_MATH_TESTS, nn_math_derivative_softmaxf)
+{
+    float in[7] = {0.5f, 0.77f, 0.22f, -0.5f, -0.22f, -233.0f, 512.0f};
+    float out[7] = {0.25f, 0.1771f, 0.1716f, -0.75f, -0.2684f, -54522.0f, -261632.0f};
+
+    for(int i = 0; i < 7; i++)
+    {
+        float roundedValue = std::round(find_derivative_softmaxf(in[i]) * 1000000.0f) / 1000000.0f;
+        EXPECT_EQ(roundedValue, out[i]);
+    }
+}
+
+TEST(NN_MATH_TESTS, nn_math_derivative_softmaxf_wrong_pred)
+{
+    float in[7] = {0.5f, 0.77f, 0.22f, -0.5f, -0.22f, -233.0f, 512.0f};
+    float out[7] = {-0.3f, -0.7161f, -0.352f, 0.3f, -0.0242f, 116.5f, -1075.2f};
+    float corr[7] = {0.6f, 0.93f, 1.6f, 0.6f, -0.11f, 0.5f, 2.1f};
+
+    for(int i = 0; i < 7; i++)
+    {
+        float roundedValue = std::round(find_derivative_softmaxf_wrong_pred(in[i], corr[i]) * 1000000.0f) / 1000000.0f;
+        EXPECT_EQ(roundedValue, out[i]);
+    }
+}
+
