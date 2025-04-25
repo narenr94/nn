@@ -1,0 +1,37 @@
+set(CMAKE_BUILD_TYPE Debug)
+
+include(GoogleTest)
+
+set(EXEC_NAME cpuAccelerator_tests)
+
+set(DEPS_INC "../../build/libs/include/")
+
+set(NN_INC "../../../../include/")
+
+set(NN_SRC "../../../../src/")
+
+set(UTESTS_ROOT "../../")
+
+include_directories(${NN_INC})
+include_directories(${DEPS_INC})
+
+set(TEST_SOURCES cpuAccelerator_tests_main.cpp
+cpuAccelerator_tests.cpp)
+
+set(NN_SOURCES ${NN_SRC}/Accelerators/cpuAccelerator.cpp
+${NN_SRC}/nn_layer.cpp
+${NN_SRC}/nn_l2l_weight_matrix.cpp
+${NN_SRC}/ActivationFunctions/sigmoidActFunc.cpp
+${NN_SRC}/ActivationFunctions/leakyReluActFunc.cpp
+${NN_SRC}/ActivationFunctions/reluActFunc.cpp
+${NN_SRC}/ActivationFunctions/softmaxActFunc.cpp
+${NN_SRC}/ActivationFunctions/tanhActFunc.cpp
+${NN_SRC}/nn_math.cpp)
+
+add_executable(${EXEC_NAME} ${TEST_SOURCES}	${NN_SOURCES})
+
+target_link_libraries(${EXEC_NAME} ${GMOCK_LINK_LIBRARIES} ${GMOCK_LINK_LIBRARIES})
+
+nn_utest_run_add(${EXEC_NAME})
+
+

@@ -240,6 +240,7 @@ void nn_layer::get_delta_all_nodes(float * fVal)
 
 nn_l2l_weight_matrix* nn_layer::GetWeightMatrix()
 {
+    assert(m_bPrevNxtLyrsSet == true);
     return m_pWtMtx;
 }
 
