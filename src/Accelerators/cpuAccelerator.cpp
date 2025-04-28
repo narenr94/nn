@@ -1,6 +1,7 @@
 #include "cpuAccelerator.h"
 #include "nn_layer.h"
 #include "nn_l2l_weight_matrix.h"
+#include <stdio.h>
 
 CpuAccelerator::CpuAccelerator(nn_layer* pLayer):BaseAccelerator(pLayer)
 {
@@ -85,7 +86,7 @@ void CpuAccelerator::do_backwardpass_dense_layer()
         // m_pLayer->GetNextLayer()
         for(k = 0; k < m_pLayer->GetNextLayer()->get_num_nodes(); k++)
         {
-            temp[j] += m_pLayer->GetNextLayer()->get_node_delta_idx(k) * m_pLayer->GetWeightMatrix()->get_weight(j, k);
+            temp[j] += m_pLayer->GetNextLayer()->get_node_delta_idx(k) * m_pLayer->GetNextLayer()->GetWeightMatrix()->get_weight(j, k);
         }
     }
         // temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
