@@ -1,11 +1,12 @@
 #include "meanAbsoluteError.h"
-#include "nn_core.h"
+#include "nn_layer.h"
+#include <cmath>
 
-MeanAbsoluteError::MeanAbsoluteError(NeuralNet* nn)
+
+MeanAbsoluteError::MeanAbsoluteError(nn_layer* nn_lyr)
 {
-    m_pNN = nn;
-    m_unOutputLyrID = (m_pNN->GetNumLys() - 1);
-    m_unOutputLyrSz = m_pNN->GetSzLayer(m_unOutputLyrID);
+    m_pLayer = nn_lyr;
+    m_unOutputLyrSz = m_pLayer->get_num_nodes();
 }
 
 float MeanAbsoluteError::apply_loss_func(float* fExpOut)
@@ -15,7 +16,7 @@ float MeanAbsoluteError::apply_loss_func(float* fExpOut)
 
     for(uint i = 0; i < m_unOutputLyrSz; i++)
     {
-        temp = std::fabs(fExpOut[i] - m_pNN->GetNodeVal(m_unOutputLyrID, i));
+        temp = std::fabs(fExpOut[i] - m_pLayer->get_node_value_idx(i));
         fRet += temp;
     }
 
@@ -24,14 +25,13 @@ float MeanAbsoluteError::apply_loss_func(float* fExpOut)
 
 void MeanAbsoluteError::get_loss_func_derv(float* fExpOut, float* fVal)
 {
-
-   for(uint i = 0; i < m_unOutputLyrSz; i++)
+    for(uint i = 0; i < m_unOutputLyrSz; i++)
     {
-        if (m_pNN->GetNodeVal(m_unOutputLyrID, i) > fExpOut[i]) 
+        if (m_pLayer->get_node_value_idx(i) > fExpOut[i]) 
         { 
             fVal[i] = 1.0f / m_unOutputLyrSz; 
             // fRet = 1.0f;
-        } else if (m_pNN->GetNodeVal(m_unOutputLyrID, i) < fExpOut[i]) 
+        } else if (m_pLayer->get_node_value_idx(i) < fExpOut[i]) 
         { 
             fVal[i] = -1.0f / m_unOutputLyrSz; 
             // fRet = -1.0f;

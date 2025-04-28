@@ -4,6 +4,14 @@
 #include "nn_l2l_weight_matrix.h"
 #include <cmath>
 
+//Loss functions
+#include "baseLossFunction.h"
+#include "meanSquaredError.h"
+#include "meanAbsoluteError.h"
+#include "huberLoss.h"
+#include "binaryCrossEntropyLoss.h"
+#include "competitiveCrossEntropyLoss.h"
+
 
 TEST(CPU_ACC_TESTS, cpuAccelerator_dense_forwardpass_relu_test)
 {

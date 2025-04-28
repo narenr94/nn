@@ -11,7 +11,7 @@ class HuberLoss : public BaseLossFunction
         float m_fDelta;
 
     public:
-    HuberLoss(NeuralNet* nn, float delta = HUBER_DEFAULT_DELTA);
+    HuberLoss(nn_layer* nn_lyr, float delta = HUBER_DEFAULT_DELTA);
 
     float apply_loss_func(float* fExpOut);
 

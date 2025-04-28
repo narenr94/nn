@@ -1,5 +1,6 @@
 #include "stochasticGradientDescent.h"
 #include "nn_core.h"
+#include <cmath>
 
 
 void StochasticGradientDescent::correct_biases()

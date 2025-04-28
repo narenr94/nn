@@ -198,7 +198,7 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
 
     delete [] m_ppLys;
 
-    SetupLayersAndWeightMatrices(other_initData->unSzLys, other_initData->eAct_Funcs, other_initData->actParam1);
+    SetupLayersAndWeightMatrices(other_initData->unSzLys, other_initData->eAct_Funcs, other_initData->actParam1, other_initData->lossParam1);
 
     switch(m_eOpt)
     {
@@ -213,28 +213,6 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
             break;
         default:
             m_pOptimizer = new StochasticGradientDescent(this);
-            break;
-    }
-
-    switch(m_eLossFunc)
-    {
-        case eLossFuncs::MSE:
-            m_pLossFunc = new MeanSquaredError(this);
-            break;
-        case eLossFuncs::MAE:
-            m_pLossFunc = new MeanAbsoluteError(this);
-            break;
-        case eLossFuncs::HUBER:
-            m_pLossFunc = new HuberLoss(this, other_initData->lossParam1 != 0.0f ? other_initData->lossParam1 : HUBER_DEFAULT_DELTA);
-            break;
-        case eLossFuncs::CCE:
-            m_pLossFunc = new CompetitiveCrossEntropyLoss(this);
-            break;
-        case eLossFuncs::BCE:
-            m_pLossFunc = new BinaryCrossEntropyLoss(this);
-            break;
-        default:
-            m_pLossFunc = new MeanSquaredError(this);
             break;
     }
 
@@ -281,7 +259,7 @@ NeuralNet::~NeuralNet()
 }
 
 
-void NeuralNet::SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, float* actParam1)
+void NeuralNet::SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, float* actParam1, float lossParam)
 {
     m_ppLys = new nn_layer*[m_unNumLys];
     
@@ -300,17 +278,39 @@ void NeuralNet::SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, floa
     //setup layers order
     for(uint i = 0; i < m_unNumLys; i++)
     {
-        if((i != 0) && (i != (m_unNumLys - 1)))
+        if((i != 0) && (i != (m_unNumLys - 1))) //hidden layers
         {
             m_ppLys[i]->SetPreviousNextLayers(m_ppLys[i - 1], m_ppLys[i + 1]);
         }
-        else if(i == 0)
+        else if(i == 0) //input layer
         {
             m_ppLys[i]->SetPreviousNextLayers(nullptr, m_ppLys[i + 1]);
         }
-        else// i == (m_unNumLys - 1)
+        else// output layer
         {
             m_ppLys[i]->SetPreviousNextLayers(m_ppLys[i - 1], nullptr);
+            switch(m_eLossFunc)
+            {
+                case eLossFuncs::MSE:
+                    m_pLossFunc = new MeanSquaredError(m_ppLys[i]);
+                    break;
+                case eLossFuncs::MAE:
+                    m_pLossFunc = new MeanAbsoluteError(m_ppLys[i]);
+                    break;
+                case eLossFuncs::HUBER:
+                    m_pLossFunc = new HuberLoss(m_ppLys[i], lossParam != 0.0f ? lossParam : HUBER_DEFAULT_DELTA);
+                    break;
+                case eLossFuncs::CCE:
+                    m_pLossFunc = new CompetitiveCrossEntropyLoss(m_ppLys[i]);
+                    break;
+                case eLossFuncs::BCE:
+                    m_pLossFunc = new BinaryCrossEntropyLoss(m_ppLys[i]);
+                    break;
+                default:
+                    m_pLossFunc = new MeanSquaredError(m_ppLys[i]);
+                    break;
+            }
+            
         }
         
     }

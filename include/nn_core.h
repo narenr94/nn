@@ -31,18 +31,6 @@ enum eOptimizers{
     ADAM
 };
 
-/*
-    list of activation functions
-    Note : keep CCE in bottom to keep tests intact
-*/
-enum eLossFuncs{
-    MSE, //mean squared error
-    MAE, //mean absolute error
-    HUBER, //huber loss
-    BCE, //binary cross entropy loss
-    CCE //competitive cross entropy loss
-};
-
 
 //when below changed make sure to update get set save and load in nn_core
 struct nnInitData{
@@ -268,7 +256,7 @@ class NeuralNet{
 
     void Set_Init_Data(nnInitData* other_initData);
 
-    void SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, float* actParam1);
+    void SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, float* actParam1, float lossParam);
 
     void MergeBiasAndWeights(uint i);
 
