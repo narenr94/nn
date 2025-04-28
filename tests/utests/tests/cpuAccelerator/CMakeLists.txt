@@ -16,7 +16,9 @@ include_directories(${NN_INC})
 include_directories(${DEPS_INC})
 
 set(TEST_SOURCES cpuAccelerator_tests_main.cpp
-cpuAccelerator_tests.cpp)
+cpuAccelerator_forwardpass_tests.cpp
+cpuAccelerator_outLayer_backwardpass_tests.cpp
+cpuAccelerator_backwardpass_tests.cpp)
 
 set(NN_SOURCES ${NN_SRC}/Accelerators/cpuAccelerator.cpp
 ${NN_SRC}/nn_layer.cpp
