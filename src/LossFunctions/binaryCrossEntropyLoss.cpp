@@ -2,6 +2,8 @@
 #include "nn_layer.h"
 #include <cmath>
 
+#define EPSILON 0.000001f
+
 BinaryCrossEntropyLoss::BinaryCrossEntropyLoss(nn_layer* nn_lyr)
 {
     m_pLayer = nn_lyr;
@@ -27,6 +29,10 @@ void BinaryCrossEntropyLoss::get_loss_func_derv(float* fExpOut, float* fVal)
 {
     for(uint i = 0; i < m_unOutputLyrSz; i++)
     {
+        if(m_pLayer->get_node_value_idx(i) == 0.0f)
+        {
+            m_pLayer->set_node_value(EPSILON, i);
+        }
         fVal[i] = ((m_pLayer->get_node_value_idx(i) - fExpOut[i]) / (m_pLayer->get_node_value_idx(i) * (1.0f - m_pLayer->get_node_value_idx(i))));
         
     }

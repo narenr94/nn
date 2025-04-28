@@ -21,14 +21,23 @@ cpuAccelerator_tests.cpp)
 set(NN_SOURCES ${NN_SRC}/Accelerators/cpuAccelerator.cpp
 ${NN_SRC}/nn_layer.cpp
 ${NN_SRC}/nn_l2l_weight_matrix.cpp
-${NN_SRC}/ActivationFunctions/sigmoidActFunc.cpp
+${NN_SRC}/nn_math.cpp)
+
+set(ACT_SOURCES ${NN_SRC}/ActivationFunctions/sigmoidActFunc.cpp
 ${NN_SRC}/ActivationFunctions/leakyReluActFunc.cpp
 ${NN_SRC}/ActivationFunctions/reluActFunc.cpp
 ${NN_SRC}/ActivationFunctions/softmaxActFunc.cpp
 ${NN_SRC}/ActivationFunctions/tanhActFunc.cpp
-${NN_SRC}/nn_math.cpp)
+)
 
-add_executable(${EXEC_NAME} ${TEST_SOURCES}	${NN_SOURCES})
+set(LOSS_SOURCES ${NN_SRC}/LossFunctions/binaryCrossEntropyLoss.cpp
+${NN_SRC}/LossFunctions/competitiveCrossEntropyLoss.cpp
+${NN_SRC}/LossFunctions/huberLoss.cpp
+${NN_SRC}/LossFunctions/meanAbsoluteError.cpp
+${NN_SRC}/LossFunctions/meanSquaredError.cpp
+)
+
+add_executable(${EXEC_NAME} ${TEST_SOURCES} ${LOSS_SOURCES} ${ACT_SOURCES} ${NN_SOURCES})
 
 target_link_libraries(${EXEC_NAME} ${GMOCK_LINK_LIBRARIES} ${GMOCK_LINK_LIBRARIES})
 
