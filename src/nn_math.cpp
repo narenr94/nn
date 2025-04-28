@@ -1,6 +1,9 @@
 #include <math.h>
 #include "nn_math.h"
 
+#include <stdlib.h>
+#include <cmath>
+
 float get_sigmoidf(float fVal) {
     return (1 / (1 + powf(EULER_NUMBER_F, - fVal)));
 }

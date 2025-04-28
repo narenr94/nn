@@ -1,9 +1,6 @@
 #ifndef NN_MATH
 #define NN_MATH
 
-#include <stdlib.h>
-#include <cmath>
-
 typedef unsigned int uint;
 
 #define EULER_NUMBER_F 2.71828182846

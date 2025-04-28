@@ -1,13 +1,13 @@
 #include "huberLoss.h"
-#include "nn_core.h"
+#include "nn_layer.h"
+#include <cmath>
 
-HuberLoss::HuberLoss(NeuralNet* nn, float delta)
+HuberLoss::HuberLoss(nn_layer* nn_lyr, float delta)
 {
 
     m_fDelta = delta;
-    m_pNN = nn;
-    m_unOutputLyrID = (m_pNN->GetNumLys() - 1);
-    m_unOutputLyrSz = m_pNN->GetSzLayer(m_unOutputLyrID);
+    m_pLayer = nn_lyr;
+    m_unOutputLyrSz = m_pLayer->get_num_nodes();
 }
 
 float HuberLoss::apply_loss_func(float* fExpOut)
@@ -26,7 +26,7 @@ float HuberLoss::apply_loss_func(float* fExpOut)
         // { 
         //     loss += delta * (std::abs(diff) - 0.5 * delta); 
         // }
-        float diff = fExpOut[i] - m_pNN->GetNodeVal(m_unOutputLyrID, i);
+        float diff = fExpOut[i] - m_pLayer->get_node_value_idx(i);
         if(std::abs(diff) <= m_fDelta)
         {
             temp = 0.5f * diff * diff;
@@ -45,11 +45,10 @@ float HuberLoss::apply_loss_func(float* fExpOut)
 
 void HuberLoss::get_loss_func_derv(float* fExpOut, float* fVal)
 {
-
     float diff = 0.0f;
     for(uint i = 0; i < m_unOutputLyrSz; i++)
     {
-        diff = fExpOut[i] - m_pNN->GetNodeVal(m_unOutputLyrID, i);
+        diff = fExpOut[i] - m_pLayer->get_node_value_idx(i);
         if(std::abs(diff) <= m_fDelta)
         {
             // ret = diff;

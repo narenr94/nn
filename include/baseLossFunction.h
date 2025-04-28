@@ -3,17 +3,27 @@
 
 #include "nn_math.h"
 
-class NeuralNet; //forward declaration, class defined in nn_core.h
+/*
+    list of activation functions
+    Note : keep CCE in bottom to keep tests intact
+*/
+enum eLossFuncs{
+    MSE, //mean squared error
+    MAE, //mean absolute error
+    HUBER, //huber loss
+    BCE, //binary cross entropy loss
+    CCE //competitive cross entropy loss
+};
+
+class nn_layer; //forward declaration, class defined in nn_layer.h
 
 class BaseLossFunction{
 
 protected:
 
-    NeuralNet* m_pNN;
+    nn_layer* m_pLayer; //output layer
 
-    uint m_unOutputLyrSz;
-
-    uint m_unOutputLyrID;
+    uint m_unOutputLyrSz; //output layer size
 
 public:
 

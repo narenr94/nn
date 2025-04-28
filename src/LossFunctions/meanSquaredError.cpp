@@ -1,12 +1,12 @@
 #include "meanSquaredError.h"
-#include "nn_core.h"
+#include "nn_layer.h"
+#include <cmath>
 #include <cstdio>
 
-MeanSquaredError::MeanSquaredError(NeuralNet* nn)
+MeanSquaredError::MeanSquaredError(nn_layer* nn_lyr)
 {
-    m_pNN = nn;
-    m_unOutputLyrID = (m_pNN->GetNumLys() - 1);
-    m_unOutputLyrSz = m_pNN->GetSzLayer(m_unOutputLyrID);
+    m_pLayer = nn_lyr;
+    m_unOutputLyrSz = m_pLayer->get_num_nodes();
 }
 
 float MeanSquaredError::apply_loss_func(float* fExpOut)
@@ -16,7 +16,7 @@ float MeanSquaredError::apply_loss_func(float* fExpOut)
 
     for(uint i = 0; i < m_unOutputLyrSz; i++)
     {
-        temp = fExpOut[i] - m_pNN->GetNodeVal(m_unOutputLyrID, i);
+        temp = fExpOut[i] - m_pLayer->get_node_value_idx(i);
         temp *= temp;
         fRet += temp;
     }
@@ -26,10 +26,9 @@ float MeanSquaredError::apply_loss_func(float* fExpOut)
 
 void MeanSquaredError::get_loss_func_derv(float* fExpOut, float* fVal)
 {
-
     for(uint i = 0; i < m_unOutputLyrSz; i++)
     {
-        fVal[i] = (-2.0f * ((fExpOut[i] - m_pNN->GetNodeVal(m_unOutputLyrID, i)) / m_unOutputLyrSz));
+        fVal[i] = (-2.0f * ((fExpOut[i] - m_pLayer->get_node_value_idx(i)) / m_unOutputLyrSz));
     }
 
 }

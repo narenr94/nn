@@ -1,5 +1,6 @@
 #include "adam.h"
 #include "nn_core.h"
+#include <cmath>
 
 ADAMOPT::ADAMOPT(NeuralNet* nn, float beta1, float beta2,float epslion)
 {

@@ -6,7 +6,7 @@
 class BinaryCrossEntropyLoss : public BaseLossFunction
 {
     public:
-    BinaryCrossEntropyLoss(NeuralNet* nn);
+    BinaryCrossEntropyLoss(nn_layer* nn_lyr);
 
     float apply_loss_func(float* fExpOut);
 

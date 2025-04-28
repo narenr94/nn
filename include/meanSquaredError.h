@@ -6,7 +6,7 @@
 class MeanSquaredError : public BaseLossFunction
 {
     public:
-    MeanSquaredError(NeuralNet* nn);
+    MeanSquaredError(nn_layer* nn_lyr);
 
     float apply_loss_func(float* fExpOut);
 

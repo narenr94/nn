@@ -1,5 +1,6 @@
 #include "rmsprop.h"
 #include "nn_core.h"
+#include <cmath>
 
 RMSProp::RMSProp(NeuralNet* nn, float beta, float epslion)
 {
