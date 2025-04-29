@@ -18,7 +18,7 @@ class OpenclAccelerator : public BaseAccelerator{
 
 public:
 
-    OpenclAccelerator(nn_layer* pLayer);
+    OpenclAccelerator(BaseLayer* pLayer);
 
     void do_forwardpass_dense_layer() override;
     void do_backwardpass_dense_layer_output_layer(float* pfExpOut, BaseLossFunction* lossFunc) override;

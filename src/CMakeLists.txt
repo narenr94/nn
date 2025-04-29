@@ -1,6 +1,6 @@
 # Source files in src 
-set(SRC_FILES nn_core.cpp nn_l2l_weight_matrix.cpp 
-    nn_layer.cpp nn_math.cpp)
+set(SRC_FILES nn_core.cpp nn_math.cpp)
+set(LYR_FILES Layers/denseLayer.cpp)
 set(ACT_FUNC_FILES ActivationFunctions/leakyReluActFunc.cpp 
     ActivationFunctions/reluActFunc.cpp 
     ActivationFunctions/sigmoidActFunc.cpp 
@@ -28,7 +28,7 @@ if(OPENCL_ACC)
 endif()
  
 # Create the main library from src 
-add_library(nncore SHARED ${SRC_FILES} ${ACT_FUNC_FILES} ${OPT_FUNC_FILES} ${LOSS_FUNC_FILES} ${ACC_FUNC_FILES})
+add_library(nncore SHARED ${SRC_FILES} ${ACT_FUNC_FILES} ${LYR_FILES} ${OPT_FUNC_FILES} ${LOSS_FUNC_FILES} ${ACC_FUNC_FILES})
 target_include_directories(nncore PUBLIC ${CMAKE_SOURCE_DIR}/include)
 if(OPENCL_ACC)
     target_link_libraries(nncore OpenCL::OpenCL)

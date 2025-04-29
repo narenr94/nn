@@ -1,10 +1,10 @@
 #include "competitiveCrossEntropyLoss.h"
-#include "nn_layer.h"
+#include "baseLayer.h"
 #include <cmath>
 
 #define EPSILON 0.000001f
 
-CompetitiveCrossEntropyLoss::CompetitiveCrossEntropyLoss(nn_layer* nn_lyr)
+CompetitiveCrossEntropyLoss::CompetitiveCrossEntropyLoss(BaseLayer* nn_lyr)
 {
     m_pLayer = nn_lyr;
     m_unOutputLyrSz = m_pLayer->get_num_nodes();

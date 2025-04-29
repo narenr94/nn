@@ -3,13 +3,13 @@
 
 #include "baseActivationFunction.h"
 
-class nn_layer;
+class BaseLayer;
 
 class SoftmaxActFunc : public BaseActivationFunction
 {
     private:
 
-        nn_layer* m_pNN_Layer;
+        BaseLayer* m_pLayer;
         uint m_unCorrectIdx = 0;
         uint m_unSzLyr = 0;
         float m_fDervCorrPred = 0.0f;
@@ -20,7 +20,7 @@ class SoftmaxActFunc : public BaseActivationFunction
 
     public:
 
-        SoftmaxActFunc(nn_layer* pNN_Layer);
+        SoftmaxActFunc(BaseLayer* pLayer);
 
         void apply_act_func();
 

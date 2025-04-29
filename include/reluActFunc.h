@@ -7,7 +7,7 @@ class ReluActFunc : public BaseActivationFunction
 {
     public:
 
-        ReluActFunc(nn_layer* pNN_Layer){m_pNN_Layer = pNN_Layer;}
+        ReluActFunc(BaseLayer* pLayer){m_pLayer = pLayer;}
 
         void apply_act_func();
 

@@ -12,7 +12,7 @@ class LeakyReluActFunc : public BaseActivationFunction
 
     public:
 
-        LeakyReluActFunc(nn_layer* pNN_Layer, float alpha = LEAKY_RELU_DEFAULT_ALPHA){m_pNN_Layer = pNN_Layer, m_alpha = alpha;}
+        LeakyReluActFunc(BaseLayer* pLayer, float alpha = LEAKY_RELU_DEFAULT_ALPHA){m_pLayer = pLayer, m_alpha = alpha;}
 
         void apply_act_func();
 

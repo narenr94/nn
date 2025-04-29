@@ -1,11 +1,11 @@
 #include "softmaxActFunc.h"
-#include "nn_layer.h"
+#include "baseLayer.h"
 #include <cstdio>
 
-SoftmaxActFunc::SoftmaxActFunc(nn_layer* pNN_Layer)
+SoftmaxActFunc::SoftmaxActFunc(BaseLayer* pLayer)
 {
-    m_pNN_Layer = pNN_Layer;
-    m_unSzLyr = m_pNN_Layer->get_num_nodes();
+    m_pLayer = pLayer;
+    m_unSzLyr = m_pLayer->get_num_nodes();
     m_ppDervMatrix = new float*[m_unSzLyr];
     for(uint i = 0; i < m_unSzLyr; i++)
     {
@@ -30,27 +30,27 @@ SoftmaxActFunc::~SoftmaxActFunc()
 void SoftmaxActFunc::apply_act_func()
 {
     
-    float max = m_pNN_Layer->get_node_value_idx(0);
+    float max = m_pLayer->get_node_value_idx(0);
     float sum = 0.0f;
 
     
     for(uint i = 1; i < m_unSzLyr; i++)
     {
-        if(max < m_pNN_Layer->get_node_value_idx(i))
+        if(max < m_pLayer->get_node_value_idx(i))
         {
-            max = m_pNN_Layer->get_node_value_idx(i);
+            max = m_pLayer->get_node_value_idx(i);
         }
     }
     for(uint i = 0; i < m_unSzLyr; i++)
     {
-        float exp_val = get_softmaxf(m_pNN_Layer->get_node_value_idx(i), max);
-        m_pNN_Layer->set_node_value(exp_val, i);
+        float exp_val = get_softmaxf(m_pLayer->get_node_value_idx(i), max);
+        m_pLayer->set_node_value(exp_val, i);
         sum += exp_val;
     }
     
     for(uint i = 0; i < m_unSzLyr; i++)
     {
-        m_pNN_Layer->set_node_value(m_pNN_Layer->get_node_value_idx(i) / sum, i);
+        m_pLayer->set_node_value(m_pLayer->get_node_value_idx(i) / sum, i);
     }
     
 }
@@ -63,11 +63,11 @@ void SoftmaxActFunc::populate_derv_matrix()
         {
             if(i == j)
             {
-                m_ppDervMatrix[i][j] = find_derivative_softmaxf(m_pNN_Layer->get_node_value_idx(i));
+                m_ppDervMatrix[i][j] = find_derivative_softmaxf(m_pLayer->get_node_value_idx(i));
             }
             else
             {
-                m_ppDervMatrix[i][j] = find_derivative_softmaxf_wrong_pred(m_pNN_Layer->get_node_value_idx(j), m_pNN_Layer->get_node_value_idx(i));
+                m_ppDervMatrix[i][j] = find_derivative_softmaxf_wrong_pred(m_pLayer->get_node_value_idx(j), m_pLayer->get_node_value_idx(i));
             }            
 
         }

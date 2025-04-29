@@ -3,12 +3,12 @@
 
 #include "nn_math.h"
 
-class nn_layer;
+class BaseLayer;
 
 class BaseActivationFunction{
 
 protected:
-    nn_layer * m_pNN_Layer;
+    BaseLayer * m_pLayer;
 
 public:
 

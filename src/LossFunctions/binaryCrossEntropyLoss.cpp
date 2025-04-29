@@ -1,10 +1,10 @@
 #include "binaryCrossEntropyLoss.h"
-#include "nn_layer.h"
+#include "baseLayer.h"
 #include <cmath>
 
 #define EPSILON 0.000001f
 
-BinaryCrossEntropyLoss::BinaryCrossEntropyLoss(nn_layer* nn_lyr)
+BinaryCrossEntropyLoss::BinaryCrossEntropyLoss(BaseLayer* nn_lyr)
 {
     m_pLayer = nn_lyr;
     m_unOutputLyrSz = m_pLayer->get_num_nodes();

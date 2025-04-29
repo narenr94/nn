@@ -8,7 +8,7 @@ class CpuAccelerator : public BaseAccelerator{
 
 public:
 
-    CpuAccelerator(nn_layer* pNLyr);
+    CpuAccelerator(BaseLayer* pNLyr);
 
     void do_forwardpass_dense_layer() override;
     void do_backwardpass_dense_layer_output_layer(float* pfExpOut, BaseLossFunction* lossFunc) override;
