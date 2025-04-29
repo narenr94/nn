@@ -21,6 +21,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <cassert>
+
 static const char* static_NNDumpFilePath = "./"; //dump file path
 
 static int static_nDumpFileNum = 0; //number postfix fro dump files
@@ -44,7 +46,8 @@ static Batch_Training_Args ** args = nullptr;
 
 
 
-NeuralNet::NeuralNet(nnInitData* initData)
+NeuralNet::NeuralNet(nnInitData* initData):
+m_ppLys(nullptr)
 {
 
     srand(time(NULL));
@@ -196,7 +199,10 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
 
     m_eLossFunc = other_initData->eLossFunc;
 
-    delete [] m_ppLys;
+    if(m_ppLys)
+    {
+        delete [] m_ppLys;
+    }
 
     SetupLayersAndWeightMatrices(other_initData->unSzLys, other_initData->eAct_Funcs, other_initData->actParam1, other_initData->lossParam1);
 
@@ -344,12 +350,9 @@ bool NeuralNet::do_forward_pass(float* pfInputArr)
 
 bool NeuralNet::populate_weights(uint unIdx, float* pfValues)
 {
-    bool bRet = false;
+    assert(unIdx != 0);
 
-    if(unIdx >= m_unNumLys - 1)
-    {
-        return bRet;
-    }
+    bool bRet = false;
 
     bRet = m_ppLys[unIdx]->GetWeightMatrix()->set_all_weight(pfValues);
 
@@ -359,12 +362,9 @@ bool NeuralNet::populate_weights(uint unIdx, float* pfValues)
 
 bool NeuralNet::populate_nodes_bias(uint unLyrIdx, float* pfBias)
 {
-    bool bRet = false;
+    assert((unLyrIdx < m_unNumLys) && (unLyrIdx > 0));
 
-    if(unLyrIdx >= m_unNumLys)
-    {
-        return bRet;
-    }
+    bool bRet = false;
 
     bRet = m_ppLys[unLyrIdx]->set_all_node_biases(pfBias);
 

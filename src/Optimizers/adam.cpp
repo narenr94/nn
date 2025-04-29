@@ -56,7 +56,7 @@ void ADAMOPT::correct_biases()
     uint i; //in layer index, out layer index is always in layer index + 1
     uint j; //in layer node index
 
-    for(i = 0; i < (m_pNN->GetNumLys() - 1); i++)
+    for(i = 1; i < m_pNN->GetNumLys(); i++)
     {
         for(j = 0; j < m_pNN->GetSzLayer(i); j++)
         {
@@ -82,20 +82,20 @@ void ADAMOPT::correct_weights()
 
     double delta_wt = 0.0;
 
-    for(i = 0; i < m_pNN->GetNumLys() - 1; i++)
+    for(i = 1; i < m_pNN->GetNumLys(); i++)
     {
-        for(j = 0; j < m_pNN->GetSzLayer(i); j++)
+        for(j = 0; j < m_pNN->GetSzLayer(i - 1); j++)
         {
-            for(k = 0; k < m_pNN->GetSzLayer(i+1); k++)
+            for(k = 0; k < m_pNN->GetSzLayer(i); k++)
             {
-                uint eval_idx = (j * m_pNN->GetSzLayer(i+1)) + k;
+                uint eval_idx = (j * m_pNN->GetSzLayer(i)) + k;
 
-                delta_wt = m_pNN->GetDelta(i + 1, k) * m_pNN->GetNodeVal(i, j);
-                m_ppMtxRep[i]->M_Val[eval_idx] = (m_fBeta1 * m_ppMtxRep[i]->M_Val[eval_idx]) + ((1.0f - m_fBeta1) * delta_wt);
-                m_ppMtxRep[i]->V_Val[eval_idx] = (m_fBeta2 * m_ppMtxRep[i]->V_Val[eval_idx]) + ((1.0f - m_fBeta2) * delta_wt * delta_wt);
-                m_hat = m_ppMtxRep[i]->M_Val[eval_idx] / (1.0f - std::pow(m_fBeta1, m_unTimeStep));
-                v_hat = m_ppMtxRep[i]->V_Val[eval_idx] / (1.0f - std::pow(m_fBeta2, m_unTimeStep));
-                m_pNN->SetWeight(i + 1, j, k, (m_pNN->GetWeight(i + 1, j, k) - ((m_pNN->GetLearningRate() * m_hat)/(std::sqrt(v_hat) + m_fEpsilon))));
+                delta_wt = m_pNN->GetDelta(i, k) * m_pNN->GetNodeVal(i - 1, j);
+                m_ppMtxRep[i - 1]->M_Val[eval_idx] = (m_fBeta1 * m_ppMtxRep[i - 1]->M_Val[eval_idx]) + ((1.0f - m_fBeta1) * delta_wt);
+                m_ppMtxRep[i - 1]->V_Val[eval_idx] = (m_fBeta2 * m_ppMtxRep[i - 1]->V_Val[eval_idx]) + ((1.0f - m_fBeta2) * delta_wt * delta_wt);
+                m_hat = m_ppMtxRep[i - 1]->M_Val[eval_idx] / (1.0f - std::pow(m_fBeta1, m_unTimeStep));
+                v_hat = m_ppMtxRep[i - 1]->V_Val[eval_idx] / (1.0f - std::pow(m_fBeta2, m_unTimeStep));
+                m_pNN->SetWeight(i, j, k, (m_pNN->GetWeight(i, j, k) - ((m_pNN->GetLearningRate() * m_hat)/(std::sqrt(v_hat) + m_fEpsilon))));
                 
             }
             
