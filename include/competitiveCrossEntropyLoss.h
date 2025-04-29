@@ -6,7 +6,7 @@
 class CompetitiveCrossEntropyLoss : public BaseLossFunction
 {
     public:
-    CompetitiveCrossEntropyLoss(nn_layer* nn_lyr);
+    CompetitiveCrossEntropyLoss(BaseLayer* nn_lyr);
 
     float apply_loss_func(float* fExpOut);
 

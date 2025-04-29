@@ -1,8 +1,6 @@
-#include "nn_layer.h"
+#include "denseLayer.h"
 
 #include "nn_math.h"
-
-#include "nn_l2l_weight_matrix.h"
 
 #include "sigmoidActFunc.h"
 #include "reluActFunc.h"
@@ -18,29 +16,13 @@
 
 #include <cassert>
 
-nn_layer::nn_layer(uint unNumNodesnodes, eAct_func eActFunc, float actParam1)
-:m_pNextLyr(nullptr),
-m_pPrevLyr(nullptr),
-m_pWtMtx(nullptr),
-m_bPrevNxtLyrsSet(false),
-m_pfValues(nullptr),
-m_pfBiases(nullptr),
-m_pfDeltas(nullptr)
+DenseLayer::DenseLayer(uint unNumNodesnodes, eAct_func eActFunc, float actParam1):BaseLayer(unNumNodesnodes, eActFunc, actParam1)
 {
     m_unNumNodes = unNumNodesnodes;
 
     m_eActFunc = eActFunc;
 
     m_actParam1 = actParam1;
-
-    // m_ppNodes = new nn_node*[m_unNumNodes];
-
-    // uint i = 0;
-
-    // for(i = 0; i < m_unNumNodes; i++)
-    // {
-    //     m_ppNodes[i] = new nn_node();
-    // }
 
     m_pfValues = new float[m_unNumNodes];
     m_pfBiases = new float[m_unNumNodes];
@@ -75,7 +57,7 @@ m_pfDeltas(nullptr)
 
 }
 
-nn_layer::~nn_layer()
+DenseLayer::~DenseLayer()
 {
     if(m_pfValues)
     {
@@ -98,13 +80,13 @@ nn_layer::~nn_layer()
     }
 }
 
-uint nn_layer::get_num_nodes()
+uint DenseLayer::get_num_nodes()
 {
     return m_unNumNodes;
     
 }
 
-bool nn_layer::set_node_value(float fVal, uint unIdx)
+bool DenseLayer::set_node_value(float fVal, uint unIdx)
 {
     bool bRet = false;
 
@@ -119,7 +101,7 @@ bool nn_layer::set_node_value(float fVal, uint unIdx)
     return bRet;
 }
 
-bool nn_layer::set_all_node_values(float* pfValue)
+bool DenseLayer::set_all_node_values(float* pfValue)
 {
     bool bRet = false;
 
@@ -137,7 +119,7 @@ bool nn_layer::set_all_node_values(float* pfValue)
     return bRet;
 }
 
-bool nn_layer::set_all_node_biases(float* pfBias)
+bool DenseLayer::set_all_node_biases(float* pfBias)
 {
     bool bRet = false;
 
@@ -155,7 +137,7 @@ bool nn_layer::set_all_node_biases(float* pfBias)
 
 }
 
-bool nn_layer::set_node_bias(float fBias, uint unIdx)
+bool DenseLayer::set_node_bias(float fBias, uint unIdx)
 {
     bool bRet = false;
 
@@ -170,7 +152,7 @@ bool nn_layer::set_node_bias(float fBias, uint unIdx)
     return bRet;
 }
 
-bool nn_layer::set_node_delta(float fDelta, uint unIdx)
+bool DenseLayer::set_node_delta(float fDelta, uint unIdx)
 {
     bool bRet = false;
 
@@ -184,22 +166,22 @@ bool nn_layer::set_node_delta(float fDelta, uint unIdx)
     return bRet;
 }
 
-float nn_layer::get_node_value_idx(uint unIdx)
+float DenseLayer::get_node_value_idx(uint unIdx)
 {
     return m_pfValues[unIdx];
 }
 
-float nn_layer::get_node_bias_idx(uint unIdx)
+float DenseLayer::get_node_bias_idx(uint unIdx)
 {
     return m_pfBiases[unIdx];
 }
 
-float nn_layer::get_node_delta_idx(uint unIdx)
+float DenseLayer::get_node_delta_idx(uint unIdx)
 {
     return m_pfDeltas[unIdx];
 }
 
-void nn_layer::populateBiasesWithRandomNumbers()
+void DenseLayer::populateBiasesWithRandomNumbers()
 {
     uint i = 0;
     float tmp;
@@ -214,74 +196,154 @@ void nn_layer::populateBiasesWithRandomNumbers()
 
 }
 
-eAct_func nn_layer::get_act_func()
+eAct_func DenseLayer::get_act_func()
 {
     return m_eActFunc;
 }
 
-float nn_layer::get_act_param()
+float DenseLayer::get_act_param()
 {
     return m_actParam1;
 }
 
-void nn_layer::apply_act_func_all_nodes()
+void DenseLayer::apply_act_func_all_nodes()
 {
     
     m_pActFunc->apply_act_func();
     
 }
 
-void nn_layer::get_delta_all_nodes(float * fVal)
+void DenseLayer::get_delta_all_nodes(float * fVal)
 {
     
     m_pActFunc->get_delta(fVal);
     
 }
 
-nn_l2l_weight_matrix* nn_layer::GetWeightMatrix()
+const float* DenseLayer::get_transform_matrix()
 {
     assert(m_bPrevNxtLyrsSet == true);
-    return m_pWtMtx;
+    return m_pfTransformParameters;
 }
 
-void nn_layer::SetPreviousNextLayers(nn_layer* prevLyr, nn_layer* nxtLyr)
+void DenseLayer::SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr)
 {
     m_pPrevLyr = prevLyr;
     m_pNextLyr = nxtLyr;
 
+    m_unTransformMatrixSize = 0;
+
     if(m_pPrevLyr)
     {
-        m_pWtMtx = new nn_l2l_weight_matrix(m_pPrevLyr, this);
+        m_unTransformMatrixSize = m_unNumNodes * (m_pPrevLyr->get_num_nodes());
+        m_pfTransformParameters = new float[m_unTransformMatrixSize];
     }
 
     m_bPrevNxtLyrsSet = true;
 }
 
-nn_layer* nn_layer::GetPreviousLayer()
+BaseLayer* DenseLayer::GetPreviousLayer()
 {
     return m_pPrevLyr;
 }
 
-nn_layer* nn_layer::GetNextLayer()
+BaseLayer* DenseLayer::GetNextLayer()
 {
     return m_pNextLyr;
 }
 
-void nn_layer::do_forwardpass_to_current_layer()
+void DenseLayer::do_forwardpass_to_current_layer()
 {
     assert(m_bPrevNxtLyrsSet == true);
     m_pAccelerator->do_forwardpass_dense_layer();
 }
 
-void nn_layer::do_backwardpass_to_previous_layer_output_layer(float* fExpOut, BaseLossFunction* lossFunc)
+void DenseLayer::do_backwardpass_to_previous_layer_output_layer(float* fExpOut, BaseLossFunction* lossFunc)
 {
     assert(m_bPrevNxtLyrsSet == true);
     m_pAccelerator->do_backwardpass_dense_layer_output_layer(fExpOut, lossFunc);
 }
 
-void nn_layer::do_backwardpass_to_previous_layer()
+void DenseLayer::do_backwardpass_to_previous_layer()
 {
     assert(m_bPrevNxtLyrsSet == true);
     m_pAccelerator->do_backwardpass_dense_layer();
 }
+
+void DenseLayer::set_transform_matrix_parameter(uint unInIdx, uint unOutIdx, float fWt)
+{
+    assert(m_bPrevNxtLyrsSet == true);
+    assert((unInIdx < m_pPrevLyr->get_num_nodes()) && (unOutIdx < get_num_nodes()));
+
+    m_pfTransformParameters[(unInIdx * get_num_nodes()) + unOutIdx] = fWt;
+
+}
+
+void DenseLayer::set_transform_matrix_parameter(uint Idx, float fWt)
+{
+    assert(m_bPrevNxtLyrsSet == true);
+    assert(Idx < m_unTransformMatrixSize);
+    
+    m_pfTransformParameters[Idx] = fWt;
+
+}
+
+
+
+void DenseLayer::set_all_transform_matrix_parameter(float* fWt)
+{
+    assert(m_bPrevNxtLyrsSet == true);
+    uint i = 0;
+    uint j = 0;
+    for(i = 0; i < m_pPrevLyr->get_num_nodes(); i++)
+    {
+        for(j = 0; j < get_num_nodes(); j++)
+        {
+            m_pfTransformParameters[(i * get_num_nodes()) + j] = fWt[(i * get_num_nodes()) + j];
+        }
+    }
+}
+
+float DenseLayer::get_transform_matrix_parameter(uint unInIdx, uint unOutIdx)
+{
+    assert(m_bPrevNxtLyrsSet == true);
+    assert((unInIdx < m_pPrevLyr->get_num_nodes()) && (unOutIdx < get_num_nodes()));
+
+    float bRet = 0.0f;
+    
+    bRet = m_pfTransformParameters[(unInIdx * get_num_nodes()) + unOutIdx];
+
+    return bRet;
+
+}
+
+float DenseLayer::get_transform_matrix_parameter(uint Idx)
+{
+    assert(m_bPrevNxtLyrsSet == true);
+    assert(Idx <= m_unTransformMatrixSize);
+    float bRet = 0;
+    
+    bRet = m_pfTransformParameters[Idx];
+
+    return bRet;
+
+}
+
+uint DenseLayer::get_transform_matrix_parameter_size()
+{
+    return m_unTransformMatrixSize;
+}
+
+void DenseLayer::populate_transform_matrix_parameter_with_random_numbers()
+{
+    assert(m_bPrevNxtLyrsSet == true);
+    uint i = 0;
+
+    for(i = 0; i < m_unTransformMatrixSize; i++)
+    {
+        m_pfTransformParameters[i] = (float)getRandomNumber(RAND_MIN_WEIGHT_BIAS, RAND_MAX_WEIGHT_BIAS);
+        m_pfTransformParameters[i] /= 10.0;
+    }
+}
+
 

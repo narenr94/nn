@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "nn_l2l_weight_matrix.h"
+#include "denseLayer.h"
 
 int main(int argc, char** argv)
 {

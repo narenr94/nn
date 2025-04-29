@@ -1,7 +1,6 @@
 include(GoogleTest)
 
-add_subdirectory(nn_layer)
+add_subdirectory(denseLayer)
 add_subdirectory(nn_math)
-add_subdirectory(nn_l2l_weight_matrix)
 add_subdirectory(cpuAccelerator)
 add_subdirectory(nn_core)

@@ -1,8 +1,8 @@
 #include "huberLoss.h"
-#include "nn_layer.h"
+#include "baseLayer.h"
 #include <cmath>
 
-HuberLoss::HuberLoss(nn_layer* nn_lyr, float delta)
+HuberLoss::HuberLoss(BaseLayer* nn_lyr, float delta)
 {
 
     m_fDelta = delta;

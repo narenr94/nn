@@ -1,15 +1,15 @@
 #include <gtest/gtest.h>
 #include "cpuAccelerator.h"
-#include "nn_layer.h"
-#include "nn_l2l_weight_matrix.h"
+#include "baseLayer.h"
+#include "denseLayer.h"
 #include <cmath>
 
 
 TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_relu_test)
 {
-    nn_layer* prev_lyr = new nn_layer(2, eAct_func::TANH, 0.999f);
-    nn_layer* curr_lyr = new nn_layer(3, eAct_func::RELU, 0.999f);
-    nn_layer* nxt_lyr = new nn_layer(2, eAct_func::TANH, 0.999f);
+    DenseLayer* prev_lyr = new DenseLayer(2, eAct_func::TANH, 0.999f);
+    DenseLayer* curr_lyr = new DenseLayer(3, eAct_func::RELU, 0.999f);
+    DenseLayer* nxt_lyr = new DenseLayer(2, eAct_func::TANH, 0.999f);
 
     float nxt_val[2] = {0.5f, 0.2f};
 
@@ -35,7 +35,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_relu_test)
 
     nxt_lyr->SetPreviousNextLayers(curr_lyr, nullptr);
 
-    nxt_lyr->GetWeightMatrix()->set_all_weight(bkwdPassWtMtx);
+    nxt_lyr->set_all_transform_matrix_parameter(bkwdPassWtMtx);
 
     CpuAccelerator* cpuAcc = new CpuAccelerator(curr_lyr);
 
@@ -53,9 +53,9 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_relu_test)
 
 TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_leakyRelu_test)
 {
-    nn_layer* prev_lyr = new nn_layer(2, eAct_func::TANH, 0.999f);
-    nn_layer* curr_lyr = new nn_layer(3, eAct_func::LEAKY_RELU, 0.01f);
-    nn_layer* nxt_lyr = new nn_layer(2, eAct_func::TANH, 0.999f);
+    DenseLayer* prev_lyr = new DenseLayer(2, eAct_func::TANH, 0.999f);
+    DenseLayer* curr_lyr = new DenseLayer(3, eAct_func::LEAKY_RELU, 0.01f);
+    DenseLayer* nxt_lyr = new DenseLayer(2, eAct_func::TANH, 0.999f);
 
     float nxt_val[2] = {0.5f, 0.2f};
 
@@ -81,7 +81,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_leakyRelu_test)
 
     nxt_lyr->SetPreviousNextLayers(curr_lyr, nullptr);
 
-    nxt_lyr->GetWeightMatrix()->set_all_weight(bkwdPassWtMtx);
+    nxt_lyr->set_all_transform_matrix_parameter(bkwdPassWtMtx);
 
     CpuAccelerator* cpuAcc = new CpuAccelerator(curr_lyr);
 
@@ -99,9 +99,9 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_leakyRelu_test)
 
 TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_tanh_test)
 {
-    nn_layer* prev_lyr = new nn_layer(2, eAct_func::TANH, 0.999f);
-    nn_layer* curr_lyr = new nn_layer(3, eAct_func::TANH, 0.01f);
-    nn_layer* nxt_lyr = new nn_layer(2, eAct_func::TANH, 0.999f);
+    DenseLayer* prev_lyr = new DenseLayer(2, eAct_func::TANH, 0.999f);
+    DenseLayer* curr_lyr = new DenseLayer(3, eAct_func::TANH, 0.01f);
+    DenseLayer* nxt_lyr = new DenseLayer(2, eAct_func::TANH, 0.999f);
 
     float nxt_val[2] = {0.5f, 0.2f};
 
@@ -127,7 +127,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_tanh_test)
 
     nxt_lyr->SetPreviousNextLayers(curr_lyr, nullptr);
 
-    nxt_lyr->GetWeightMatrix()->set_all_weight(bkwdPassWtMtx);
+    nxt_lyr->set_all_transform_matrix_parameter(bkwdPassWtMtx);
 
     CpuAccelerator* cpuAcc = new CpuAccelerator(curr_lyr);
 
@@ -145,9 +145,9 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_tanh_test)
 
 TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_sigmoid_test)
 {
-    nn_layer* prev_lyr = new nn_layer(2, eAct_func::TANH, 0.999f);
-    nn_layer* curr_lyr = new nn_layer(3, eAct_func::SIGMOID, 0.01f);
-    nn_layer* nxt_lyr = new nn_layer(2, eAct_func::TANH, 0.999f);
+    DenseLayer* prev_lyr = new DenseLayer(2, eAct_func::TANH, 0.999f);
+    DenseLayer* curr_lyr = new DenseLayer(3, eAct_func::SIGMOID, 0.01f);
+    DenseLayer* nxt_lyr = new DenseLayer(2, eAct_func::TANH, 0.999f);
 
     float nxt_val[2] = {0.5f, 0.2f};
 
@@ -173,7 +173,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_sigmoid_test)
 
     nxt_lyr->SetPreviousNextLayers(curr_lyr, nullptr);
 
-    nxt_lyr->GetWeightMatrix()->set_all_weight(bkwdPassWtMtx);
+    nxt_lyr->set_all_transform_matrix_parameter(bkwdPassWtMtx);
 
     CpuAccelerator* cpuAcc = new CpuAccelerator(curr_lyr);
 
@@ -191,9 +191,9 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_sigmoid_test)
 
 TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_softmax_test)
 {
-    nn_layer* prev_lyr = new nn_layer(2, eAct_func::TANH, 0.999f);
-    nn_layer* curr_lyr = new nn_layer(3, eAct_func::SOFTMAX, 0.01f);
-    nn_layer* nxt_lyr = new nn_layer(2, eAct_func::TANH, 0.999f);
+    DenseLayer* prev_lyr = new DenseLayer(2, eAct_func::TANH, 0.999f);
+    DenseLayer* curr_lyr = new DenseLayer(3, eAct_func::SOFTMAX, 0.01f);
+    DenseLayer* nxt_lyr = new DenseLayer(2, eAct_func::TANH, 0.999f);
 
     float nxt_val[2] = {0.5f, 0.2f};
 
@@ -219,7 +219,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_softmax_test)
 
     nxt_lyr->SetPreviousNextLayers(curr_lyr, nullptr);
 
-    nxt_lyr->GetWeightMatrix()->set_all_weight(bkwdPassWtMtx);
+    nxt_lyr->set_all_transform_matrix_parameter(bkwdPassWtMtx);
 
     CpuAccelerator* cpuAcc = new CpuAccelerator(curr_lyr);
 

@@ -1,6 +1,6 @@
 #include "cpuAccelerator.h"
 
-CpuAccelerator::CpuAccelerator(nn_layer* pLayer):BaseAccelerator(pLayer)
+CpuAccelerator::CpuAccelerator(BaseLayer* pLayer):BaseAccelerator(pLayer)
 {
 }
 

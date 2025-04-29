@@ -3,17 +3,17 @@
 #include "nn_math.h"
 #include "baseLossFunction.h"
 
-class nn_layer;
+class BaseLayer;
 
 class BaseAccelerator{
 
 protected:
 
-    nn_layer* m_pLayer;
+    BaseLayer* m_pLayer;
 
 public:
 
-    BaseAccelerator(nn_layer* pLayer){}
+    BaseAccelerator(BaseLayer* pLayer){}
 
     virtual void do_forwardpass_dense_layer() = 0;
     virtual void do_backwardpass_dense_layer_output_layer(float* pfExpOut, BaseLossFunction* lossFunc) = 0;

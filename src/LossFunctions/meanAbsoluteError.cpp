@@ -1,9 +1,9 @@
 #include "meanAbsoluteError.h"
-#include "nn_layer.h"
+#include "baseLayer.h"
 #include <cmath>
 
 
-MeanAbsoluteError::MeanAbsoluteError(nn_layer* nn_lyr)
+MeanAbsoluteError::MeanAbsoluteError(BaseLayer* nn_lyr)
 {
     m_pLayer = nn_lyr;
     m_unOutputLyrSz = m_pLayer->get_num_nodes();

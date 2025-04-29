@@ -1,9 +1,9 @@
 #include "meanSquaredError.h"
-#include "nn_layer.h"
+#include "baseLayer.h"
 #include <cmath>
 #include <cstdio>
 
-MeanSquaredError::MeanSquaredError(nn_layer* nn_lyr)
+MeanSquaredError::MeanSquaredError(BaseLayer* nn_lyr)
 {
     m_pLayer = nn_lyr;
     m_unOutputLyrSz = m_pLayer->get_num_nodes();

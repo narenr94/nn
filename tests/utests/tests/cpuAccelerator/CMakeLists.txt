@@ -21,8 +21,7 @@ cpuAccelerator_outLayer_backwardpass_tests.cpp
 cpuAccelerator_backwardpass_tests.cpp)
 
 set(NN_SOURCES ${NN_SRC}/Accelerators/cpuAccelerator.cpp
-${NN_SRC}/nn_layer.cpp
-${NN_SRC}/nn_l2l_weight_matrix.cpp
+${NN_SRC}/Layers/denseLayer.cpp
 ${NN_SRC}/nn_math.cpp)
 
 set(ACT_SOURCES ${NN_SRC}/ActivationFunctions/sigmoidActFunc.cpp

@@ -6,10 +6,9 @@
 #include "KernelsOpencl/kernelTempDelta.h"
 #include "KernelsOpencl/kernelBwWtNodeProd.h"
 
-#include "nn_layer.h"
-#include "nn_l2l_weight_matrix.h"
+#include "baseLayer.h"
 
-OpenclAccelerator::OpenclAccelerator(nn_layer* pLayer):BaseAccelerator(pLayer)
+OpenclAccelerator::OpenclAccelerator(BaseLayer* pLayer):BaseAccelerator(pLayer)
 {
     m_pLayer = pLayer;
     // Set up OpenCL context, device, and queue
@@ -50,15 +49,13 @@ OpenclAccelerator::~OpenclAccelerator()
 
 void OpenclAccelerator::do_forwardpass_dense_layer()
 {
-    nn_layer* in_lyr = m_pLayer->GetPreviousLayer();
-    nn_layer* out_lyr = m_pLayer;
-
-    nn_l2l_weight_matrix* curr_mtx_ptr = m_pLayer->GetWeightMatrix();
+    BaseLayer* in_lyr = m_pLayer->GetPreviousLayer();
+    BaseLayer* out_lyr = m_pLayer;
 
     uint in_lyr_sz = in_lyr->get_num_nodes();
     uint out_lyr_sz = out_lyr->get_num_nodes();
 
-    const float * wtMtx = curr_mtx_ptr->getWtMtx();
+    const float * wtMtx = m_pLayer->get_transform_matrix();
 
     uint i = 0;
     uint j = 0;
@@ -161,7 +158,7 @@ void OpenclAccelerator::do_backwardpass_dense_layer()
 
     //[(unInIdx * m_pOutputLayer->get_num_nodes()) + unOutIdx]
 
-    const float * wtMtx = m_pLayer->GetWeightMatrix()->getWtMtx();
+    const float * wtMtx = m_pLayer->get_transform_matrix();
     uint out_lyr_sz = m_pLayer->GetNextLayer()->get_num_nodes();
     uint in_lyr_sz = m_pLayer->get_num_nodes();
     float* outLyrNodeDelta = new float[out_lyr_sz];

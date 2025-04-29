@@ -8,7 +8,7 @@ class TanhActFunc : public BaseActivationFunction
 
     public:
 
-        TanhActFunc(nn_layer* pNN_Layer){m_pNN_Layer = pNN_Layer;}
+        TanhActFunc(BaseLayer* pLayer){m_pLayer = pLayer;}
 
         void apply_act_func();
 

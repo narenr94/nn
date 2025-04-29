@@ -19,8 +19,7 @@ set(TEST_SOURCES    nn_core_tests_main.cpp
 	nn_core_tests.cpp)
 
 set(NN_SOURCES ${NN_SRC}/Accelerators/cpuAccelerator.cpp
-${NN_SRC}/nn_layer.cpp
-${NN_SRC}/nn_l2l_weight_matrix.cpp
+${NN_SRC}/Layers/denseLayer.cpp
 ${NN_SRC}/nn_math.cpp
 ${NN_SRC}/nn_core.cpp)
 

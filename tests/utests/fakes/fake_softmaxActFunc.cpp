@@ -1,6 +1,6 @@
 #include "softmaxActFunc.h"
 
-SoftmaxActFunc::SoftmaxActFunc(nn_layer* pNN_Layer)
+SoftmaxActFunc::SoftmaxActFunc(BaseLayer* pLayer)
 {
 }
 

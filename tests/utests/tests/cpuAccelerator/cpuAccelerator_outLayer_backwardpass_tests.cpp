@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include "cpuAccelerator.h"
-#include "nn_layer.h"
-#include "nn_l2l_weight_matrix.h"
+#include "denseLayer.h"
 #include <cmath>
 
 //Loss functions
@@ -14,7 +13,7 @@
 
 TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_MAE)
 {
-    nn_layer* curr_lyr = new nn_layer(5, eAct_func::TANH, 0.999f);
+    DenseLayer* curr_lyr = new DenseLayer(5, eAct_func::TANH, 0.999f);
     curr_lyr->SetPreviousNextLayers(nullptr, nullptr);
 
     float fExpOut[5] = {0.1f, 0.22f, 0.001f, 0.0f, 1.0f};
@@ -42,7 +41,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_MAE)
 
 TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_MSE)
 {
-    nn_layer* curr_lyr = new nn_layer(5, eAct_func::TANH, 0.999f);
+    DenseLayer* curr_lyr = new DenseLayer(5, eAct_func::TANH, 0.999f);
     curr_lyr->SetPreviousNextLayers(nullptr, nullptr);
 
     float fExpOut[5] = {0.1f, 0.22f, 0.001f, 0.0f, 1.0f};
@@ -70,7 +69,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_MSE)
 
 TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_HUBER)
 {
-    nn_layer* curr_lyr = new nn_layer(5, eAct_func::TANH, 0.999f);
+    DenseLayer* curr_lyr = new DenseLayer(5, eAct_func::TANH, 0.999f);
     curr_lyr->SetPreviousNextLayers(nullptr, nullptr);
 
     float fExpOut[5] = {0.1f, 0.22f, 0.001f, 0.0f, 1.0f};
@@ -98,7 +97,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_HUBER)
 
 TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_CCE)
 {
-    nn_layer* curr_lyr = new nn_layer(5, eAct_func::TANH, 0.999f);
+    DenseLayer* curr_lyr = new DenseLayer(5, eAct_func::TANH, 0.999f);
     curr_lyr->SetPreviousNextLayers(nullptr, nullptr);
 
     float fExpOut[5] = {1.0f, 0.0f, 1.0f, 0.0f, 0.0f};
@@ -126,7 +125,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_CCE)
 
 TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_BCE)
 {
-    nn_layer* curr_lyr = new nn_layer(1, eAct_func::SIGMOID, 0.999f);
+    DenseLayer* curr_lyr = new DenseLayer(1, eAct_func::SIGMOID, 0.999f);
     curr_lyr->SetPreviousNextLayers(nullptr, nullptr);
     BaseLossFunction* mae = new CompetitiveCrossEntropyLoss(curr_lyr);
 

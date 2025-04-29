@@ -7,7 +7,8 @@
 #include <thread>
 #include <cassert>
 #include "nn_math.h"
-#include "nn_l2l_weight_matrix.h"
+
+#include "baseLayer.h"
 
 #include "baseOptimizer.h"
 
@@ -80,7 +81,7 @@ class NeuralNet{
 
     
 
-    nn_layer** m_ppLys; //starting address of layers
+    BaseLayer** m_ppLys; //starting address of layers
 
     uint m_unNumLys; //total number of layers in NN, including input and output layer
 
@@ -149,7 +150,7 @@ class NeuralNet{
         @idx : index of matrix
         @values : list of values to populate
     */
-    bool populate_weights(uint unIdx, float* pfValues);
+    void populate_weights(uint unIdx, float* pfValues);
 
     /*
         populate_nodes() : populates nodes of particular layer with specific values and biases. Useful during initialization
@@ -229,9 +230,9 @@ class NeuralNet{
 
     void SaveNN(const char* fileName);   
 
-    nn_layer* GetLayer(uint idx);
+    BaseLayer* GetLayer(uint idx);
 
-    nn_l2l_weight_matrix* GetMatrix(uint idx);
+    const float* GetMatrix(uint idx);
 
     BaseLossFunction* GetLossFunc();
 

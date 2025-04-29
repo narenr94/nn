@@ -6,7 +6,7 @@
 class MeanAbsoluteError : public BaseLossFunction
 {
     public:
-    MeanAbsoluteError(nn_layer* nn_lyr);
+    MeanAbsoluteError(BaseLayer* nn_lyr);
 
     float apply_loss_func(float* fExpOut);
 

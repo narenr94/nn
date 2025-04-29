@@ -15,13 +15,13 @@ enum eLossFuncs{
     CCE //competitive cross entropy loss
 };
 
-class nn_layer; //forward declaration, class defined in nn_layer.h
+class BaseLayer; //forward declaration, class defined in baseLayer.h
 
 class BaseLossFunction{
 
 protected:
 
-    nn_layer* m_pLayer; //output layer
+    BaseLayer* m_pLayer; //output layer
 
     uint m_unOutputLyrSz; //output layer size
 
