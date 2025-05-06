@@ -78,12 +78,12 @@ class ADAMOPT : public BaseOptimizer
 
         void correct_biases();
 
-        void correct_weights();
+        void correct_transform_parameters();
 
     public:
         ADAMOPT(NeuralNet* nn, float beta1 = ADAM_DEFAULT_BETA1, float beta2 = ADAM_DEFAULT_BETA2,float epslion = ADAM_DEFAULT_EPSILON);
         
-        void correct_weights_biases();
+        void correct_transform_parameters_and_biases();
 
         ~ADAMOPT();
 };
