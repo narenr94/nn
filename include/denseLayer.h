@@ -143,8 +143,6 @@ class DenseLayer : public BaseLayer{
         @in_idx : input node index
         @out_idx : output node index
     */
-    float get_transform_matrix_parameter(uint in_idx, uint out_idx) override;
-
     float get_transform_matrix_parameter(uint Idx) override;
 
     /*

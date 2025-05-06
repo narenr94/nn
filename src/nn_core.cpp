@@ -405,7 +405,7 @@ bool NeuralNet::do_backward_pass(float* pfExpOut)
     }
     
 
-    m_pOptimizer->correct_weights_biases();
+    m_pOptimizer->correct_transform_parameters_and_biases();
 
     bRet = true;
 
@@ -579,7 +579,7 @@ uint NeuralNet::Train_batch(float** in, float** out, uint numIn)
 
     // apply_delats_to_weights_and_biases_batch_training(deltas);
        
-    m_pOptimizer->correct_weights_biases();
+    m_pOptimizer->correct_transform_parameters_and_biases();
     
     delete [] threads; 
     Release_Args(numIn);
@@ -752,13 +752,6 @@ void NeuralNet::SetWeight(uint MtxId, uint inIdx, uint outIdx, float val)
 {
     assert(MtxId > 0);
     m_ppLys[MtxId]->set_transform_matrix_parameter(inIdx, outIdx, val);
-}
-
-float NeuralNet::GetWeight(uint MtxID, uint inIdx, uint outIdx)
-{
-    assert(MtxID > 0);
-    
-    return m_ppLys[MtxID]->get_transform_matrix_parameter(inIdx, outIdx);
 }
 
 void NeuralNet::SaveNN(const char* fileName)

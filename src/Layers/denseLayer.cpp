@@ -304,19 +304,6 @@ void DenseLayer::set_all_transform_matrix_parameter(float* fWt)
     }
 }
 
-float DenseLayer::get_transform_matrix_parameter(uint unInIdx, uint unOutIdx)
-{
-    assert(m_bPrevNxtLyrsSet == true);
-    assert((unInIdx < m_pPrevLyr->get_num_nodes()) && (unOutIdx < get_num_nodes()));
-
-    float bRet = 0.0f;
-    
-    bRet = m_pfTransformParameters[(unInIdx * get_num_nodes()) + unOutIdx];
-
-    return bRet;
-
-}
-
 float DenseLayer::get_transform_matrix_parameter(uint Idx)
 {
     assert(m_bPrevNxtLyrsSet == true);

@@ -31,7 +31,8 @@ void CpuAccelerator::do_forwardpass_dense_layer()
     {
         for(i = 0; i < in_lyr_sz; i++)
         {
-            sigma += (m_pLayer->get_transform_matrix_parameter(i, j) * in_lyr->get_node_value_idx(i));
+            uint mtx_idx = (i * out_lyr_sz) + j;
+            sigma += (m_pLayer->get_transform_matrix_parameter(mtx_idx) * in_lyr->get_node_value_idx(i));
                         
         }
         sigma += out_lyr->get_node_bias_idx(j);
@@ -73,14 +74,18 @@ void CpuAccelerator::do_backwardpass_dense_layer()
 
     float * temp = new float[m_pLayer->get_num_nodes()];
 
-    for(j = 0; j < m_pLayer->get_num_nodes(); j++)
+    uint curr_mtx_sz = m_pLayer->get_num_nodes();
+    uint nxt_mtx_sz = m_pLayer->GetNextLayer()->get_num_nodes();
+
+    for(j = 0; j < curr_mtx_sz; j++)
     {
         temp[j] = 0.0f;
 
         // m_pLayer->GetNextLayer()
-        for(k = 0; k < m_pLayer->GetNextLayer()->get_num_nodes(); k++)
+        for(k = 0; k < nxt_mtx_sz; k++)
         {
-            temp[j] += m_pLayer->GetNextLayer()->get_node_delta_idx(k) * m_pLayer->GetNextLayer()->get_transform_matrix_parameter(j, k);
+            uint mtx_idx = (j * nxt_mtx_sz) + k;
+            temp[j] += m_pLayer->GetNextLayer()->get_node_delta_idx(k) * m_pLayer->GetNextLayer()->get_transform_matrix_parameter(mtx_idx);
         }
     }
         // temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));

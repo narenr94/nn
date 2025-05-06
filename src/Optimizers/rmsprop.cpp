@@ -62,7 +62,7 @@ void RMSProp::correct_biases()
     }
 }
 
-void RMSProp::correct_weights()
+void RMSProp::correct_transform_parameters()
 {
 
     uint i; //in layer index, out layer index is always in layer index + 1
@@ -85,7 +85,8 @@ void RMSProp::correct_weights()
 
                 delta_wt *= m_pNN->GetLearningRate();
 
-                m_pNN->SetWeight(i, j, k, (m_pNN->GetWeight(i, j, k) - (delta_wt/(std::sqrt(m_ppMtxRep[i - 1]->E_Val[eval_idx]) + m_fEpsilon))));
+                uint mtx_idx = (j * m_pNN->GetSzLayer(i)) + k;
+                m_pNN->SetWeight(i, j, k, (m_pNN->GetWeight(i, mtx_idx) - (delta_wt/(std::sqrt(m_ppMtxRep[i - 1]->E_Val[eval_idx]) + m_fEpsilon))));
             }
             
 
@@ -93,8 +94,8 @@ void RMSProp::correct_weights()
     }
 }
 
-void RMSProp::correct_weights_biases()
+void RMSProp::correct_transform_parameters_and_biases()
 {
-    correct_weights();
+    correct_transform_parameters();
     correct_biases();
 }

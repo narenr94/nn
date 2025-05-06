@@ -71,7 +71,7 @@ void ADAMOPT::correct_biases()
     }
 }
 
-void ADAMOPT::correct_weights()
+void ADAMOPT::correct_transform_parameters()
 {
 
     double m_hat;
@@ -95,7 +95,8 @@ void ADAMOPT::correct_weights()
                 m_ppMtxRep[i - 1]->V_Val[eval_idx] = (m_fBeta2 * m_ppMtxRep[i - 1]->V_Val[eval_idx]) + ((1.0f - m_fBeta2) * delta_wt * delta_wt);
                 m_hat = m_ppMtxRep[i - 1]->M_Val[eval_idx] / (1.0f - std::pow(m_fBeta1, m_unTimeStep));
                 v_hat = m_ppMtxRep[i - 1]->V_Val[eval_idx] / (1.0f - std::pow(m_fBeta2, m_unTimeStep));
-                m_pNN->SetWeight(i, j, k, (m_pNN->GetWeight(i, j, k) - ((m_pNN->GetLearningRate() * m_hat)/(std::sqrt(v_hat) + m_fEpsilon))));
+                uint mtx_idx = (j * m_pNN->GetSzLayer(i)) + k;
+                m_pNN->SetWeight(i, j, k, (m_pNN->GetWeight(i, mtx_idx) - ((m_pNN->GetLearningRate() * m_hat)/(std::sqrt(v_hat) + m_fEpsilon))));
                 
             }
             
@@ -104,10 +105,10 @@ void ADAMOPT::correct_weights()
     }
 }
 
-void ADAMOPT::correct_weights_biases()
+void ADAMOPT::correct_transform_parameters_and_biases()
 {
     m_unTimeStep++;
-    correct_weights();
+    correct_transform_parameters();
     correct_biases();   
 
 }

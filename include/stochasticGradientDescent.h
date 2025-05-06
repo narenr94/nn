@@ -9,13 +9,13 @@ class StochasticGradientDescent : public BaseOptimizer
     private:
         void correct_biases();
 
-        void correct_weights();
+        void correct_transform_parameters();
 
     public:
 
         StochasticGradientDescent(NeuralNet* nn){ m_pNN = nn;}
 
-        void correct_weights_biases();   
+        void correct_transform_parameters_and_biases();   
 
         ~StochasticGradientDescent(){}
 };

@@ -16,7 +16,7 @@ public:
 
     BaseOptimizer(){}
 
-    virtual void correct_weights_biases() = 0;
+    virtual void correct_transform_parameters_and_biases() = 0;
 
     virtual ~BaseOptimizer(){}
 

@@ -20,7 +20,7 @@ void StochasticGradientDescent::correct_biases()
     
 }
 
-void StochasticGradientDescent::correct_weights()
+void StochasticGradientDescent::correct_transform_parameters()
 {
     uint i; //in layer index, out layer index is always in layer index + 1
     uint j; //in layer node index
@@ -36,16 +36,17 @@ void StochasticGradientDescent::correct_weights()
             {
                 delta_wt = m_pNN->GetDelta(i, k) * m_pNN->GetNodeVal(i - 1, j);
                 delta_wt *= m_pNN->GetLearningRate();
-                m_pNN->SetWeight(i, j, k, (m_pNN->GetWeight(i, j, k) - delta_wt));
+                uint mtx_idx = (j * m_pNN->GetSzLayer(i)) + k;
+                m_pNN->SetWeight(i, j, k, (m_pNN->GetWeight(i, mtx_idx) - delta_wt));
             }            
 
         }
     }
 }
 
-void StochasticGradientDescent::correct_weights_biases()
+void StochasticGradientDescent::correct_transform_parameters_and_biases()
 {
-    correct_weights();
+    correct_transform_parameters();
     correct_biases();
 }
 

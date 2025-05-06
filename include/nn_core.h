@@ -216,8 +216,6 @@ class NeuralNet{
 
     float GetWeight(uint MtxID, uint Idx);
 
-    float GetWeight(uint MtxID, uint inIdx, uint outIdx);
-
     void SetBias(uint LayerID, uint NodeID, float val);
 
     float GetLearningRate();

@@ -186,8 +186,6 @@ public:
         @in_idx : input node index
         @out_idx : output node index
     */
-    virtual float get_transform_matrix_parameter(uint in_idx, uint out_idx) = 0;
-
     virtual float get_transform_matrix_parameter(uint Idx) = 0;
 
     /*
