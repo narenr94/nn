@@ -162,30 +162,12 @@ public:
 
     //---------- Transform Parameters APIs------------
 
-    /*
-        set_weight() : sets weight of connection between particulat input and output node
-
-        @in_idx : input node index
-        @out_idx : output node index
-        @wt : value of weight
-    */
     virtual void set_transform_matrix_parameter(uint in_idx, uint out_idx, float wt) = 0;
 
     virtual void set_transform_matrix_parameter(uint Idx, float fWt) = 0;
 
-    /*
-        set_all_weight() : sets all weight in matrix
-
-        @wt : array of values of weights
-    */
     virtual void set_all_transform_matrix_parameter(float* wt) = 0;
 
-    /*
-        get_weight() : gets weight of connection between particulat input and output node
-
-        @in_idx : input node index
-        @out_idx : output node index
-    */
     virtual float get_transform_matrix_parameter(uint Idx) = 0;
 
     /*
@@ -193,9 +175,6 @@ public:
     */
     virtual uint get_transform_matrix_parameter_size() = 0;
 
-    /*
-        populate_transform_matrix_parameter_with_random_numbers() : assign random numbers to weights
-    */
     virtual void populate_transform_matrix_parameter_with_random_numbers() = 0;
 
     //---------- Transform Parameters APIs------------

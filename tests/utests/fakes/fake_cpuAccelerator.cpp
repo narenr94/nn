@@ -12,10 +12,14 @@ void CpuAccelerator::do_forwardpass_dense_layer()
 {
 }
 
-void CpuAccelerator::do_backwardpass_dense_layer_output_layer(float* pfExpOut, BaseLossFunction* lossFunc)
+void CpuAccelerator::do_backwardpass_from_output_layer(float* pfExpOut, BaseLossFunction* lossFunc)
 {
 }
 
 void CpuAccelerator::do_backwardpass_dense_layer()
+{
+}
+
+void CpuAccelerator::do_forwardpass_conv_layer(uint input_rows, uint input_columns, uint filter_rows, uint filter_columns)
 {
 }

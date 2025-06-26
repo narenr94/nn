@@ -15,20 +15,15 @@ public:
 
     BaseAccelerator(BaseLayer* pLayer){}
 
+    //dense layer
     virtual void do_forwardpass_dense_layer() = 0;
-    virtual void do_backwardpass_dense_layer_output_layer(float* pfExpOut, BaseLossFunction* lossFunc) = 0;
+    virtual void do_backwardpass_from_output_layer(float* pfExpOut, BaseLossFunction* lossFunc) = 0;
     virtual void do_backwardpass_dense_layer() = 0;
 
-    /*todo:
+    //convolution layer
+    virtual void do_forwardpass_conv_layer(uint input_rows, uint input_columns, uint filter_rows, uint filter_columns) = 0;
 
-        out_lyr->apply_act_func_all_nodes();
-        m_pOptimizer->correct_weights_biases();
-
-        //batch processing stuff
-        
-    */ 
-
-   virtual ~BaseAccelerator(){}
+    virtual ~BaseAccelerator(){}
 
 };
 #endif

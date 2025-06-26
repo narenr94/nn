@@ -1,5 +1,5 @@
-#ifndef DenseLayer_H
-#define DenseLayer_H
+#ifndef ConvLayer_H
+#define ConvLayer_H
 
 #include "baseLayer.h"
 
@@ -8,24 +8,28 @@
 #define RAND_MAX_PARAMETER_BIAS 9
 
 
-class DenseLayer : public BaseLayer{
+class ConvLayer : public BaseLayer{
 
-    
-
+    uint m_unInputRows;
+    uint m_unInputColumns;
+    uint m_unOutputRows;
+    uint m_unOutputColumns;
+    uint m_unKernelRows;
+    uint m_unKernelColumns;
     
     public:
 
     /*
-        DenseLayer() : constructor for layer
+        ConvLayer() : constructor for layer
         @n_nodes : number of nodes in layer
         @prevLyr : pointer to previous layer, nullptr for input layer
     */
-    DenseLayer(uint n_nodes, eAct_func eActFunc, float actParam1);
+    ConvLayer(uint in_row, uint in_col, uint out_row, uint out_col, eAct_func eActFunc, float actParam1);
 
     /*
-        ~DenseLayer() : destruct and frees layer resources
+        ~ConvLayer() : destruct and frees layer resources
     */
-    ~DenseLayer();
+    ~ConvLayer();
 
     eAct_func get_act_func() override;
 
