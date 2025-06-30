@@ -19,6 +19,8 @@
 
 DenseLayer::DenseLayer(uint unNumNodesnodes, eAct_func eActFunc, float actParam1):BaseLayer(unNumNodesnodes, eActFunc, actParam1)
 {
+    m_layer_type = eLayer_type::DENSE;
+
     m_unNumNodes = unNumNodesnodes;
 
     m_eActFunc = eActFunc;
@@ -270,12 +272,6 @@ void DenseLayer::do_backwardpass_to_previous_layer_output_layer(float* fExpOut, 
     m_pAccelerator->do_backwardpass_from_output_layer(fExpOut, lossFunc);
 }
 
-void DenseLayer::do_backwardpass_to_previous_layer()
-{
-    assert(m_bPrevNxtLyrsSet == true);
-    m_pAccelerator->do_backwardpass_dense_layer();
-}
-
 void DenseLayer::set_transform_matrix_parameter(uint unInIdx, uint unOutIdx, float fWt)
 {
     assert(m_bPrevNxtLyrsSet == true);
@@ -339,4 +335,7 @@ void DenseLayer::populate_transform_matrix_parameter_with_random_numbers()
     }
 }
 
-
+eLayer_type DenseLayer::get_layer_type()
+{
+    return m_layer_type;
+}

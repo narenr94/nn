@@ -3,20 +3,10 @@
 
 #include "baseLayer.h"
 
-#define RAND_MIN_PARAMETER_BIAS 1
-
-#define RAND_MAX_PARAMETER_BIAS 9
-
 
 class ConvLayer : public BaseLayer{
 
-    uint m_unInputRows;
-    uint m_unInputColumns;
-    uint m_unOutputRows;
-    uint m_unOutputColumns;
-    uint m_unKernelRows;
-    uint m_unKernelColumns;
-    
+     
     public:
 
     /*
@@ -38,6 +28,8 @@ class ConvLayer : public BaseLayer{
     void apply_act_func_all_nodes() override;
     
     void get_delta_all_nodes(float * fVal) override;
+
+    eLayer_type get_layer_type() override;
 
     /*
         get_num_nodes() : returns total number of nodes in layer
@@ -118,8 +110,6 @@ class ConvLayer : public BaseLayer{
     BaseLayer* GetNextLayer() override;
 
     void do_forwardpass_to_current_layer() override;
-
-    void do_backwardpass_to_previous_layer() override;
 
     void do_backwardpass_to_previous_layer_output_layer(float* fExpOut, BaseLossFunction* lossFunc) override;
 

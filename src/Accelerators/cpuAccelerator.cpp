@@ -88,7 +88,7 @@ void CpuAccelerator::do_backwardpass_dense_layer()
             temp[j] += m_pLayer->GetNextLayer()->get_node_delta_idx(k) * m_pLayer->GetNextLayer()->get_transform_matrix_parameter(mtx_idx);
         }
     }
-        // temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
+    // temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
     m_pLayer->get_delta_all_nodes(temp);
     for(j = 0; j < m_pLayer->get_num_nodes(); j++)
     {
@@ -129,4 +129,56 @@ void CpuAccelerator::do_forwardpass_conv_layer(uint input_rows, uint input_colum
 
     //apply activation function
     m_pLayer->apply_act_func_all_nodes();
+}
+
+void CpuAccelerator::do_backwardpass_conv_layer(uint input_rows, uint input_columns, uint filter_rows, uint filter_columns)
+{
+    float * temp = new float[m_pLayer->get_num_nodes()];
+
+    uint out_rows = input_rows - filter_rows + 1;
+    uint out_columns = input_columns - filter_columns + 1;
+
+    uint p = 0; //out_rows
+    uint q = 0; //out_columns
+
+    uint m = 0; //filter_rows
+    uint n = 0; //filter_columns
+
+    uint rm = 0;
+    uint rn = 0;
+    uint rot_filter_idx = 0;
+
+
+    float next_lyr_idx = 0.0f;
+    float filter_idx = 0.0f;
+
+    for (p = 0; p < out_rows; ++p) 
+    {
+        for (q = 0; q < out_columns; ++q) 
+        {
+            for (m = 0; m < filter_rows; ++m) 
+            {
+                for (n = 0; n < filter_columns; ++n) 
+                {
+                    // dX[p + m][q + n] += dOut[p][q] * kernel[m][n];
+
+                    next_lyr_idx = (p * out_columns) + q;
+                    // compute rotated indices
+                    rm = filter_rows  - 1 - m;
+                    rn = filter_columns  - 1 - n;
+                    rot_filter_idx = rm * filter_columns + rn;
+
+                    temp[((p + m) * input_columns) + (q + n)] += m_pLayer->GetNextLayer()->get_node_delta_idx(next_lyr_idx) * m_pLayer->GetNextLayer()->get_transform_matrix_parameter(rot_filter_idx);
+                }
+            }
+        }
+    }
+
+    m_pLayer->get_delta_all_nodes(temp);
+    for(uint j = 0; j < m_pLayer->get_num_nodes(); j++)
+    {
+        m_pLayer->set_node_delta(temp[j], j);
+    }
+
+    delete [] temp;
 }

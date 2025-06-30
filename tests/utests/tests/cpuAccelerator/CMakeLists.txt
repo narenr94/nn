@@ -21,6 +21,7 @@ cpuAccelerator_outLayer_backwardpass_tests.cpp
 cpuAccelerator_backwardpass_tests.cpp)
 
 set(NN_SOURCES ${NN_SRC}/Accelerators/cpuAccelerator.cpp
+${NN_SRC}/Layers/baseLayer.cpp
 ${NN_SRC}/Layers/denseLayer.cpp
 ${NN_SRC}/Layers/convLayer.cpp
 ${NN_SRC}/nn_math.cpp)

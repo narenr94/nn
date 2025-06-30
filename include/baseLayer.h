@@ -5,6 +5,10 @@
 #include "baseActivationFunction.h"
 #include "baseLossFunction.h"
 
+#define RAND_MIN_PARAMETER_BIAS 1
+
+#define RAND_MAX_PARAMETER_BIAS 9
+
 /*
     list of activation functions
     Note: keep TANH at last to keep test scripts intact
@@ -15,6 +19,15 @@ enum eAct_func{
     LEAKY_RELU,
     SOFTMAX,
     TANH    
+};
+
+/*
+    list of layer type
+    Note: keep DENSE at last to keep test scripts intact
+*/
+enum eLayer_type{
+    CONV,
+    DENSE
 };
 
 class BaseAccelerator; //Forward Declaration
@@ -28,6 +41,15 @@ protected:
     float* m_pfBiases; //value of bias
     float* m_pfDeltas; //delta value of node , used for back propogation
 
+
+    //dimentions
+    uint m_unInputRows;
+    uint m_unInputColumns;
+    uint m_unOutputRows;
+    uint m_unOutputColumns;
+    uint m_unTransformParametersRows;
+    uint m_unTransformParametersColumns;
+ 
     //end of node stuff
 
     uint m_unNumNodes; //total number of nodes
@@ -49,6 +71,7 @@ protected:
 
     uint m_unTransformMatrixSize;
 
+    eLayer_type m_layer_type;
 
 
 public:
@@ -60,7 +83,9 @@ public:
     m_bPrevNxtLyrsSet(false),
     m_pfValues(nullptr),
     m_pfBiases(nullptr),
-    m_pfDeltas(nullptr){}
+    m_pfDeltas(nullptr),
+    m_unTransformParametersColumns(0),
+    m_unTransformParametersRows(0){}
 
     virtual ~BaseLayer(){}
 
@@ -73,6 +98,8 @@ public:
     virtual void apply_act_func_all_nodes() = 0;
     
     virtual void get_delta_all_nodes(float * fVal) = 0;
+
+    virtual eLayer_type get_layer_type() = 0;
 
     /*
         get_num_nodes() : returns total number of nodes in layer
@@ -154,7 +181,7 @@ public:
 
     virtual void do_forwardpass_to_current_layer() = 0;
 
-    virtual void do_backwardpass_to_previous_layer() = 0;
+    void do_backwardpass_to_previous_layer();
 
     virtual void do_backwardpass_to_previous_layer_output_layer(float* fExpOut, BaseLossFunction* lossFunc) = 0;
 

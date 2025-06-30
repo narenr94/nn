@@ -26,7 +26,8 @@ ${UTESTS_ROOT}/fakes/fake_reluActFunc.cpp
 ${UTESTS_ROOT}/fakes/fake_softmaxActFunc.cpp
 ${UTESTS_ROOT}/fakes/fake_tanhActFunc.cpp
 ${UTESTS_ROOT}/fakes/fake_cpuAccelerator.cpp
-${UTESTS_ROOT}/fakes/fake_nn_math.cpp)
+${UTESTS_ROOT}/fakes/fake_nn_math.cpp
+${UTESTS_ROOT}/fakes/fake_baseLayer.cpp)
 
 add_executable(${EXEC_NAME}	${FAKE_SOURCES} ${TEST_SOURCES}	${NN_SOURCES})
 

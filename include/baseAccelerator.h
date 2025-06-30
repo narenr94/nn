@@ -22,6 +22,7 @@ public:
 
     //convolution layer
     virtual void do_forwardpass_conv_layer(uint input_rows, uint input_columns, uint filter_rows, uint filter_columns) = 0;
+    virtual void do_backwardpass_conv_layer(uint input_rows, uint input_columns, uint filter_rows, uint filter_columns) = 0;
 
     virtual ~BaseAccelerator(){}
 
