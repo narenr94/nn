@@ -14,7 +14,7 @@ class ConvLayer : public BaseLayer{
         @n_nodes : number of nodes in layer
         @prevLyr : pointer to previous layer, nullptr for input layer
     */
-    ConvLayer(uint in_row, uint in_col, uint out_row, uint out_col, eAct_func eActFunc, float actParam1);
+    ConvLayer(uint in_row, uint in_col, uint filter_row, uint filter_col, eAct_func eActFunc, float actParam1);
 
     /*
         ~ConvLayer() : destruct and frees layer resources

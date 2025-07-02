@@ -239,7 +239,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_softmax_test)
 TEST(CPU_ACC_TESTS, cpuAccelerator_conv_backwardpass_leakyRelu_test)
 {
     DenseLayer* prev_lyr = new DenseLayer(36, eAct_func::TANH, 0.999f);
-    ConvLayer* curr_lyr = new ConvLayer(6, 6, 4, 4, eAct_func::LEAKY_RELU, 0.01f);
+    ConvLayer* curr_lyr = new ConvLayer(6, 6, 3, 3, eAct_func::LEAKY_RELU, 0.01f);
     DenseLayer* nxt_lyr = new DenseLayer(2, eAct_func::TANH, 0.999f);
 
     float curr_delta[16] = {0.1f, 0.1f, 0.1f, 0.1f,

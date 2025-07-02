@@ -30,6 +30,29 @@ enum eLayer_type{
     DENSE
 };
 
+struct sLayer_Dimensions{
+
+    uint unInputRows;
+    uint unInputColumns;
+    uint unOutputRows;
+    uint unOutputColumns;
+    uint unTransformParametersRows;
+    uint unTransformParametersColumns;
+    uint unNoTransformParameterMtx;
+
+    sLayer_Dimensions(uint in_rows, uint in_columns, uint out_rows, uint out_cols, uint trans_rows, uint trans_cols, uint no_trans_mtx)
+    {
+        unInputRows = in_rows;
+        unInputColumns = in_columns;
+        unOutputRows = out_rows;
+        unOutputColumns = out_cols;
+        unTransformParametersRows = trans_rows;
+        unTransformParametersColumns = trans_cols;
+        unNoTransformParameterMtx = no_trans_mtx;
+    }
+
+};
+
 class BaseAccelerator; //Forward Declaration
 
 class BaseLayer{
@@ -43,12 +66,7 @@ protected:
 
 
     //dimentions
-    uint m_unInputRows;
-    uint m_unInputColumns;
-    uint m_unOutputRows;
-    uint m_unOutputColumns;
-    uint m_unTransformParametersRows;
-    uint m_unTransformParametersColumns;
+    sLayer_Dimensions m_Dimensions;
  
     //end of node stuff
 
@@ -84,8 +102,7 @@ public:
     m_pfValues(nullptr),
     m_pfBiases(nullptr),
     m_pfDeltas(nullptr),
-    m_unTransformParametersColumns(0),
-    m_unTransformParametersRows(0){}
+    m_Dimensions(0,0,0,0,0,0,0){}
 
     virtual ~BaseLayer(){}
 
@@ -100,6 +117,8 @@ public:
     virtual void get_delta_all_nodes(float * fVal) = 0;
 
     virtual eLayer_type get_layer_type() = 0;
+
+    sLayer_Dimensions get_layer_dimensions();
 
     /*
         get_num_nodes() : returns total number of nodes in layer

@@ -14,6 +14,8 @@
 
 #include "baseLossFunction.h"
 
+#include <vector>
+
 
 
 
@@ -37,8 +39,9 @@ enum eOptimizers{
 struct nnInitData{
 
     uint unNoLys = 0;
-    uint* unSzLys = nullptr;
-    eAct_func *eAct_Funcs;
+    std::vector<sLayer_Dimensions> layer_dimensions;
+    std::vector<eAct_func> eAct_Funcs;
+    std::vector<eLayer_type> e_layer_type;
     float fLearningRate = 0.5f;
     uint ID = 0;
     eOptimizers eOpt = eOptimizers::SGD;
@@ -46,32 +49,21 @@ struct nnInitData{
     float optParam1 = 0.0f; //RMS_PROP : beta, ADAM : beta1
     float optParam2 = 0.0f; //RMS_PROP : epsilon, ADAM : beta2
     float optParam3 = 0.0f; //ADAM : epsilon
-    float* actParam1; //LEAKY_RELU : delta
+    std::vector<float>actParam1; //LEAKY_RELU : delta
     float lossParam1 = 0.0f; //HUBER : delta
     //ToDo: parameters for actFunc and Optimizers
     
     nnInitData(uint NumLys)
     {
         unNoLys = NumLys;
-        unSzLys = new uint [NumLys];
-        eAct_Funcs = new eAct_func[NumLys];
-        actParam1 = new float[NumLys];
-
-        //initialize
-        for(uint i = 0; i < NumLys; i++)
-        {
-            unSzLys[i] = 0;
-            eAct_Funcs[i] = eAct_func::TANH;
-            actParam1[i] = 0.0f;
-        }
-
+        layer_dimensions.reserve(unNoLys);
+        eAct_Funcs.reserve(unNoLys);
+        e_layer_type.reserve(unNoLys);
+        actParam1.reserve(unNoLys);
     };
 
     ~nnInitData()
     {
-        delete [] unSzLys;
-        delete [] eAct_Funcs;
-        delete [] actParam1;
     }
 
 };
@@ -234,6 +226,8 @@ class NeuralNet{
 
     BaseLossFunction* GetLossFunc();
 
+    eLayer_type get_layer_type(uint idx);
+
 
 
 
@@ -255,9 +249,13 @@ class NeuralNet{
 
     void Set_Init_Data(nnInitData* other_initData);
 
-    void SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, float* actParam1, float lossParam);
+    void SetupLayersAndWeightMatrices(std::vector<eLayer_type>& layer_types, std::vector<sLayer_Dimensions>& dims, std::vector<eAct_func>& actFuncs, std::vector<float>& actParam1, float lossParam);
 
     void MergeBiasAndWeights(uint i);
+
+    void setup_dense_layer(uint layer_idx, uint out_sz, eAct_func act_func, float actParam);
+
+    void setup_conv_layer(uint layer_idx, uint input_rows, uint input_columns, uint kernel_rows, uint kernel_columns, eAct_func act_func, float actParam);
 
     
 };

@@ -18,6 +18,12 @@ class StochasticGradientDescent : public BaseOptimizer
         void correct_transform_parameters_and_biases();   
 
         ~StochasticGradientDescent(){}
+
+    private:
+    
+        void correct_transform_parameters_dense(uint curr_lyr_idx) override;
+
+        void correct_transform_parameters_conv(uint curr_lyr_idx) override;
 };
 
 

@@ -6,6 +6,8 @@
 #include "nn_utils.h"
 #include <chrono>
 
+#include "setup_layer_info.h"
+
 #define BUFF_SIZE 3500 //buffer size for line of mnist data
 #define TRAIN_MAX 60000 //max number of lines in training set
 #define TEST_MAX 10000 //max number of lines in testing set
@@ -95,9 +97,12 @@ int main()
     */
 
     initData->unNoLys = 4;
+
+    set_layer_info(sz, initData->unNoLys, initData);
+
     for(uint l = 0; l < initData->unNoLys; l++)
     {
-        initData->unSzLys[l] = sz[l];
+        initData->e_layer_type[l] = eLayer_type::DENSE;
         initData->eAct_Funcs[l] = actFuncs[l];
     }
     initData->eOpt = eOptimizers::SGD;

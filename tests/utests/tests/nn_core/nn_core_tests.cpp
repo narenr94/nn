@@ -17,10 +17,38 @@ TEST(NN_CORE_TESTS, nn_core_setup_test)
     uint sz[4] = {2,3,2};
     nnInitData * initData = new nnInitData(3); 
     initData->unNoLys = 3;
+
+    //input layer
+    initData->layer_dimensions[0].unInputColumns = 0;
+    initData->layer_dimensions[0].unInputRows = 0;
+    initData->layer_dimensions[0].unNoTransformParameterMtx = 0;
+    initData->layer_dimensions[0].unOutputColumns = 2;
+    initData->layer_dimensions[0].unOutputRows = 1;
+    initData->layer_dimensions[0].unTransformParametersColumns = 0;
+    initData->layer_dimensions[0].unTransformParametersRows = 0;
+
+    //hidden layer
+    initData->layer_dimensions[1].unInputColumns = 2;
+    initData->layer_dimensions[1].unInputRows = 1;
+    initData->layer_dimensions[1].unNoTransformParameterMtx = 1;
+    initData->layer_dimensions[1].unOutputColumns = 3;
+    initData->layer_dimensions[1].unOutputRows = 1;
+    initData->layer_dimensions[1].unTransformParametersColumns = 3;
+    initData->layer_dimensions[1].unTransformParametersRows = 2;
+
+    //output layer
+    initData->layer_dimensions[2].unInputColumns = 3;
+    initData->layer_dimensions[2].unInputRows = 1;
+    initData->layer_dimensions[2].unNoTransformParameterMtx = 1;
+    initData->layer_dimensions[2].unOutputColumns = 2;
+    initData->layer_dimensions[2].unOutputRows = 1;
+    initData->layer_dimensions[2].unTransformParametersColumns = 2;
+    initData->layer_dimensions[2].unTransformParametersRows = 3;
+
     for(uint l = 0; l < initData->unNoLys; l++)
     {
-        initData->unSzLys[l] = sz[l];
         initData->eAct_Funcs[l] = eAct_func::TANH;
+        initData->e_layer_type[l] = eLayer_type::DENSE;
     }
     initData->eOpt = eOptimizers::SGD;
     initData->eLossFunc = eLossFuncs::HUBER;
@@ -38,7 +66,7 @@ TEST(NN_CORE_TESTS, nn_core_setup_test)
     EXPECT_EQ(nn->GetLearningRate(), 0.01f);
     for(uint i = 0; i < initData->unNoLys; i++)
     {
-        EXPECT_EQ(nn->GetSzLayer(i), initData->unSzLys[i]);
+        EXPECT_EQ(nn->GetSzLayer(i), initData->layer_dimensions[i].unOutputColumns * initData->layer_dimensions[i].unOutputRows);
     }
 
     for(uint i = 0; i < 2; i++)
@@ -80,9 +108,37 @@ TEST(NN_CORE_TESTS, nn_core_testrun_test)
     uint sz[4] = {2,3,2};
     nnInitData * initData = new nnInitData(3); 
     initData->unNoLys = 3;
+
+    //input layer
+    initData->layer_dimensions[0].unInputColumns = 0;
+    initData->layer_dimensions[0].unInputRows = 0;
+    initData->layer_dimensions[0].unNoTransformParameterMtx = 0;
+    initData->layer_dimensions[0].unOutputColumns = 2;
+    initData->layer_dimensions[0].unOutputRows = 1;
+    initData->layer_dimensions[0].unTransformParametersColumns = 0;
+    initData->layer_dimensions[0].unTransformParametersRows = 0;
+
+    //hidden layer
+    initData->layer_dimensions[1].unInputColumns = 2;
+    initData->layer_dimensions[1].unInputRows = 1;
+    initData->layer_dimensions[1].unNoTransformParameterMtx = 1;
+    initData->layer_dimensions[1].unOutputColumns = 3;
+    initData->layer_dimensions[1].unOutputRows = 1;
+    initData->layer_dimensions[1].unTransformParametersColumns = 3;
+    initData->layer_dimensions[1].unTransformParametersRows = 2;
+
+    //output layer
+    initData->layer_dimensions[2].unInputColumns = 3;
+    initData->layer_dimensions[2].unInputRows = 1;
+    initData->layer_dimensions[2].unNoTransformParameterMtx = 1;
+    initData->layer_dimensions[2].unOutputColumns = 2;
+    initData->layer_dimensions[2].unOutputRows = 1;
+    initData->layer_dimensions[2].unTransformParametersColumns = 2;
+    initData->layer_dimensions[2].unTransformParametersRows = 3;
+
     for(uint l = 0; l < initData->unNoLys; l++)
     {
-        initData->unSzLys[l] = sz[l];
+        initData->e_layer_type[l] = eLayer_type::DENSE;
         initData->eAct_Funcs[l] = eAct_func::TANH;
     }
     initData->eOpt = eOptimizers::SGD;
@@ -128,9 +184,37 @@ TEST(NN_CORE_TESTS, nn_core_trainrun_test)
     uint sz[4] = {2,3,2};
     nnInitData * initData = new nnInitData(3); 
     initData->unNoLys = 3;
+
+        //input layer
+    initData->layer_dimensions[0].unInputColumns = 0;
+    initData->layer_dimensions[0].unInputRows = 0;
+    initData->layer_dimensions[0].unNoTransformParameterMtx = 0;
+    initData->layer_dimensions[0].unOutputColumns = 2;
+    initData->layer_dimensions[0].unOutputRows = 1;
+    initData->layer_dimensions[0].unTransformParametersColumns = 0;
+    initData->layer_dimensions[0].unTransformParametersRows = 0;
+
+    //hidden layer
+    initData->layer_dimensions[1].unInputColumns = 2;
+    initData->layer_dimensions[1].unInputRows = 1;
+    initData->layer_dimensions[1].unNoTransformParameterMtx = 1;
+    initData->layer_dimensions[1].unOutputColumns = 3;
+    initData->layer_dimensions[1].unOutputRows = 1;
+    initData->layer_dimensions[1].unTransformParametersColumns = 3;
+    initData->layer_dimensions[1].unTransformParametersRows = 2;
+
+    //output layer
+    initData->layer_dimensions[2].unInputColumns = 3;
+    initData->layer_dimensions[2].unInputRows = 1;
+    initData->layer_dimensions[2].unNoTransformParameterMtx = 1;
+    initData->layer_dimensions[2].unOutputColumns = 2;
+    initData->layer_dimensions[2].unOutputRows = 1;
+    initData->layer_dimensions[2].unTransformParametersColumns = 2;
+    initData->layer_dimensions[2].unTransformParametersRows = 3;
+
     for(uint l = 0; l < initData->unNoLys; l++)
     {
-        initData->unSzLys[l] = sz[l];
+        initData->e_layer_type[l] = eLayer_type::DENSE;
         initData->eAct_Funcs[l] = eAct_func::TANH;
     }
     initData->eOpt = eOptimizers::SGD;

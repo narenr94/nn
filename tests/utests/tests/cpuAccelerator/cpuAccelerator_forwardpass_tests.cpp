@@ -194,7 +194,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_forwardpass_tanh_test)
 TEST(CPU_ACC_TESTS, cpuAccelerator_conv_forwardpass_leakyrelu_test)
 {
     DenseLayer* prev_lyr = new DenseLayer(36, eAct_func::LEAKY_RELU, 0.01f);
-    ConvLayer* curr_lyr = new ConvLayer(6, 6, 4, 4, eAct_func::LEAKY_RELU, 0.01f);
+    ConvLayer* curr_lyr = new ConvLayer(6, 6, 3, 3, eAct_func::LEAKY_RELU, 0.01f);
     DenseLayer* nxt_lyr = new DenseLayer(2, eAct_func::LEAKY_RELU, 0.01f);
 
     float prev_in[36] = {0.5f, 0.2f, 0.1f, 0.11f, 0.4f, 0.26f,

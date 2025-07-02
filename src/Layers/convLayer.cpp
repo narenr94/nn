@@ -18,28 +18,28 @@
 
 #include <cstdio>
 
-ConvLayer::ConvLayer(uint in_row, uint in_col, uint out_row, uint out_col, eAct_func eActFunc, float actParam1):BaseLayer((out_row * out_col), eActFunc, actParam1)
+ConvLayer::ConvLayer(uint in_row, uint in_col, uint filter_row, uint filter_col, eAct_func eActFunc, float actParam1):BaseLayer((((1 + in_row) - filter_row) * ((1 + in_col) - filter_col)), eActFunc, actParam1)
 {
     assert((in_row > 0) && (in_col > 0));
 
-    assert((in_row * in_col) > (out_col * out_row));
+    assert((in_row * in_col) > (((1 + in_row) - filter_row) * ((1 + in_col) - filter_col)));
 
     m_layer_type = eLayer_type::CONV;
 
-    m_unOutputRows = out_row;
-    m_unOutputColumns = out_col;
+    m_Dimensions.unInputRows = in_row;
+    m_Dimensions.unInputColumns = in_col;
 
-    m_unInputRows = in_row;
-    m_unInputColumns = in_col;
+    m_Dimensions.unOutputRows = (1 + m_Dimensions.unInputRows) - filter_row;
+    m_Dimensions.unOutputColumns = (1 + m_Dimensions.unInputColumns) - filter_col;
 
-    m_unNumNodes = out_col * out_row;
+    m_unNumNodes = m_Dimensions.unOutputRows * m_Dimensions.unOutputColumns;
 
     m_eActFunc = eActFunc;
     m_actParam1 = actParam1;
 
     //filter = (1 + in) - out
-    m_unTransformParametersRows = (1 + m_unInputRows) - m_unOutputRows;
-    m_unTransformParametersColumns = (1 + m_unInputColumns) - m_unOutputColumns;
+    m_Dimensions.unTransformParametersRows = filter_row;
+    m_Dimensions.unTransformParametersColumns = filter_col;
 
     m_pfValues = new float[m_unNumNodes];
     m_pfBiases = new float[m_unNumNodes];
@@ -257,8 +257,8 @@ void ConvLayer::SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr)
 
     if(m_pPrevLyr)
     {
-        assert(m_pPrevLyr->get_num_nodes() == (m_unInputRows * m_unInputColumns));
-        m_unTransformMatrixSize = m_unTransformParametersRows * m_unTransformParametersColumns;
+        assert(m_pPrevLyr->get_num_nodes() == (m_Dimensions.unInputRows * m_Dimensions.unInputColumns));
+        m_unTransformMatrixSize = m_Dimensions.unTransformParametersRows * m_Dimensions.unTransformParametersColumns;
         m_pfTransformParameters = new float[m_unTransformMatrixSize];
     }
 
@@ -278,7 +278,7 @@ BaseLayer* ConvLayer::GetNextLayer()
 void ConvLayer::do_forwardpass_to_current_layer()
 {
     assert(m_bPrevNxtLyrsSet == true);
-    m_pAccelerator->do_forwardpass_conv_layer(m_unInputRows, m_unInputColumns, m_unTransformParametersRows, m_unTransformParametersColumns);
+    m_pAccelerator->do_forwardpass_conv_layer(m_Dimensions.unInputRows, m_Dimensions.unInputColumns, m_Dimensions.unTransformParametersRows, m_Dimensions.unTransformParametersColumns);
 }
 
 void ConvLayer::do_backwardpass_to_previous_layer_output_layer(float* fExpOut, BaseLossFunction* lossFunc)
@@ -312,11 +312,11 @@ void ConvLayer::set_all_transform_matrix_parameter(float* fWt)
     assert(m_bPrevNxtLyrsSet == true);
     uint i = 0;
     uint j = 0;
-    for(i = 0; i < m_unTransformParametersRows; i++)
+    for(i = 0; i < m_Dimensions.unTransformParametersRows; i++)
     {
-        for(j = 0; j < m_unTransformParametersColumns; j++)
+        for(j = 0; j < m_Dimensions.unTransformParametersColumns; j++)
         {
-            m_pfTransformParameters[(i * m_unTransformParametersColumns) + j] = fWt[(i * m_unTransformParametersColumns) + j];
+            m_pfTransformParameters[(i * m_Dimensions.unTransformParametersColumns) + j] = fWt[(i * m_Dimensions.unTransformParametersColumns) + j];
         }
     }
 }

@@ -20,6 +20,12 @@ public:
 
     virtual ~BaseOptimizer(){}
 
+private:
+
+    virtual void correct_transform_parameters_dense(uint curr_lyr_idx) = 0;
+
+    virtual void correct_transform_parameters_conv(uint curr_lyr_idx) = 0;
+
 };
 
 #endif

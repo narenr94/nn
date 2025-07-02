@@ -112,3 +112,13 @@ void ADAMOPT::correct_transform_parameters_and_biases()
     correct_biases();   
 
 }
+
+void ADAMOPT::correct_transform_parameters_dense(uint curr_lyr_idx)
+{
+
+}
+
+void ADAMOPT::correct_transform_parameters_conv(uint curr_lyr_idx)
+{
+
+}
