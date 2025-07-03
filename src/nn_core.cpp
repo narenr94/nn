@@ -423,7 +423,7 @@ bool NeuralNet::do_backward_pass(float* pfExpOut)
         for hidden layer nodes:
             error = der_act_func(actual value) * (sum(weights_leading_out_of_node * error_of_node_it_is_reaching))
     */
-    for(uint i = (m_unNumLys - 1); i > INPUT_LAYER_ID; i--)
+    for(int i = (m_unNumLys - 1); i >= INPUT_LAYER_ID; i--)
     {
         if(i != (m_unNumLys - 1))
         {

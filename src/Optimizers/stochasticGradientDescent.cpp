@@ -109,7 +109,7 @@ void StochasticGradientDescent::correct_transform_parameters_conv(uint curr_lyr_
                 }
             }
             delta_wt *= m_pNN->GetLearningRate();
-            uint mtx_idx = (l * m_pNN->GetSzLayer(i)) + m;
+            uint mtx_idx = (l * k_cols) + m;
             // dW[i][j] = delta_wt;
             m_pNN->SetWeight(i, l, m, (m_pNN->GetWeight(i, mtx_idx) - delta_wt));
         }

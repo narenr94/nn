@@ -290,9 +290,10 @@ void ConvLayer::do_backwardpass_to_previous_layer_output_layer(float* fExpOut, B
 void ConvLayer::set_transform_matrix_parameter(uint unInIdx, uint unOutIdx, float fWt)
 {
     assert(m_bPrevNxtLyrsSet == true);
-    assert((unInIdx < m_pPrevLyr->get_num_nodes()) && (unOutIdx < get_num_nodes()));
+    assert(unInIdx < m_Dimensions.unTransformParametersRows);
+    assert(unOutIdx < m_Dimensions.unTransformParametersColumns);
 
-    m_pfTransformParameters[(unInIdx * get_num_nodes()) + unOutIdx] = fWt;
+    m_pfTransformParameters[(unInIdx * m_Dimensions.unTransformParametersColumns) + unOutIdx] = fWt;
 
 }
 
