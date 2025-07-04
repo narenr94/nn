@@ -26,6 +26,7 @@ enum eAct_func{
     Note: keep DENSE at last to keep test scripts intact
 */
 enum eLayer_type{
+    INPUT,
     CONV,
     DENSE
 };
@@ -39,6 +40,17 @@ struct sLayer_Dimensions{
     uint unTransformParametersRows;
     uint unTransformParametersColumns;
     uint unNoTransformParameterMtx;
+
+    sLayer_Dimensions()
+    {
+        unInputRows;
+        unInputColumns;
+        unOutputRows;
+        unOutputColumns;
+        unTransformParametersRows;
+        unTransformParametersColumns;
+        unNoTransformParameterMtx;
+    }
 
     sLayer_Dimensions(uint in_rows, uint in_columns, uint out_rows, uint out_cols, uint trans_rows, uint trans_cols, uint no_trans_mtx)
     {
@@ -94,36 +106,28 @@ protected:
 
 public:
 
-    BaseLayer(uint unNumNodesnodes, eAct_func eActFunc, float actParam1):
-    m_pNextLyr(nullptr),
-    m_pPrevLyr(nullptr),
-    m_pfTransformParameters(nullptr),
-    m_bPrevNxtLyrsSet(false),
-    m_pfValues(nullptr),
-    m_pfBiases(nullptr),
-    m_pfDeltas(nullptr),
-    m_Dimensions(0,0,0,0,0,0,0){}
+    BaseLayer(eLayer_type t_layer_type, sLayer_Dimensions t_dims, eAct_func eActFunc, float actParam1);
 
-    virtual ~BaseLayer(){}
+    virtual ~BaseLayer();
 
     //---------- Layer APIs-------------
 
-    virtual eAct_func get_act_func() = 0;
+    eAct_func get_act_func();
 
-    virtual float get_act_param() = 0;
+    float get_act_param();
 
-    virtual void apply_act_func_all_nodes() = 0;
+    void apply_act_func_all_nodes();
     
-    virtual void get_delta_all_nodes(float * fVal) = 0;
+    void get_delta_all_nodes(float * fVal);
 
-    virtual eLayer_type get_layer_type() = 0;
+    eLayer_type get_layer_type();
 
     sLayer_Dimensions get_layer_dimensions();
 
     /*
         get_num_nodes() : returns total number of nodes in layer
     */
-    virtual uint get_num_nodes() = 0;
+    uint get_num_nodes();
 
     /*
         set_node_value() : sets value of node in particular index
@@ -131,7 +135,7 @@ public:
         @value : value to be set in node
         @index : the index represnting the node where value is to be set
     */
-    virtual bool set_node_value(float value, uint index) = 0;
+    bool set_node_value(float value, uint index);
 
     /*
         set_all_node_values() : sets value of all nodes in layer
@@ -139,7 +143,7 @@ public:
         @value : array containing values to be added
         
     */
-    virtual bool set_all_node_values(float* value) = 0;
+    bool set_all_node_values(float* value);
 
     /*
         set_all_node_biases() : sets value of all nodes in layer
@@ -147,7 +151,7 @@ public:
         @bias : array containing bias to be added
         
     */
-    virtual bool set_all_node_biases(float* bias) = 0;
+    bool set_all_node_biases(float* bias);
 
     /*
         set_node_bias() : sets bias of node in particular index
@@ -155,7 +159,7 @@ public:
         @bias : bias to be set in node
         @index : the index represnting the node where bias is to be set
     */
-    virtual bool set_node_bias(float bias, uint index) = 0;
+    bool set_node_bias(float bias, uint index);
 
     /*
         set_node_delta() : sets delta of node in particular index
@@ -163,50 +167,52 @@ public:
         @delta : delta to be set in node
         @index : the index represnting the node where bias is to be set
     */
-    virtual bool set_node_delta(float delta, uint index) = 0;
+    bool set_node_delta(float delta, uint index);
 
     /*
         get_node_value_idx() : returns value of node in specified index
 
         @idx : the index represnting the node from where value is to be got
     */
-    virtual float get_node_value_idx(uint idx) = 0;
+    float get_node_value_idx(uint idx);
     /*
         get_node_bias_idx() : returns bias of node in specified index
 
         @idx : the index represnting the node from where bias is to be got
     */
-    virtual float get_node_bias_idx(uint idx) = 0;
+    float get_node_bias_idx(uint idx);
 
     /*
         get_node_delta_idx() : returns delta of node in specified index
 
         @idx : the index represnting the node from where delta is to be got
     */
-    virtual float get_node_delta_idx(uint idx) = 0;
+    float get_node_delta_idx(uint idx);
     
     /*
         populateBiasesWithRandomNumbers() : assign random numbers to biases
     */
-    virtual void populateBiasesWithRandomNumbers() = 0;
+    void populateBiasesWithRandomNumbers();
 
-    virtual const float* get_transform_matrix() = 0;
+    const float* get_transform_matrix();
 
-    virtual void SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr) = 0;
+    BaseLayer* GetPreviousLayer();
 
-    virtual BaseLayer* GetPreviousLayer() = 0;
-
-    virtual BaseLayer* GetNextLayer() = 0;
-
-    virtual void do_forwardpass_to_current_layer() = 0;
+    BaseLayer* GetNextLayer();    
 
     void do_backwardpass_to_previous_layer();
 
-    virtual void do_backwardpass_to_previous_layer_output_layer(float* fExpOut, BaseLossFunction* lossFunc) = 0;
+    void do_backwardpass_to_previous_layer_output_layer(float* fExpOut, BaseLossFunction* lossFunc);
+
+    float get_transform_matrix_parameter(uint Idx);
+
+    uint get_transform_matrix_parameter_size();
+
+    void populate_transform_matrix_parameter_with_random_numbers();
 
     //---------- End Layer APIs-------------
 
-    //---------- Transform Parameters APIs------------
+    //---------- Pure Virtual APIs------------
 
     virtual void set_transform_matrix_parameter(uint in_idx, uint out_idx, float wt) = 0;
 
@@ -214,16 +220,11 @@ public:
 
     virtual void set_all_transform_matrix_parameter(float* wt) = 0;
 
-    virtual float get_transform_matrix_parameter(uint Idx) = 0;
+    virtual void SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr) = 0;
+    
+    virtual void do_forwardpass_to_current_layer() = 0;
 
-    /*
-        get_transform_matrix_parameter_size() : gets size of matrix
-    */
-    virtual uint get_transform_matrix_parameter_size() = 0;
-
-    virtual void populate_transform_matrix_parameter_with_random_numbers() = 0;
-
-    //---------- Transform Parameters APIs------------
+    //---------- Pure Virtual APIs------------
 
 };
 

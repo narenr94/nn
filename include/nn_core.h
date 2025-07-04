@@ -56,10 +56,17 @@ struct nnInitData{
     nnInitData(uint NumLys)
     {
         unNoLys = NumLys;
-        layer_dimensions.reserve(unNoLys);
-        eAct_Funcs.reserve(unNoLys);
-        e_layer_type.reserve(unNoLys);
-        actParam1.reserve(unNoLys);
+        layer_dimensions.resize(unNoLys);
+        eAct_Funcs.resize(unNoLys);
+        e_layer_type.resize(unNoLys);
+        actParam1.resize(unNoLys);
+
+        for(uint i = 0; i < NumLys; i++)
+        {
+            eAct_Funcs[i] = eAct_func::TANH;
+            e_layer_type[i] = eLayer_type::DENSE;
+            actParam1[i] = 0.0f;
+        }
     };
 
     ~nnInitData()
@@ -252,11 +259,6 @@ class NeuralNet{
     void SetupLayersAndWeightMatrices(std::vector<eLayer_type>& layer_types, std::vector<sLayer_Dimensions>& dims, std::vector<eAct_func>& actFuncs, std::vector<float>& actParam1, float lossParam);
 
     void MergeBiasAndWeights(uint i);
-
-    void setup_dense_layer(uint layer_idx, uint out_sz, eAct_func act_func, float actParam);
-
-    void setup_conv_layer(uint layer_idx, uint input_rows, uint input_columns, uint kernel_rows, uint kernel_columns, eAct_func act_func, float actParam);
-
     
 };
 

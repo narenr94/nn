@@ -108,9 +108,14 @@ int main()
 
     for(uint l = 0; l < initData->unNoLys; l++)
     {
-        initData->e_layer_type[l] = eLayer_type::DENSE;
-        
-        
+        if(l != 0)
+        {
+            initData->e_layer_type[l] = eLayer_type::DENSE;
+        }
+        else
+        {
+            initData->e_layer_type[l] = eLayer_type::INPUT;
+        }
         initData->eAct_Funcs[l] = actFuncs[l];
         if(l == (initData->unNoLys - 1))
         {

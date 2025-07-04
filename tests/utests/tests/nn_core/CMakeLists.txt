@@ -21,6 +21,7 @@ set(TEST_SOURCES    nn_core_tests_main.cpp
 set(NN_SOURCES ${NN_SRC}/Accelerators/cpuAccelerator.cpp
 ${NN_SRC}/Layers/denseLayer.cpp
 ${NN_SRC}/Layers/convLayer.cpp
+${NN_SRC}/Layers/inputLayer.cpp
 ${NN_SRC}/Layers/baseLayer.cpp
 ${NN_SRC}/nn_math.cpp
 ${NN_SRC}/nn_core.cpp)

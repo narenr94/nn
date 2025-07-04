@@ -2,7 +2,8 @@
 set(SRC_FILES nn_core.cpp nn_math.cpp)
 set(LYR_FILES Layers/baseLayer.cpp
     Layers/denseLayer.cpp
-    Layers/convLayer.cpp)
+    Layers/convLayer.cpp
+    Layers/inputLayer.cpp)
 set(ACT_FUNC_FILES ActivationFunctions/leakyReluActFunc.cpp 
     ActivationFunctions/reluActFunc.cpp 
     ActivationFunctions/sigmoidActFunc.cpp 

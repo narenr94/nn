@@ -21,6 +21,7 @@
 //Layers
 #include "denseLayer.h"
 #include "convLayer.h"
+#include "inputLayer.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -276,19 +277,6 @@ NeuralNet::~NeuralNet()
     }
 }
 
-void NeuralNet::setup_dense_layer(uint layer_idx, uint out_sz, eAct_func act_func, float actParam)
-{
-    m_ppLys[layer_idx] = new DenseLayer(out_sz, act_func, actParam);
-    
-}
-
-void NeuralNet::setup_conv_layer(uint layer_idx, uint input_rows, uint input_columns, uint kernel_rows, uint kernel_columns, eAct_func act_func, float actParam)
-{
-    m_ppLys[layer_idx] = new ConvLayer(input_rows, input_columns, kernel_rows, kernel_columns, act_func, actParam);
-
-}
-
-
 void NeuralNet::SetupLayersAndWeightMatrices(std::vector<eLayer_type>& layer_types, std::vector<sLayer_Dimensions>& dims, std::vector<eAct_func>& actFuncs, std::vector<float>& actParam1, float lossParam)
 {
     m_ppLys = new BaseLayer*[m_unNumLys];
@@ -298,13 +286,17 @@ void NeuralNet::SetupLayersAndWeightMatrices(std::vector<eLayer_type>& layer_typ
     {
         switch(layer_types[i])
         {
+            case eLayer_type::INPUT:
+                m_ppLys[i] = new InputLayer(dims[i], actFuncs[i], actParam1[i]);
+                break;
+
             case eLayer_type::CONV:
-                m_ppLys[i] = new ConvLayer(dims[i].unInputRows, dims[i].unInputColumns, dims[i].unTransformParametersRows, dims[i].unTransformParametersColumns, actFuncs[i], actParam1[i]);
+                m_ppLys[i] = new ConvLayer(dims[i], actFuncs[i], actParam1[i]);
                 break;
             
             case eLayer_type::DENSE:
             default:
-                m_ppLys[i] = new DenseLayer(dims[i].unOutputRows * dims[i].unOutputColumns, actFuncs[i], actParam1[i]);
+                m_ppLys[i] = new DenseLayer(dims[i], actFuncs[i], actParam1[i]);
                 break;
         }
 

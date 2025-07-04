@@ -135,6 +135,11 @@ void CpuAccelerator::do_backwardpass_conv_layer(uint input_rows, uint input_colu
 {
     float * temp = new float[m_pLayer->get_num_nodes()];
 
+    for(uint i = 0; i < m_pLayer->get_num_nodes(); i++)
+    {
+        temp[i] = 0.0f;
+    }
+
     uint out_rows = input_rows - filter_rows + 1;
     uint out_columns = input_columns - filter_columns + 1;
 
@@ -175,6 +180,7 @@ void CpuAccelerator::do_backwardpass_conv_layer(uint input_rows, uint input_colu
     }
 
     m_pLayer->get_delta_all_nodes(temp);
+    
     for(uint j = 0; j < m_pLayer->get_num_nodes(); j++)
     {
         m_pLayer->set_node_delta(temp[j], j);
