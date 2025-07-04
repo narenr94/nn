@@ -72,9 +72,9 @@ class BaseLayer{
 protected:
     //node stuff
 
-    float* m_pfValues; //value of node
-    float* m_pfBiases; //value of bias
-    float* m_pfDeltas; //delta value of node , used for back propogation
+    float* m_pfValues = nullptr; //value of node
+    float* m_pfBiases = nullptr; //value of bias
+    float* m_pfDeltas = nullptr; //delta value of node , used for back propogation
 
 
     //dimentions
@@ -89,13 +89,13 @@ protected:
     BaseActivationFunction* m_pActFunc;
     float m_actParam1;
 
-    float* m_pfTransformParameters;
+    float* m_pfTransformParameters = nullptr;
 
     BaseAccelerator* m_pAccelerator;
 
-    BaseLayer* m_pPrevLyr;
+    BaseLayer* m_pPrevLyr = nullptr;
 
-    BaseLayer* m_pNextLyr;
+    BaseLayer* m_pNextLyr = nullptr;
 
     bool m_bPrevNxtLyrsSet;
 
