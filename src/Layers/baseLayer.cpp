@@ -114,7 +114,7 @@ void BaseLayer::do_backwardpass_to_previous_layer()
     switch(m_pNextLyr->get_layer_type())
     {
         case eLayer_type::CONV :
-            m_pAccelerator->do_backwardpass_conv_layer(dims.unInputRows, dims.unInputColumns, dims.unTransformParametersRows, dims.unTransformParametersColumns);
+            m_pAccelerator->do_backwardpass_conv_layer(dims);
             break;
         case eLayer_type::DENSE :
             m_pAccelerator->do_backwardpass_dense_layer();

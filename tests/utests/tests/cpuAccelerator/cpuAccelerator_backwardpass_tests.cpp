@@ -436,7 +436,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_conv_backwardpass_leakyRelu_test)
 
     CpuAccelerator* cpuAcc = new CpuAccelerator(prev_lyr);
 
-    cpuAcc->do_backwardpass_conv_layer(6, 6, 3, 3);
+    cpuAcc->do_backwardpass_conv_layer(dims2);
 
     for(int i = 0; i < 36; i++)
     {

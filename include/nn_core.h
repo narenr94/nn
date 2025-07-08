@@ -16,64 +16,10 @@
 
 #include <vector>
 
-
+#include "nn_defines.h"
 
 
 #define INPUT_LAYER_ID 0 //input layer is the first layer
-
-
-
-
-/*
-    list of activation functions
-    Note : keep ADAM in bottom to keep tests intact
-*/
-enum eOptimizers{
-    SGD,
-    RMSPROP,
-    ADAM
-};
-
-
-//when below changed make sure to update get set save and load in nn_core
-struct nnInitData{
-
-    uint unNoLys = 0;
-    std::vector<sLayer_Dimensions> layer_dimensions;
-    std::vector<eAct_func> eAct_Funcs;
-    std::vector<eLayer_type> e_layer_type;
-    float fLearningRate = 0.5f;
-    uint ID = 0;
-    eOptimizers eOpt = eOptimizers::SGD;
-    eLossFuncs eLossFunc = eLossFuncs::MSE;
-    float optParam1 = 0.0f; //RMS_PROP : beta, ADAM : beta1
-    float optParam2 = 0.0f; //RMS_PROP : epsilon, ADAM : beta2
-    float optParam3 = 0.0f; //ADAM : epsilon
-    std::vector<float>actParam1; //LEAKY_RELU : delta
-    float lossParam1 = 0.0f; //HUBER : delta
-    //ToDo: parameters for actFunc and Optimizers
-    
-    nnInitData(uint NumLys)
-    {
-        unNoLys = NumLys;
-        layer_dimensions.resize(unNoLys);
-        eAct_Funcs.resize(unNoLys);
-        e_layer_type.resize(unNoLys);
-        actParam1.resize(unNoLys);
-
-        for(uint i = 0; i < NumLys; i++)
-        {
-            eAct_Funcs[i] = eAct_func::TANH;
-            e_layer_type[i] = eLayer_type::DENSE;
-            actParam1[i] = 0.0f;
-        }
-    };
-
-    ~nnInitData()
-    {
-    }
-
-};
 
 
 class NeuralNet{

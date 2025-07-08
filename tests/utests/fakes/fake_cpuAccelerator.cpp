@@ -20,10 +20,10 @@ void CpuAccelerator::do_backwardpass_dense_layer()
 {
 }
 
-void CpuAccelerator::do_forwardpass_conv_layer(uint input_rows, uint input_columns, uint filter_rows, uint filter_columns)
+void CpuAccelerator::do_forwardpass_conv_layer(sLayer_Dimensions t_tims)
 {
 }
 
-void CpuAccelerator::do_backwardpass_conv_layer(uint input_rows, uint input_columns, uint filter_rows, uint filter_columns)
+void CpuAccelerator::do_backwardpass_conv_layer(sLayer_Dimensions t_tims)
 {
 }

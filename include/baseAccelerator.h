@@ -1,7 +1,9 @@
 #ifndef NN_BASE_ACC_H
 #define NN_BASE_ACC_H
-#include "nn_math.h"
+
 #include "baseLossFunction.h"
+
+#include "nn_defines.h"
 
 class BaseLayer;
 
@@ -21,8 +23,8 @@ public:
     virtual void do_backwardpass_dense_layer() = 0;
 
     //convolution layer
-    virtual void do_forwardpass_conv_layer(uint input_rows, uint input_columns, uint filter_rows, uint filter_columns) = 0;
-    virtual void do_backwardpass_conv_layer(uint input_rows, uint input_columns, uint filter_rows, uint filter_columns) = 0;
+    virtual void do_forwardpass_conv_layer(sLayer_Dimensions t_tims) = 0;
+    virtual void do_backwardpass_conv_layer(sLayer_Dimensions t_tims) = 0;
 
     virtual ~BaseAccelerator(){}
 

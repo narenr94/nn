@@ -14,8 +14,8 @@ public:
     void do_backwardpass_from_output_layer(float* pfExpOut, BaseLossFunction* lossFunc) override;
     void do_backwardpass_dense_layer() override;
 
-    void do_forwardpass_conv_layer(uint input_rows, uint input_columns, uint filter_rows, uint filter_columns) override;
-    void do_backwardpass_conv_layer(uint input_rows, uint input_columns, uint filter_rows, uint filter_columns) override;
+    void do_forwardpass_conv_layer(sLayer_Dimensions t_tims) override;
+    void do_backwardpass_conv_layer(sLayer_Dimensions t_tims) override;
 
     virtual ~CpuAccelerator();
 

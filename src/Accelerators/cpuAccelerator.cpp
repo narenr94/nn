@@ -99,8 +99,13 @@ void CpuAccelerator::do_backwardpass_dense_layer()
 }
 
 
-void CpuAccelerator::do_forwardpass_conv_layer(uint input_rows, uint input_columns, uint filter_rows, uint filter_columns)
+void CpuAccelerator::do_forwardpass_conv_layer(sLayer_Dimensions t_tims)
 {
+    uint input_rows = t_tims.unInputRows;
+    uint input_columns = t_tims.unInputColumns;
+    uint filter_rows = t_tims.unTransformParametersRows;
+    uint filter_columns = t_tims.unTransformParametersColumns;
+
     BaseLayer* in_lyr = m_pLayer->GetPreviousLayer();
 
     uint kernalSz = m_pLayer->get_transform_matrix_parameter_size();
@@ -131,8 +136,13 @@ void CpuAccelerator::do_forwardpass_conv_layer(uint input_rows, uint input_colum
     m_pLayer->apply_act_func_all_nodes();
 }
 
-void CpuAccelerator::do_backwardpass_conv_layer(uint input_rows, uint input_columns, uint filter_rows, uint filter_columns)
+void CpuAccelerator::do_backwardpass_conv_layer(sLayer_Dimensions t_tims)
 {
+    uint input_rows = t_tims.unInputRows;
+    uint input_columns = t_tims.unInputColumns;
+    uint filter_rows = t_tims.unTransformParametersRows;
+    uint filter_columns = t_tims.unTransformParametersColumns;
+
     float * temp = new float[m_pLayer->get_num_nodes()];
 
     for(uint i = 0; i < m_pLayer->get_num_nodes(); i++)

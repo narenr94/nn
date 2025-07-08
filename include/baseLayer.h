@@ -9,61 +9,7 @@
 
 #define RAND_MAX_PARAMETER_BIAS 9
 
-/*
-    list of activation functions
-    Note: keep TANH at last to keep test scripts intact
-*/
-enum eAct_func{
-    SIGMOID,
-    RELU,
-    LEAKY_RELU,
-    SOFTMAX,
-    TANH    
-};
-
-/*
-    list of layer type
-    Note: keep DENSE at last to keep test scripts intact
-*/
-enum eLayer_type{
-    INPUT,
-    CONV,
-    DENSE
-};
-
-struct sLayer_Dimensions{
-
-    uint unInputRows;
-    uint unInputColumns;
-    uint unOutputRows;
-    uint unOutputColumns;
-    uint unTransformParametersRows;
-    uint unTransformParametersColumns;
-    uint unNoTransformParameterMtx;
-
-    sLayer_Dimensions()
-    {
-        unInputRows;
-        unInputColumns;
-        unOutputRows;
-        unOutputColumns;
-        unTransformParametersRows;
-        unTransformParametersColumns;
-        unNoTransformParameterMtx;
-    }
-
-    sLayer_Dimensions(uint in_rows, uint in_columns, uint out_rows, uint out_cols, uint trans_rows, uint trans_cols, uint no_trans_mtx)
-    {
-        unInputRows = in_rows;
-        unInputColumns = in_columns;
-        unOutputRows = out_rows;
-        unOutputColumns = out_cols;
-        unTransformParametersRows = trans_rows;
-        unTransformParametersColumns = trans_cols;
-        unNoTransformParameterMtx = no_trans_mtx;
-    }
-
-};
+#include "nn_defines.h"
 
 class BaseAccelerator; //Forward Declaration
 
