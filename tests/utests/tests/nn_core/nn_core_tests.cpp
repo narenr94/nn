@@ -473,17 +473,16 @@ TEST(NN_CORE_TESTS, nn_core_trainrun_conv_test)
     float delta_out1[4] = {-0.180643f, -0.355933f, -0.355933f, -0.180643f};
     float delta_out0[9] = {-0.036129f, -0.107315f, -0.071187f, -0.107315f, -0.21463f, -0.107315f, -0.071187f, -0.107315f, -0.036129f};
 
-    float bias_out2[2] = {0.0f, 0.0f};
-    float bias_out1[9] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    float bias_out2[2] = {0.199465f, 0.2093f};
+    float bias_out1[4] = {0.101806f, 0.103559f, 0.103559f, 0.101806f};
 
-    float out_lyr1_wts[16] = {0.0f, 0.0f, 0.0f, 0.0f,
-                                0.0f, 0.0f, 0.0f, 0.0f,
-                                0.0f, 0.0f, 0.0f, 0.0f,
-                                0.0f, 0.0f, 0.0f, 0.0f};
+    float out_lyr1_wts[4] = {0.19966f, 0.203559f,
+                                0.202182f, 0.203552f};
 
-    float out_lyr2_wts[18] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                                0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                                0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    float out_lyr2_wts[8] = {0.099981f, 0.200325f, 
+                                0.29996f, 0.400698f, 
+                                0.299965f, 0.400609f,
+                                0.099955f, 0.200786f};
 
     uint sz[4] = {9,4,2};
     nnInitData * initData = new nnInitData(3); 
@@ -518,11 +517,11 @@ TEST(NN_CORE_TESTS, nn_core_trainrun_conv_test)
 
     initData->eAct_Funcs[0] = eAct_func::LEAKY_RELU;
     initData->e_layer_type[0] = eLayer_type::INPUT;
-     initData->actParam1[0] = 0.01f;
+    initData->actParam1[0] = 0.01f;
 
     initData->eAct_Funcs[1] = eAct_func::LEAKY_RELU;
     initData->e_layer_type[1] = eLayer_type::CONV;
-     initData->actParam1[1] = 0.01f;
+    initData->actParam1[1] = 0.01f;
 
     initData->eAct_Funcs[2] = eAct_func::LEAKY_RELU;
     initData->e_layer_type[2] = eLayer_type::DENSE;
@@ -563,28 +562,28 @@ TEST(NN_CORE_TESTS, nn_core_trainrun_conv_test)
     }
 
 
-    // for(uint i = 0; i < 2; i++)
-    // {
-    //     float roundedValue = std::round(nn->GetBias(2, i) * 1000000.0f) / 1000000.0f;
-    //     EXPECT_EQ(roundedValue, bias_out2[i]);
-    // }
+    for(uint i = 0; i < 2; i++)
+    {
+        float roundedValue = std::round(nn->GetBias(2, i) * 1000000.0f) / 1000000.0f;
+        EXPECT_EQ(roundedValue, bias_out2[i]);
+    }
     
-    // for(uint i = 0; i < 4; i++)
-    // {
-    //     float roundedValue = std::round(nn->GetBias(1, i) * 1000000.0f) / 1000000.0f;
-    //     EXPECT_EQ(roundedValue, bias_out1[i]);
-    // }
+    for(uint i = 0; i < 4; i++)
+    {
+        float roundedValue = std::round(nn->GetBias(1, i) * 1000000.0f) / 1000000.0f;
+        EXPECT_EQ(roundedValue, bias_out1[i]);
+    }
 
-    // for(uint i = 0; i < 8; i++)
-    // {
-    //     float roundedValue = std::round(nn->GetWeight(2, i) * 1000000.0f) / 1000000.0f;
-    //     EXPECT_EQ(roundedValue, out_lyr2_wts[i]);
-    // }
-    // for(uint i = 0; i < 4; i++)
-    // {
-    //     float roundedValue = std::round(nn->GetWeight(1, i) * 1000000.0f) / 1000000.0f;
-    //     EXPECT_EQ(roundedValue, out_lyr1_wts[i]);
-    // }
+    for(uint i = 0; i < 8; i++)
+    {
+        float roundedValue = std::round(nn->GetWeight(2, i) * 1000000.0f) / 1000000.0f;
+        EXPECT_EQ(roundedValue, out_lyr2_wts[i]);
+    }
+    for(uint i = 0; i < 4; i++)
+    {
+        float roundedValue = std::round(nn->GetWeight(1, i) * 1000000.0f) / 1000000.0f;
+        EXPECT_EQ(roundedValue, out_lyr1_wts[i]);
+    }
 
     delete nn;
 }
