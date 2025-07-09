@@ -152,6 +152,9 @@ void CpuAccelerator::do_backwardpass_conv_layer(sLayer_Dimensions t_dims)
     uint filter_rows = t_dims.unTransformParametersRows;
     uint filter_columns = t_dims.unTransformParametersColumns;
 
+    uint kernelSz = filter_rows * filter_columns;
+   
+
     float * temp = new float[m_pLayer->get_num_nodes()];
 
     for(uint i = 0; i < m_pLayer->get_num_nodes(); i++)
@@ -161,6 +164,8 @@ void CpuAccelerator::do_backwardpass_conv_layer(sLayer_Dimensions t_dims)
 
     uint out_rows = input_rows - filter_rows + 1;
     uint out_columns = input_columns - filter_columns + 1;
+
+    uint outSz = out_rows * out_columns;
 
     uint p = 0; //out_rows
     uint q = 0; //out_columns
@@ -176,23 +181,29 @@ void CpuAccelerator::do_backwardpass_conv_layer(sLayer_Dimensions t_dims)
     float next_lyr_idx = 0.0f;
     float filter_idx = 0.0f;
 
-    for (p = 0; p < out_rows; ++p) 
+    for(uint f  = 0; f < t_dims.unNoTransformParameterMtx; f++)
     {
-        for (q = 0; q < out_columns; ++q) 
+
+        for (p = 0; p < out_rows; ++p) 
         {
-            for (m = 0; m < filter_rows; ++m) 
+            for (q = 0; q < out_columns; ++q) 
             {
-                for (n = 0; n < filter_columns; ++n) 
+                for (m = 0; m < filter_rows; ++m) 
                 {
-                    // dX[p + m][q + n] += dOut[p][q] * kernel[m][n];
+                    for (n = 0; n < filter_columns; ++n) 
+                    {
+                        // dX[p + m][q + n] += dOut[p][q] * kernel[m][n];
 
-                    next_lyr_idx = (p * out_columns) + q;
-                    // compute rotated indices
-                    rm = filter_rows  - 1 - m;
-                    rn = filter_columns  - 1 - n;
-                    rot_filter_idx = rm * filter_columns + rn;
+                        next_lyr_idx = (p * out_columns) + q;
+                        next_lyr_idx += (f * outSz);
+                        // compute rotated indices
+                        rm = filter_rows  - 1 - m;
+                        rn = filter_columns  - 1 - n;
+                        rot_filter_idx = rm * filter_columns + rn;
+                        rot_filter_idx += (f * kernelSz);
 
-                    temp[((p + m) * input_columns) + (q + n)] += m_pLayer->GetNextLayer()->get_node_delta_idx(next_lyr_idx) * m_pLayer->GetNextLayer()->get_transform_matrix_parameter(rot_filter_idx);
+                        temp[((p + m) * input_columns) + (q + n)] += m_pLayer->GetNextLayer()->get_node_delta_idx(next_lyr_idx) * m_pLayer->GetNextLayer()->get_transform_matrix_parameter(rot_filter_idx);
+                    }
                 }
             }
         }

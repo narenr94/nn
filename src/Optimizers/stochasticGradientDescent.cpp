@@ -86,32 +86,42 @@ void StochasticGradientDescent::correct_transform_parameters_conv(uint curr_lyr_
     uint k_rows = layer_dim.unTransformParametersRows;
     uint k_cols = layer_dim.unTransformParametersColumns;
 
+    uint kernelSz = k_rows * k_cols;
+
     uint out_rows = layer_dim.unOutputRows;
     uint out_cols = layer_dim.unOutputColumns;
+
+    uint outSz = out_rows * out_cols;
 
     uint curr_idx = 0;
     uint prev_idx = 0;
 
-    for (int l = 0; l < k_rows; ++l) 
+    for(uint f = 0; f < layer_dim.unNoTransformParameterMtx; f++)
     {
-        for (int m = 0; m < k_cols; ++m) 
-        {
-            delta_wt = 0.0f;
 
-            for (int p = 0; p < out_rows; ++p) 
+        for (int l = 0; l < k_rows; ++l) 
+        {
+            for (int m = 0; m < k_cols; ++m) 
             {
-                for (int q = 0; q < out_cols; ++q) 
+                delta_wt = 0.0f;
+
+                for (int p = 0; p < out_rows; ++p) 
                 {
-                    // delta_wt += dOut[p][q] * input[p + l][q + m];
-                    curr_idx = (p * out_cols) + q;
-                    prev_idx = ((p + l) * (layer_dim.unInputColumns)) + (q + m);
-                    delta_wt += m_pNN->GetDelta(i, curr_idx) * m_pNN->GetNodeVal(i - 1, prev_idx);
+                    for (int q = 0; q < out_cols; ++q) 
+                    {
+                        // delta_wt += dOut[p][q] * input[p + l][q + m];
+                        curr_idx = (p * out_cols) + q;
+                        curr_idx += (f * outSz);
+                        prev_idx = ((p + l) * (layer_dim.unInputColumns)) + (q + m);
+                        delta_wt += m_pNN->GetDelta(i, curr_idx) * m_pNN->GetNodeVal(i - 1, prev_idx);
+                    }
                 }
+                delta_wt *= m_pNN->GetLearningRate();
+                uint mtx_idx = (l * k_cols) + m;
+                mtx_idx += (f * kernelSz);
+                // dW[i][j] = delta_wt;
+                m_pNN->SetWeight(i, l, m, (m_pNN->GetWeight(i, mtx_idx) - delta_wt));
             }
-            delta_wt *= m_pNN->GetLearningRate();
-            uint mtx_idx = (l * k_cols) + m;
-            // dW[i][j] = delta_wt;
-            m_pNN->SetWeight(i, l, m, (m_pNN->GetWeight(i, mtx_idx) - delta_wt));
         }
     }
 

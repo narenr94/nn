@@ -449,3 +449,92 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_conv_backwardpass_leakyRelu_test)
     delete nxt_lyr;
 }
 
+TEST(CPU_ACC_TESTS, cpuAccelerator_conv_backwardpass_multiKernel_leakyRelu_test)
+{
+    sLayer_Dimensions dims1, dims2, dims3;
+    
+    dims1.unInputColumns = 0;
+    dims1.unInputRows = 0;
+    dims1.unNoTransformParameterMtx = 0;
+    dims1.unOutputColumns = 6;
+    dims1.unOutputRows = 6;
+    dims1.unTransformParametersColumns = 0;
+    dims1.unTransformParametersRows = 0;
+
+    dims2.unInputColumns = 6;
+    dims2.unInputRows = 6;
+    dims2.unNoTransformParameterMtx = 3;
+    dims2.unOutputColumns = 4;
+    dims2.unOutputRows = 12;
+    dims2.unTransformParametersColumns = 3;
+    dims2.unTransformParametersRows = 3;
+
+    dims3.unInputColumns = 4;
+    dims3.unInputRows = 12;
+    dims3.unNoTransformParameterMtx = 1;
+    dims3.unOutputColumns = 2;
+    dims3.unOutputRows = 1;
+    dims3.unTransformParametersColumns = 2;
+    dims3.unTransformParametersRows = 48;
+
+    InputLayer* prev_lyr = new InputLayer(dims1, eAct_func::TANH, 0.999f);
+    ConvLayer* curr_lyr = new ConvLayer(dims2, eAct_func::LEAKY_RELU, 0.01f);
+    DenseLayer* nxt_lyr = new DenseLayer(dims3, eAct_func::TANH, 0.999f);
+
+    float curr_delta[48] = {0.1f, 0.1f, 0.1f, 0.1f,
+                            0.1f, 0.1f, 0.1f, 0.1f,
+                            0.1f, 0.1f, 0.1f, 0.1f,
+                            0.1f, 0.1f, 0.1f, 0.1f,
+                            0.1f, 0.1f, 0.1f, 0.1f,
+                            0.1f, 0.1f, 0.1f, 0.1f,
+                            0.1f, 0.1f, 0.1f, 0.1f,
+                            0.1f, 0.1f, 0.1f, 0.1f,
+                            0.1f, 0.1f, 0.1f, 0.1f,
+                            0.1f, 0.1f, 0.1f, 0.1f,
+                            0.1f, 0.1f, 0.1f, 0.1f,
+                            0.1f, 0.1f, 0.1f, 0.1f};
+
+    
+    float bkwdPassKernelMtx[27] = {0.1f, 0.6f, -0.2f,
+                                    0.1f, 0.6f, -0.2f,
+                                    0.1f, 0.6f, -0.2f,
+                                    0.1f, 0.6f, -0.2f,
+                                    0.1f, 0.6f, -0.2f,
+                                    0.1f, 0.6f, -0.2f,
+                                    0.1f, 0.6f, -0.2f,
+                                    0.1f, 0.6f, -0.2f,
+                                    0.1f, 0.6f, -0.2f};
+
+    float out[36] = {-0.06f, 0.12f, 0.15f, 0.15f, 0.21f, 0.03f, 
+                        -0.12f, 0.24f, 0.3f, 0.3f, 0.42f, 0.06f, 
+                        -0.18f, 0.36f, 0.45f, 0.45f, 0.63f, 0.09f, 
+                        -0.18f, 0.36f, 0.45f, 0.45f, 0.63f, 0.09f, 
+                        -0.12f, 0.24f, 0.3f, 0.3f, 0.42f, 0.06f,
+                        -0.06f, 0.12f, 0.15f, 0.15f, 0.21f, 0.03f};
+
+    for(int i = 0; i < 48; i++)
+    {
+        curr_lyr->set_node_delta(curr_delta[i], i);
+    }
+
+    prev_lyr->SetPreviousNextLayers(nullptr, curr_lyr);
+
+    curr_lyr->SetPreviousNextLayers(prev_lyr, nxt_lyr);
+
+    nxt_lyr->SetPreviousNextLayers(curr_lyr, nullptr);
+
+    curr_lyr->set_all_transform_matrix_parameter(bkwdPassKernelMtx);
+
+    CpuAccelerator* cpuAcc = new CpuAccelerator(prev_lyr);
+
+    cpuAcc->do_backwardpass_conv_layer(dims2);
+
+    for(int i = 0; i < 36; i++)
+    {
+        float roundedValue = std::round(prev_lyr->get_node_delta_idx(i) * 1000000.0f) / 1000000.0f;
+        EXPECT_EQ(roundedValue, out[i]);
+    }
+
+    delete curr_lyr;
+    delete nxt_lyr;
+}
