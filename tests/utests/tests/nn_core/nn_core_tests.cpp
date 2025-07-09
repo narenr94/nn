@@ -138,7 +138,10 @@ TEST(NN_CORE_TESTS, nn_core_testrun_dense_test)
     initData->layer_dimensions[2].unTransformParametersColumns = 2;
     initData->layer_dimensions[2].unTransformParametersRows = 3;
 
-    for(uint l = 0; l < initData->unNoLys; l++)
+    initData->e_layer_type[0] = eLayer_type::INPUT;
+    initData->eAct_Funcs[0] = eAct_func::TANH;
+
+    for(uint l = 1; l < initData->unNoLys; l++)
     {
         initData->e_layer_type[l] = eLayer_type::DENSE;
         initData->eAct_Funcs[l] = eAct_func::TANH;
@@ -214,7 +217,10 @@ TEST(NN_CORE_TESTS, nn_core_trainrun_dense_test)
     initData->layer_dimensions[2].unTransformParametersColumns = 2;
     initData->layer_dimensions[2].unTransformParametersRows = 3;
 
-    for(uint l = 0; l < initData->unNoLys; l++)
+    initData->e_layer_type[0] = eLayer_type::INPUT;
+    initData->eAct_Funcs[0] = eAct_func::TANH;
+
+    for(uint l = 1; l < initData->unNoLys; l++)
     {
         initData->e_layer_type[l] = eLayer_type::DENSE;
         initData->eAct_Funcs[l] = eAct_func::TANH;
@@ -316,7 +322,7 @@ TEST(NN_CORE_TESTS, nn_core_setup_conv_test)
     initData->layer_dimensions[2].unTransformParametersRows = 9;
 
     initData->eAct_Funcs[0] = eAct_func::LEAKY_RELU;
-    initData->e_layer_type[0] = eLayer_type::DENSE;
+    initData->e_layer_type[0] = eLayer_type::INPUT;
 
     initData->eAct_Funcs[1] = eAct_func::LEAKY_RELU;
     initData->e_layer_type[1] = eLayer_type::CONV;
@@ -419,7 +425,7 @@ TEST(NN_CORE_TESTS, nn_core_testrun_conv_test)
     initData->layer_dimensions[2].unTransformParametersRows = 4;
 
     initData->eAct_Funcs[0] = eAct_func::LEAKY_RELU;
-    initData->e_layer_type[0] = eLayer_type::DENSE;
+    initData->e_layer_type[0] = eLayer_type::INPUT;
 
     initData->eAct_Funcs[1] = eAct_func::LEAKY_RELU;
     initData->e_layer_type[1] = eLayer_type::CONV;

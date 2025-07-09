@@ -16,18 +16,14 @@
 #include <cassert>
 #include <cstdio>
 
+void validate_input_data_layers(eLayer_type t_layer_type, sLayer_Dimensions t_dims);
+
 BaseLayer::BaseLayer(eLayer_type t_layer_type, sLayer_Dimensions t_dims, eAct_func eActFunc, float actParam1)
 {
     m_layer_type = t_layer_type;
 
-    //if conv layer check if input size is larger than output
-    if(m_layer_type == eLayer_type::CONV)
-    {
-        assert((t_dims.unInputRows > 0) && (t_dims.unInputColumns > 0));
-
-        assert((t_dims.unInputRows * t_dims.unInputColumns) > (((1 + t_dims.unInputRows) - t_dims.unTransformParametersRows) * ((1 + t_dims.unInputColumns) - t_dims.unTransformParametersColumns)));
-    }
-
+    validate_input_data_layers(t_layer_type, t_dims);
+    
     m_Dimensions = t_dims;
 
     m_Dimensions.unInputRows = t_dims.unInputRows;
@@ -325,4 +321,33 @@ eLayer_type BaseLayer::get_layer_type()
 sLayer_Dimensions BaseLayer::get_layer_dimensions()
 {
     return m_Dimensions;
+}
+
+void validate_input_data_layers(eLayer_type t_layer_type, sLayer_Dimensions t_dims)
+{
+
+    
+
+    if(t_layer_type == eLayer_type::INPUT)
+    {
+        assert(t_dims.unInputRows == 0);
+        assert(t_dims.unInputColumns == 0);
+        assert(t_dims.unNoTransformParameterMtx == 0);
+        assert(t_dims.unTransformParametersColumns == 0);
+        assert(t_dims.unTransformParametersRows == 0);
+    }
+
+    if(t_layer_type == eLayer_type::CONV)
+    {
+        assert((t_dims.unInputRows > 0) && (t_dims.unInputColumns > 0));
+
+    }
+
+    if(t_layer_type == eLayer_type::DENSE)
+    {
+        assert((t_dims.unInputRows > 0) && (t_dims.unInputColumns > 0));
+        assert(t_dims.unNoTransformParameterMtx == 1);
+        assert(((t_dims.unInputRows * t_dims.unInputColumns) * (t_dims.unOutputRows * t_dims.unOutputColumns)) == (t_dims.unTransformParametersColumns * t_dims.unTransformParametersRows));
+    }
+
 }

@@ -3,6 +3,7 @@
 #include "baseLayer.h"
 #include "denseLayer.h"
 #include "convLayer.h"
+#include "inputLayer.h"
 #include <cmath>
 
 
@@ -12,7 +13,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_relu_test)
 
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 1;
+    dims1.unNoTransformParameterMtx = 0;
     dims1.unOutputColumns = 2;
     dims1.unOutputRows = 1;
     dims1.unTransformParametersColumns = 0;
@@ -34,7 +35,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_relu_test)
     dims3.unTransformParametersColumns = 2;
     dims3.unTransformParametersRows = 3;
 
-    DenseLayer* prev_lyr = new DenseLayer(dims1, eAct_func::TANH, 0.999f);
+    InputLayer* prev_lyr = new InputLayer(dims1, eAct_func::TANH, 0.999f);
     DenseLayer* curr_lyr = new DenseLayer(dims2, eAct_func::RELU, 0.999f);
     DenseLayer* nxt_lyr = new DenseLayer(dims3, eAct_func::TANH, 0.999f);
 
@@ -84,7 +85,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_leakyRelu_test)
 
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 1;
+    dims1.unNoTransformParameterMtx = 0;
     dims1.unOutputColumns = 2;
     dims1.unOutputRows = 1;
     dims1.unTransformParametersColumns = 0;
@@ -106,7 +107,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_leakyRelu_test)
     dims3.unTransformParametersColumns = 2;
     dims3.unTransformParametersRows = 3;
 
-    DenseLayer* prev_lyr = new DenseLayer(dims1, eAct_func::TANH, 0.999f);
+    InputLayer* prev_lyr = new InputLayer(dims1, eAct_func::TANH, 0.999f);
     DenseLayer* curr_lyr = new DenseLayer(dims2, eAct_func::LEAKY_RELU, 0.01f);
     DenseLayer* nxt_lyr = new DenseLayer(dims3, eAct_func::TANH, 0.999f);
 
@@ -156,7 +157,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_tanh_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 1;
+    dims1.unNoTransformParameterMtx = 0;
     dims1.unOutputColumns = 2;
     dims1.unOutputRows = 1;
     dims1.unTransformParametersColumns = 0;
@@ -178,7 +179,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_tanh_test)
     dims3.unTransformParametersColumns = 2;
     dims3.unTransformParametersRows = 3;
 
-    DenseLayer* prev_lyr = new DenseLayer(dims1, eAct_func::TANH, 0.999f);
+    InputLayer* prev_lyr = new InputLayer(dims1, eAct_func::TANH, 0.999f);
     DenseLayer* curr_lyr = new DenseLayer(dims2, eAct_func::TANH, 0.01f);
     DenseLayer* nxt_lyr = new DenseLayer(dims3, eAct_func::TANH, 0.999f);
 
@@ -228,7 +229,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_sigmoid_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 1;
+    dims1.unNoTransformParameterMtx = 0;
     dims1.unOutputColumns = 2;
     dims1.unOutputRows = 1;
     dims1.unTransformParametersColumns = 0;
@@ -250,7 +251,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_sigmoid_test)
     dims3.unTransformParametersColumns = 2;
     dims3.unTransformParametersRows = 3;
 
-    DenseLayer* prev_lyr = new DenseLayer(dims1, eAct_func::TANH, 0.999f);
+    InputLayer* prev_lyr = new InputLayer(dims1, eAct_func::TANH, 0.999f);
     DenseLayer* curr_lyr = new DenseLayer(dims2, eAct_func::SIGMOID, 0.01f);
     DenseLayer* nxt_lyr = new DenseLayer(dims3, eAct_func::TANH, 0.999f);
 
@@ -300,7 +301,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_softmax_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 1;
+    dims1.unNoTransformParameterMtx = 0;
     dims1.unOutputColumns = 2;
     dims1.unOutputRows = 1;
     dims1.unTransformParametersColumns = 0;
@@ -322,7 +323,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_softmax_test)
     dims3.unTransformParametersColumns = 2;
     dims3.unTransformParametersRows = 3;
 
-    DenseLayer* prev_lyr = new DenseLayer(dims1, eAct_func::TANH, 0.999f);
+    InputLayer* prev_lyr = new InputLayer(dims1, eAct_func::TANH, 0.999f);
     DenseLayer* curr_lyr = new DenseLayer(dims2, eAct_func::SOFTMAX, 0.01f);
     DenseLayer* nxt_lyr = new DenseLayer(dims3, eAct_func::TANH, 0.999f);
 
@@ -372,7 +373,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_conv_backwardpass_leakyRelu_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 1;
+    dims1.unNoTransformParameterMtx = 0;
     dims1.unOutputColumns = 6;
     dims1.unOutputRows = 6;
     dims1.unTransformParametersColumns = 0;
@@ -394,7 +395,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_conv_backwardpass_leakyRelu_test)
     dims3.unTransformParametersColumns = 2;
     dims3.unTransformParametersRows = 16;
 
-    DenseLayer* prev_lyr = new DenseLayer(dims1, eAct_func::TANH, 0.999f);
+    InputLayer* prev_lyr = new InputLayer(dims1, eAct_func::TANH, 0.999f);
     ConvLayer* curr_lyr = new ConvLayer(dims2, eAct_func::LEAKY_RELU, 0.01f);
     DenseLayer* nxt_lyr = new DenseLayer(dims3, eAct_func::TANH, 0.999f);
 

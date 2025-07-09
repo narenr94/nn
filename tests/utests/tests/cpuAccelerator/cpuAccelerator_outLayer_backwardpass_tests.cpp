@@ -15,13 +15,13 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_MAE)
 {
     sLayer_Dimensions dims;
     
-    dims.unInputColumns = 0;
-    dims.unInputRows = 0;
+    dims.unInputColumns = 4;
+    dims.unInputRows = 1;
     dims.unNoTransformParameterMtx = 1;
     dims.unOutputColumns = 5;
     dims.unOutputRows = 1;
-    dims.unTransformParametersColumns = 0;
-    dims.unTransformParametersRows = 0;
+    dims.unTransformParametersColumns = 5;
+    dims.unTransformParametersRows = 4;
 
     DenseLayer* curr_lyr = new DenseLayer(dims, eAct_func::TANH, 0.999f);
     curr_lyr->SetPreviousNextLayers(nullptr, nullptr);
@@ -53,13 +53,13 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_MSE)
 {
     sLayer_Dimensions dims;
     
-    dims.unInputColumns = 0;
-    dims.unInputRows = 0;
+    dims.unInputColumns = 4;
+    dims.unInputRows = 1;
     dims.unNoTransformParameterMtx = 1;
     dims.unOutputColumns = 5;
     dims.unOutputRows = 1;
-    dims.unTransformParametersColumns = 0;
-    dims.unTransformParametersRows = 0;
+    dims.unTransformParametersColumns = 5;
+    dims.unTransformParametersRows = 4;
 
     DenseLayer* curr_lyr = new DenseLayer(dims, eAct_func::TANH, 0.999f);
     curr_lyr->SetPreviousNextLayers(nullptr, nullptr);
@@ -91,13 +91,13 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_HUBER)
 {
     sLayer_Dimensions dims;
     
-    dims.unInputColumns = 0;
-    dims.unInputRows = 0;
+    dims.unInputColumns = 4;
+    dims.unInputRows = 1;
     dims.unNoTransformParameterMtx = 1;
     dims.unOutputColumns = 5;
     dims.unOutputRows = 1;
-    dims.unTransformParametersColumns = 0;
-    dims.unTransformParametersRows = 0;
+    dims.unTransformParametersColumns = 5;
+    dims.unTransformParametersRows = 4;
 
     DenseLayer* curr_lyr = new DenseLayer(dims, eAct_func::TANH, 0.999f);
     curr_lyr->SetPreviousNextLayers(nullptr, nullptr);
@@ -129,13 +129,13 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_CCE)
 {
     sLayer_Dimensions dims;
     
-    dims.unInputColumns = 0;
-    dims.unInputRows = 0;
+    dims.unInputColumns = 4;
+    dims.unInputRows = 1;
     dims.unNoTransformParameterMtx = 1;
     dims.unOutputColumns = 5;
     dims.unOutputRows = 1;
-    dims.unTransformParametersColumns = 0;
-    dims.unTransformParametersRows = 0;
+    dims.unTransformParametersColumns = 5;
+    dims.unTransformParametersRows = 4;
 
     DenseLayer* curr_lyr = new DenseLayer(dims, eAct_func::TANH, 0.999f);
     curr_lyr->SetPreviousNextLayers(nullptr, nullptr);
@@ -167,13 +167,13 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_BCE)
 {
     sLayer_Dimensions dims;
     
-    dims.unInputColumns = 0;
-    dims.unInputRows = 0;
+    dims.unInputColumns = 4;
+    dims.unInputRows = 1;
     dims.unNoTransformParameterMtx = 1;
     dims.unOutputColumns = 1;
     dims.unOutputRows = 1;
-    dims.unTransformParametersColumns = 0;
-    dims.unTransformParametersRows = 0;
+    dims.unTransformParametersColumns = 1;
+    dims.unTransformParametersRows = 4;
 
     DenseLayer* curr_lyr = new DenseLayer(dims, eAct_func::SIGMOID, 0.999f);
     curr_lyr->SetPreviousNextLayers(nullptr, nullptr);

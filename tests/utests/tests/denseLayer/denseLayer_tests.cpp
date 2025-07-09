@@ -5,13 +5,13 @@
 TEST(DenseLayer_TESTS, DenseLayer_setup_test)
 {
     sLayer_Dimensions dims;
-    dims.unInputColumns = 0;
-    dims.unInputRows = 0;
+    dims.unInputColumns = 4;
+    dims.unInputRows = 1;
     dims.unNoTransformParameterMtx = 1;
     dims.unOutputColumns = 5;
     dims.unOutputRows = 1;
-    dims.unTransformParametersColumns = 0;
-    dims.unTransformParametersRows = 0;
+    dims.unTransformParametersColumns = 5;
+    dims.unTransformParametersRows = 4;
 
     DenseLayer* lyr = new DenseLayer(dims, eAct_func::RELU, 0.999f);
 
@@ -26,13 +26,13 @@ TEST(DenseLayer_TESTS, DenseLayer_setup_test)
 TEST(DenseLayer_TESTS, DenseLayer_set_get_node_data_test)
 {
     sLayer_Dimensions dims;
-    dims.unInputColumns = 0;
-    dims.unInputRows = 0;
+    dims.unInputColumns = 4;
+    dims.unInputRows = 1;
     dims.unNoTransformParameterMtx = 1;
     dims.unOutputColumns = 5;
     dims.unOutputRows = 1;
-    dims.unTransformParametersColumns = 0;
-    dims.unTransformParametersRows = 0;
+    dims.unTransformParametersColumns = 5;
+    dims.unTransformParametersRows = 4;
 
     DenseLayer* lyr = new DenseLayer(dims, eAct_func::RELU, 0.999f);
 

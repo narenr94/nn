@@ -22,7 +22,7 @@ void ConvLayer::SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr)
     if(m_pPrevLyr)
     {
         assert(m_pPrevLyr->get_num_nodes() == (m_Dimensions.unInputRows * m_Dimensions.unInputColumns));
-        m_unTransformMatrixSize = m_Dimensions.unTransformParametersRows * m_Dimensions.unTransformParametersColumns;
+        m_unTransformMatrixSize = m_Dimensions.unTransformParametersRows * m_Dimensions.unTransformParametersColumns * m_Dimensions.unNoTransformParameterMtx;
         m_pfTransformParameters = new float[m_unTransformMatrixSize];
     }
 
@@ -61,11 +61,18 @@ void ConvLayer::set_all_transform_matrix_parameter(float* fWt)
     assert(m_bPrevNxtLyrsSet == true);
     uint i = 0;
     uint j = 0;
-    for(i = 0; i < m_Dimensions.unTransformParametersRows; i++)
+    uint f = 0;
+
+    uint filterSz = m_Dimensions.unTransformParametersRows * m_Dimensions.unTransformParametersColumns;
+
+    for(f = 0; f < m_Dimensions.unNoTransformParameterMtx; f++)
     {
-        for(j = 0; j < m_Dimensions.unTransformParametersColumns; j++)
+        for(i = 0; i < m_Dimensions.unTransformParametersRows; i++)
         {
-            m_pfTransformParameters[(i * m_Dimensions.unTransformParametersColumns) + j] = fWt[(i * m_Dimensions.unTransformParametersColumns) + j];
+            for(j = 0; j < m_Dimensions.unTransformParametersColumns; j++)
+            {
+                m_pfTransformParameters[((i * m_Dimensions.unTransformParametersColumns) + j) + (f * filterSz)] = fWt[((i * m_Dimensions.unTransformParametersColumns) + j) + (f * filterSz)];
+            }
         }
     }
 }
