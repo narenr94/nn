@@ -169,7 +169,9 @@ class NeuralNet{
 
     float GetNodeVal(uint LayerID, uint NodeID);
 
-    void SetWeight(uint MtxId, uint inIdx, uint outIdx, float val); 
+    void SetWeight(uint MtxId, uint inIdx, uint outIdx, float val);
+
+    void SetWeight(uint MtxId, uint Idx, float val);
 
     void SaveNN(const char* fileName);   
 

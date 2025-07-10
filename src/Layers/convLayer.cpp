@@ -38,7 +38,7 @@ void ConvLayer::do_forwardpass_to_current_layer()
 void ConvLayer::set_transform_matrix_parameter(uint unInIdx, uint unOutIdx, float fWt)
 {
     assert(m_bPrevNxtLyrsSet == true);
-    assert(unInIdx < m_Dimensions.unTransformParametersRows);
+    assert(unInIdx < (m_Dimensions.unTransformParametersRows * m_Dimensions.unNoTransformParameterMtx));
     assert(unOutIdx < m_Dimensions.unTransformParametersColumns);
 
     m_pfTransformParameters[(unInIdx * m_Dimensions.unTransformParametersColumns) + unOutIdx] = fWt;

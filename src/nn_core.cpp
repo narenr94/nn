@@ -777,6 +777,12 @@ void NeuralNet::SetWeight(uint MtxId, uint inIdx, uint outIdx, float val)
     m_ppLys[MtxId]->set_transform_matrix_parameter(inIdx, outIdx, val);
 }
 
+void NeuralNet::SetWeight(uint MtxId, uint Idx, float val)
+{
+    assert(MtxId > 0);
+    m_ppLys[MtxId]->set_transform_matrix_parameter(Idx, val);
+}
+
 void NeuralNet::SaveNN(const char* fileName)
 {
     FILE* file = fopen(fileName, "w"); 

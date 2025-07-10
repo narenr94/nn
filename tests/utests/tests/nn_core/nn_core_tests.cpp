@@ -594,4 +594,272 @@ TEST(NN_CORE_TESTS, nn_core_trainrun_conv_test)
     delete nn;
 }
 
+TEST(NN_CORE_TESTS, nn_core_testrun_conv_multiKernel_test)
+{
+    float init_lyr1_biases[12] = {0.1f, 0.1f, 0.1f, 0.1f,
+                                    0.1f, 0.1f, 0.1f, 0.1f,
+                                    0.1f, 0.1f, 0.1f, 0.1f};
+
+    float init_lyr2_biases[2] = {0.2f, 0.2f};
+
+    float init_lyr1_wts[12] = {0.2f, 0.2f,
+                                0.2f, 0.2f,
+                                0.2f, 0.2f,
+                                0.2f, 0.2f,
+                                0.2f, 0.2f,
+                                0.2f, 0.2f};
+
+    float init_lyr2_wts[24] = {0.1f, 0.2f,
+                                0.3f, 0.4f,
+                                0.3f, 0.4f,
+                                0.1f, 0.2f,
+                                0.1f, 0.2f,
+                                0.3f, 0.4f,
+                                0.3f, 0.4f,
+                                0.1f, 0.2f,
+                                0.1f, 0.2f,
+                                0.3f, 0.4f,
+                                0.3f, 0.4f,
+                                0.1f, 0.2f};
+
+    float in[9] = {0.2f, -0.1f, 0.6f,
+                    -0.3f, 0.4f, 0.1f,
+                    0.01f, 0.7f, -0.01f};
+
+    float out[2] = {0.030192f, 0.036692f};
+
+    uint sz[4] = {9,12,2};
+    nnInitData * initData = new nnInitData(3); 
+    initData->unNoLys = 3;
+
+    //input layer
+    initData->layer_dimensions[0].unInputColumns = 0;
+    initData->layer_dimensions[0].unInputRows = 0;
+    initData->layer_dimensions[0].unNoTransformParameterMtx = 0;
+    initData->layer_dimensions[0].unOutputColumns = 9;
+    initData->layer_dimensions[0].unOutputRows = 1;
+    initData->layer_dimensions[0].unTransformParametersColumns = 0;
+    initData->layer_dimensions[0].unTransformParametersRows = 0;
+
+    //hidden layer
+    initData->layer_dimensions[1].unInputColumns = 3;
+    initData->layer_dimensions[1].unInputRows = 3;
+    initData->layer_dimensions[1].unNoTransformParameterMtx = 3;
+    initData->layer_dimensions[1].unOutputColumns = 2;
+    initData->layer_dimensions[1].unOutputRows = 6;
+    initData->layer_dimensions[1].unTransformParametersColumns = 2;
+    initData->layer_dimensions[1].unTransformParametersRows = 2;
+
+    //output layer
+    initData->layer_dimensions[2].unInputColumns = 2;
+    initData->layer_dimensions[2].unInputRows = 6;
+    initData->layer_dimensions[2].unNoTransformParameterMtx = 1;
+    initData->layer_dimensions[2].unOutputColumns = 2;
+    initData->layer_dimensions[2].unOutputRows = 1;
+    initData->layer_dimensions[2].unTransformParametersColumns = 2;
+    initData->layer_dimensions[2].unTransformParametersRows = 12;
+
+    initData->eAct_Funcs[0] = eAct_func::LEAKY_RELU;
+    initData->e_layer_type[0] = eLayer_type::INPUT;
+
+    initData->eAct_Funcs[1] = eAct_func::LEAKY_RELU;
+    initData->e_layer_type[1] = eLayer_type::CONV;
+
+    initData->eAct_Funcs[2] = eAct_func::LEAKY_RELU;
+    initData->e_layer_type[2] = eLayer_type::DENSE;
+
+    initData->eOpt = eOptimizers::SGD;
+    initData->eLossFunc = eLossFuncs::HUBER;
+    initData->fLearningRate = 0.01f;
+
+    NeuralNet* nn = new NeuralNet(initData);
+
+    nn->populate_nodes_bias(1, init_lyr1_biases);
+    nn->populate_nodes_bias(2, init_lyr2_biases);
+
+    nn->populate_weights(1, init_lyr1_wts);
+    nn->populate_weights(2, init_lyr2_wts);
+
+    nn->Test(in, out);
+
+    for(uint i = 0; i < 2; i++)
+    {
+        float roundedValue = std::round(nn->GetNodeVal(2, i) * 1000000.0f) / 1000000.0f;
+        EXPECT_EQ(roundedValue, out[i]);
+    }
+
+    delete nn;
+}
+
+
+TEST(NN_CORE_TESTS, nn_core_trainrun_conv_multiKernel_test)
+{
+    float init_lyr1_biases[12] = {0.1f, 0.1f, 0.1f, 0.1f,
+                                    0.1f, 0.1f, 0.1f, 0.1f,
+                                    0.1f, 0.1f, 0.1f, 0.1f};
+
+    float init_lyr2_biases[2] = {0.2f, 0.2f};
+
+    float init_lyr1_wts[12] = {0.2f, 0.2f,
+                                0.2f, 0.2f,
+                                0.2f, 0.2f,
+                                0.2f, 0.2f,
+                                0.2f, 0.2f,
+                                0.2f, 0.2f};
+
+    float init_lyr2_wts[24] = {0.1f, 0.2f,
+                                0.3f, 0.4f,
+                                0.3f, 0.4f,
+                                0.1f, 0.2f,
+                                0.1f, 0.2f,
+                                0.3f, 0.4f,
+                                0.3f, 0.4f,
+                                0.1f, 0.2f,
+                                0.1f, 0.2f,
+                                0.3f, 0.4f,
+                                0.3f, 0.4f,
+                                0.1f, 0.2f};
+
+    float in[9] = {0.2f, -0.1f, 0.6f,
+                    -0.3f, 0.4f, 0.1f,
+                    0.01f, 0.7f, -0.01f};
+
+    float out[2] = {0.01f, 1.0f};
+
+    float delta_out2[2] = {0.020192f, -0.963308f};
+    float delta_out1[12] = {-0.190643f, -0.379266f, -0.379266f, -0.190643f,
+                            -0.190643f, -0.379266f, -0.379266f, -0.190643f,
+                            -0.190643f, -0.379266f, -0.379266f, -0.190643f};
+    float delta_out0[9] = {-0.114386f, -0.341945f, -0.22756f,
+                            -0.341945f, -0.68389f, -0.341945f,
+                            -0.22756f, -0.341945f, -0.114386f};
+
+    float bias_out2[2] = {0.199798f, 0.209633f};
+    float bias_out1[12] = {0.101906f, 0.103793f, 0.103793f, 0.101906f, 0.101906f, 0.103793f, 0.103793f, 0.101906f, 0.101906f, 0.103793f, 0.103793f, 0.101906f};
+
+    float out_lyr1_wts[12] = {0.199627f, 0.203793f,
+                                0.202318f, 0.203778f,
+                                0.199627f, 0.203793f,
+                                0.202318f, 0.203778f,
+                                0.199627f, 0.203793f,
+                                0.202318f, 0.203778f};
+
+    float out_lyr2_wts[24] = {0.099993f, 0.200337f, 
+                                0.299985f, 0.400722f, 
+                                0.299987f, 0.400631f,
+                                0.099983f, 0.200814f,
+                                0.099993f, 0.200337f, 
+                                0.299985f, 0.400722f, 
+                                0.299987f, 0.400631f,
+                                0.099983f, 0.200814f,
+                                0.099993f, 0.200337f, 
+                                0.299985f, 0.400722f, 
+                                0.299987f, 0.400631f,
+                                0.099983f, 0.200814f};
+
+    uint sz[4] = {9,12,2};
+    nnInitData * initData = new nnInitData(3); 
+    initData->unNoLys = 3;
+
+    //input layer
+    initData->layer_dimensions[0].unInputColumns = 0;
+    initData->layer_dimensions[0].unInputRows = 0;
+    initData->layer_dimensions[0].unNoTransformParameterMtx = 0;
+    initData->layer_dimensions[0].unOutputColumns = 9;
+    initData->layer_dimensions[0].unOutputRows = 1;
+    initData->layer_dimensions[0].unTransformParametersColumns = 0;
+    initData->layer_dimensions[0].unTransformParametersRows = 0;
+
+    //hidden layer
+    initData->layer_dimensions[1].unInputColumns = 3;
+    initData->layer_dimensions[1].unInputRows = 3;
+    initData->layer_dimensions[1].unNoTransformParameterMtx = 3;
+    initData->layer_dimensions[1].unOutputColumns = 2;
+    initData->layer_dimensions[1].unOutputRows = 6;
+    initData->layer_dimensions[1].unTransformParametersColumns = 2;
+    initData->layer_dimensions[1].unTransformParametersRows = 2;
+
+    //output layer
+    initData->layer_dimensions[2].unInputColumns = 2;
+    initData->layer_dimensions[2].unInputRows = 6;
+    initData->layer_dimensions[2].unNoTransformParameterMtx = 1;
+    initData->layer_dimensions[2].unOutputColumns = 2;
+    initData->layer_dimensions[2].unOutputRows = 1;
+    initData->layer_dimensions[2].unTransformParametersColumns = 2;
+    initData->layer_dimensions[2].unTransformParametersRows = 12;
+
+    initData->eAct_Funcs[0] = eAct_func::LEAKY_RELU;
+    initData->e_layer_type[0] = eLayer_type::INPUT;
+    initData->actParam1[0] = 0.01f;
+
+    initData->eAct_Funcs[1] = eAct_func::LEAKY_RELU;
+    initData->e_layer_type[1] = eLayer_type::CONV;
+    initData->actParam1[1] = 0.01f;
+
+    initData->eAct_Funcs[2] = eAct_func::LEAKY_RELU;
+    initData->e_layer_type[2] = eLayer_type::DENSE;
+    initData->actParam1[2] = 0.01f;
+
+    initData->eOpt = eOptimizers::SGD;
+    initData->eLossFunc = eLossFuncs::MSE;
+    initData->fLearningRate = 0.01f;
+
+    NeuralNet* nn = new NeuralNet(initData);
+
+    nn->populate_nodes_bias(1, init_lyr1_biases);
+    nn->populate_nodes_bias(2, init_lyr2_biases);
+
+    nn->populate_weights(1, init_lyr1_wts);
+    nn->populate_weights(2, init_lyr2_wts);
+
+    nn->Train(in, out);
+
+    printf("outlyr delta");
+
+    // for(uint i = 0; i < 2; i++)
+    // {
+    //     float roundedValue = std::round(nn->GetDelta(2, i) * 1000000.0f) / 1000000.0f;
+    //     EXPECT_EQ(roundedValue, delta_out2[i]);
+    // }
+
+    // for(uint i = 0; i < 12; i++)
+    // {
+    //     float roundedValue = std::round(nn->GetDelta(1, i) * 1000000.0f) / 1000000.0f;
+    //     EXPECT_EQ(roundedValue, delta_out1[i]);
+    // }
+
+    // for(uint i = 0; i < 9; i++)
+    // {
+    //     float roundedValue = std::round(nn->GetDelta(0, i) * 1000000.0f) / 1000000.0f;
+    //     EXPECT_EQ(roundedValue, delta_out0[i]);
+    // }
+
+
+    // for(uint i = 0; i < 2; i++)
+    // {
+    //     float roundedValue = std::round(nn->GetBias(2, i) * 1000000.0f) / 1000000.0f;
+    //     EXPECT_EQ(roundedValue, bias_out2[i]);
+    // }
+    
+    // for(uint i = 0; i < 12; i++)
+    // {
+    //     float roundedValue = std::round(nn->GetBias(1, i) * 1000000.0f) / 1000000.0f;
+    //     EXPECT_EQ(roundedValue, bias_out1[i]);
+    // }
+
+    // for(uint i = 0; i < 24; i++)
+    // {
+    //     float roundedValue = std::round(nn->GetWeight(2, i) * 1000000.0f) / 1000000.0f;
+    //     EXPECT_EQ(roundedValue, out_lyr2_wts[i]);
+    // }
+
+    for(uint i = 0; i < 12; i++)
+    {
+        float roundedValue = std::round(nn->GetWeight(1, i) * 1000000.0f) / 1000000.0f;
+        EXPECT_EQ(roundedValue, out_lyr1_wts[i]);
+    }
+
+    delete nn;
+}
+
 

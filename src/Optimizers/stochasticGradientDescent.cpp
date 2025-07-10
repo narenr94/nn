@@ -88,8 +88,11 @@ void StochasticGradientDescent::correct_transform_parameters_conv(uint curr_lyr_
 
     uint kernelSz = k_rows * k_cols;
 
-    uint out_rows = layer_dim.unOutputRows;
-    uint out_cols = layer_dim.unOutputColumns;
+    // uint out_rows = layer_dim.unOutputRows;
+    // uint out_cols = layer_dim.unOutputColumns;
+
+    uint out_rows = layer_dim.unInputRows - layer_dim.unTransformParametersRows + 1;
+    uint out_cols = layer_dim.unInputColumns - layer_dim.unTransformParametersColumns + 1;
 
     uint outSz = out_rows * out_cols;
 
@@ -120,7 +123,7 @@ void StochasticGradientDescent::correct_transform_parameters_conv(uint curr_lyr_
                 uint mtx_idx = (l * k_cols) + m;
                 mtx_idx += (f * kernelSz);
                 // dW[i][j] = delta_wt;
-                m_pNN->SetWeight(i, l, m, (m_pNN->GetWeight(i, mtx_idx) - delta_wt));
+                m_pNN->SetWeight(i, mtx_idx, (m_pNN->GetWeight(i, mtx_idx) - delta_wt));
             }
         }
     }
