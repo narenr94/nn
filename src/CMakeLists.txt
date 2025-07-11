@@ -9,7 +9,8 @@ set(ACT_FUNC_FILES ActivationFunctions/leakyReluActFunc.cpp
     ActivationFunctions/sigmoidActFunc.cpp 
     ActivationFunctions/tanhActFunc.cpp
     ActivationFunctions/softmaxActFunc.cpp)
-set(OPT_FUNC_FILES Optimizers/adam.cpp 
+set(OPT_FUNC_FILES Optimizers/baseOptimizer.cpp
+    Optimizers/adam.cpp 
     Optimizers/rmsprop.cpp 
     Optimizers/stochasticGradientDescent.cpp ) 
 set(LOSS_FUNC_FILES LossFunctions/huberLoss.cpp

@@ -60,13 +60,9 @@ class RMSProp : public BaseOptimizer
 
         void correct_biases();
 
-        void correct_transform_parameters();
-
     public:
     
         RMSProp(NeuralNet* nn, float beta = RMS_PROP_DEFAULT_BETA, float epslion = RMS_PROP_DEFAULT_EPSILON);
-
-        void correct_transform_parameters_and_biases();
 
         ~RMSProp();
 
