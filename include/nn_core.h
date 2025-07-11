@@ -14,67 +14,12 @@
 
 #include "baseLossFunction.h"
 
+#include <vector>
 
+#include "nn_defines.h"
 
 
 #define INPUT_LAYER_ID 0 //input layer is the first layer
-
-
-
-
-/*
-    list of activation functions
-    Note : keep ADAM in bottom to keep tests intact
-*/
-enum eOptimizers{
-    SGD,
-    RMSPROP,
-    ADAM
-};
-
-
-//when below changed make sure to update get set save and load in nn_core
-struct nnInitData{
-
-    uint unNoLys = 0;
-    uint* unSzLys = nullptr;
-    eAct_func *eAct_Funcs;
-    float fLearningRate = 0.5f;
-    uint ID = 0;
-    eOptimizers eOpt = eOptimizers::SGD;
-    eLossFuncs eLossFunc = eLossFuncs::MSE;
-    float optParam1 = 0.0f; //RMS_PROP : beta, ADAM : beta1
-    float optParam2 = 0.0f; //RMS_PROP : epsilon, ADAM : beta2
-    float optParam3 = 0.0f; //ADAM : epsilon
-    float* actParam1; //LEAKY_RELU : delta
-    float lossParam1 = 0.0f; //HUBER : delta
-    //ToDo: parameters for actFunc and Optimizers
-    
-    nnInitData(uint NumLys)
-    {
-        unNoLys = NumLys;
-        unSzLys = new uint [NumLys];
-        eAct_Funcs = new eAct_func[NumLys];
-        actParam1 = new float[NumLys];
-
-        //initialize
-        for(uint i = 0; i < NumLys; i++)
-        {
-            unSzLys[i] = 0;
-            eAct_Funcs[i] = eAct_func::TANH;
-            actParam1[i] = 0.0f;
-        }
-
-    };
-
-    ~nnInitData()
-    {
-        delete [] unSzLys;
-        delete [] eAct_Funcs;
-        delete [] actParam1;
-    }
-
-};
 
 
 class NeuralNet{
@@ -224,7 +169,9 @@ class NeuralNet{
 
     float GetNodeVal(uint LayerID, uint NodeID);
 
-    void SetWeight(uint MtxId, uint inIdx, uint outIdx, float val); 
+    void SetWeight(uint MtxId, uint inIdx, uint outIdx, float val);
+
+    void SetWeight(uint MtxId, uint Idx, float val);
 
     void SaveNN(const char* fileName);   
 
@@ -233,6 +180,8 @@ class NeuralNet{
     const float* GetMatrix(uint idx);
 
     BaseLossFunction* GetLossFunc();
+
+    eLayer_type get_layer_type(uint idx);
 
 
 
@@ -255,10 +204,9 @@ class NeuralNet{
 
     void Set_Init_Data(nnInitData* other_initData);
 
-    void SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, float* actParam1, float lossParam);
+    void SetupLayersAndWeightMatrices(std::vector<eLayer_type>& layer_types, std::vector<sLayer_Dimensions>& dims, std::vector<eAct_func>& actFuncs, std::vector<float>& actParam1, float lossParam);
 
     void MergeBiasAndWeights(uint i);
-
     
 };
 

@@ -1,12 +1,16 @@
 # Source files in src 
 set(SRC_FILES nn_core.cpp nn_math.cpp)
-set(LYR_FILES Layers/denseLayer.cpp)
+set(LYR_FILES Layers/baseLayer.cpp
+    Layers/denseLayer.cpp
+    Layers/convLayer.cpp
+    Layers/inputLayer.cpp)
 set(ACT_FUNC_FILES ActivationFunctions/leakyReluActFunc.cpp 
     ActivationFunctions/reluActFunc.cpp 
     ActivationFunctions/sigmoidActFunc.cpp 
     ActivationFunctions/tanhActFunc.cpp
     ActivationFunctions/softmaxActFunc.cpp)
-set(OPT_FUNC_FILES Optimizers/adam.cpp 
+set(OPT_FUNC_FILES Optimizers/baseOptimizer.cpp
+    Optimizers/adam.cpp 
     Optimizers/rmsprop.cpp 
     Optimizers/stochasticGradientDescent.cpp ) 
 set(LOSS_FUNC_FILES LossFunctions/huberLoss.cpp

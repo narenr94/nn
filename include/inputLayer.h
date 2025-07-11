@@ -1,10 +1,13 @@
-#ifndef DenseLayer_H
-#define DenseLayer_H
+#ifndef INPUT_LAYER_H
+#define INPUT_LAYER_H
+
 
 #include "baseLayer.h"
 
+#include <cassert>
 
-class DenseLayer : public BaseLayer{
+
+class InputLayer : public BaseLayer{
 
     
 
@@ -16,12 +19,12 @@ class DenseLayer : public BaseLayer{
         @n_nodes : number of nodes in layer
         @prevLyr : pointer to previous layer, nullptr for input layer
     */
-    DenseLayer(sLayer_Dimensions t_dims, eAct_func eActFunc, float actParam1);
+    InputLayer(sLayer_Dimensions t_dims, eAct_func eActFunc, float actParam1);
 
     /*
         ~DenseLayer() : destruct and frees layer resources
     */
-    ~DenseLayer();
+    ~InputLayer();
 
     void SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr) override;
 
@@ -32,7 +35,7 @@ class DenseLayer : public BaseLayer{
     void set_transform_matrix_parameter(uint Idx, float fWt) override;
 
     void set_all_transform_matrix_parameter(float* wt) override;
-    
+
 
 };
 

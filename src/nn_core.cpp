@@ -20,6 +20,8 @@
 
 //Layers
 #include "denseLayer.h"
+#include "convLayer.h"
+#include "inputLayer.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -102,7 +104,13 @@ NeuralNet::NeuralNet(const char* fileName)
 
     for(i = 0; i < temp_numLys; i++)
     {
-        fscanf(file, "%d", &(temp_initData->unSzLys[i]));
+        fscanf(file, "%d", &(temp_initData->layer_dimensions[i].unInputRows));
+        fscanf(file, "%d", &(temp_initData->layer_dimensions[i].unInputColumns));
+        fscanf(file, "%d", &(temp_initData->layer_dimensions[i].unOutputRows));
+        fscanf(file, "%d", &(temp_initData->layer_dimensions[i].unOutputColumns));
+        fscanf(file, "%d", &(temp_initData->layer_dimensions[i].unTransformParametersRows));
+        fscanf(file, "%d", &(temp_initData->layer_dimensions[i].unTransformParametersColumns));
+        fscanf(file, "%d", &(temp_initData->layer_dimensions[i].unNoTransformParameterMtx));
     }
 
     for(i = 0; i < temp_numLys; i++)
@@ -174,7 +182,9 @@ void NeuralNet::Get_Init_Data(nnInitData *ret)
     ret->unNoLys = m_unNumLys;
     for(uint i = 0; i < m_unNumLys; i++)
     {
-        ret->unSzLys[i] = m_ppLys[i]->get_num_nodes();
+        ret->layer_dimensions[i] = m_ppLys[i]->get_layer_dimensions();
+
+
         ret->eAct_Funcs[i] = m_ppLys[i]->get_act_func();
         ret->actParam1[i] = m_ppLys[i]->get_act_param();
     }
@@ -207,7 +217,7 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
         delete [] m_ppLys;
     }
 
-    SetupLayersAndWeightMatrices(other_initData->unSzLys, other_initData->eAct_Funcs, other_initData->actParam1, other_initData->lossParam1);
+    SetupLayersAndWeightMatrices(other_initData->e_layer_type, other_initData->layer_dimensions, other_initData->eAct_Funcs, other_initData->actParam1, other_initData->lossParam1);
 
     switch(m_eOpt)
     {
@@ -267,19 +277,32 @@ NeuralNet::~NeuralNet()
     }
 }
 
-
-void NeuralNet::SetupLayersAndWeightMatrices(uint *sz, eAct_func* actFuncs, float* actParam1, float lossParam)
+void NeuralNet::SetupLayersAndWeightMatrices(std::vector<eLayer_type>& layer_types, std::vector<sLayer_Dimensions>& dims, std::vector<eAct_func>& actFuncs, std::vector<float>& actParam1, float lossParam)
 {
     m_ppLys = new BaseLayer*[m_unNumLys];
     
     //create layers
     for(uint i = 0; i < m_unNumLys; i++)
     {
-        m_ppLys[i] = new DenseLayer(sz[i], actFuncs[i], actParam1[i]);
-        
+        switch(layer_types[i])
+        {
+            case eLayer_type::INPUT:
+                m_ppLys[i] = new InputLayer(dims[i], actFuncs[i], actParam1[i]);
+                break;
+
+            case eLayer_type::CONV:
+                m_ppLys[i] = new ConvLayer(dims[i], actFuncs[i], actParam1[i]);
+                break;
+            
+            case eLayer_type::DENSE:
+            default:
+                m_ppLys[i] = new DenseLayer(dims[i], actFuncs[i], actParam1[i]);
+                break;
+        }
+
         if(i != 0)
         {
-            m_unTotalCorrectableNodes += sz[i];
+            m_unTotalCorrectableNodes += dims[i].unOutputRows * dims[i].unOutputColumns;
         }
 
     }
@@ -392,7 +415,7 @@ bool NeuralNet::do_backward_pass(float* pfExpOut)
         for hidden layer nodes:
             error = der_act_func(actual value) * (sum(weights_leading_out_of_node * error_of_node_it_is_reaching))
     */
-    for(uint i = (m_unNumLys - 1); i > INPUT_LAYER_ID; i--)
+    for(int i = (m_unNumLys - 1); i >= INPUT_LAYER_ID; i--)
     {
         if(i != (m_unNumLys - 1))
         {
@@ -754,6 +777,12 @@ void NeuralNet::SetWeight(uint MtxId, uint inIdx, uint outIdx, float val)
     m_ppLys[MtxId]->set_transform_matrix_parameter(inIdx, outIdx, val);
 }
 
+void NeuralNet::SetWeight(uint MtxId, uint Idx, float val)
+{
+    assert(MtxId > 0);
+    m_ppLys[MtxId]->set_transform_matrix_parameter(Idx, val);
+}
+
 void NeuralNet::SaveNN(const char* fileName)
 {
     FILE* file = fopen(fileName, "w"); 
@@ -841,5 +870,11 @@ const float* NeuralNet::GetMatrix(uint idx)
 BaseLossFunction* NeuralNet::GetLossFunc()
 {
     return m_pLossFunc;
+}
+
+eLayer_type NeuralNet::get_layer_type(uint idx)
+{
+    assert(idx < m_unNumLys);
+    return m_ppLys[idx]->get_layer_type();
 }
 

@@ -115,7 +115,7 @@ void OpenclAccelerator::do_forwardpass_dense_layer()
 
 }
 
-void OpenclAccelerator::do_backwardpass_dense_layer_output_layer(float* pfExpOut, BaseLossFunction* lossFunc)
+void OpenclAccelerator::do_backwardpass_from_output_layer(float* pfExpOut, BaseLossFunction* lossFunc)
 {
     //i = layer index
     uint j = 0; //current layer node index

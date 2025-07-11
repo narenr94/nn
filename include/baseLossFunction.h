@@ -3,18 +3,6 @@
 
 #include "nn_math.h"
 
-/*
-    list of activation functions
-    Note : keep CCE in bottom to keep tests intact
-*/
-enum eLossFuncs{
-    MSE, //mean squared error
-    MAE, //mean absolute error
-    HUBER, //huber loss
-    BCE, //binary cross entropy loss
-    CCE //competitive cross entropy loss
-};
-
 class BaseLayer; //forward declaration, class defined in baseLayer.h
 
 class BaseLossFunction{
