@@ -2,7 +2,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 include(GoogleTest)
 
-set(EXEC_NAME DenseLayer_tests)
+set(EXEC_NAME ConvLayer_tests)
 
 set(DEPS_INC "../../build/libs/include/")
 
@@ -15,11 +15,12 @@ set(UTESTS_ROOT "../../")
 include_directories(${NN_INC})
 include_directories(${DEPS_INC})
 
-set(TEST_SOURCES    denseLayer_tests_main.cpp
-	denseLayer_tests.cpp)
+set(TEST_SOURCES    convLayer_tests_main.cpp
+	convLayer_tests.cpp)
 
-set(NN_SOURCES ${NN_SRC}/Layers/denseLayer.cpp
-	${NN_SRC}/Layers/baseLayer.cpp)
+set(NN_SOURCES ${NN_SRC}/Layers/convLayer.cpp
+	${NN_SRC}/Layers/baseLayer.cpp
+	${NN_SRC}/Layers/inputLayer.cpp)
 
 set(FAKE_SOURCES ${UTESTS_ROOT}/fakes/fake_sigmoidActFunc.cpp
 ${UTESTS_ROOT}/fakes/fake_leakyReluActFunc.cpp

@@ -16,9 +16,19 @@ public:
 
     BaseOptimizer(){}
 
-    virtual void correct_transform_parameters_and_biases() = 0;
+    void correct_transform_parameters_and_biases();
 
     virtual ~BaseOptimizer(){}
+
+private:
+
+    virtual void correct_biases() = 0;
+
+    void correct_transform_parameters();
+
+    virtual void correct_transform_parameters_dense(uint curr_lyr_idx) = 0;
+
+    virtual void correct_transform_parameters_conv(uint curr_lyr_idx) = 0;
 
 };
 

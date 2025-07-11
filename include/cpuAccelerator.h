@@ -11,19 +11,13 @@ public:
     CpuAccelerator(BaseLayer* pNLyr);
 
     void do_forwardpass_dense_layer() override;
-    void do_backwardpass_dense_layer_output_layer(float* pfExpOut, BaseLossFunction* lossFunc) override;
+    void do_backwardpass_from_output_layer(float* pfExpOut, BaseLossFunction* lossFunc) override;
     void do_backwardpass_dense_layer() override;
 
-    /*todo:
+    void do_forwardpass_conv_layer(sLayer_Dimensions t_tims) override;
+    void do_backwardpass_conv_layer(sLayer_Dimensions t_tims) override;
 
-        out_lyr->apply_act_func_all_nodes();
-        m_pOptimizer->correct_weights_biases();
-
-        //batch processing stuff
-        
-    */ 
-
-   virtual ~CpuAccelerator();
+    virtual ~CpuAccelerator();
 
 };
 #endif

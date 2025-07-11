@@ -25,7 +25,7 @@ void CpuAccelerator::do_forwardpass_dense_layer()
     uint i = 0;
     uint j = 0;
 
-    float sigma = 0;
+    float sigma = 0.0f;
 
     for(j = 0; j < out_lyr_sz; j++)
     {
@@ -39,14 +39,14 @@ void CpuAccelerator::do_forwardpass_dense_layer()
         sigma /= in_lyr->get_num_nodes();
         // sigma = m_pActFunc->apply_act_func(sigma);
         out_lyr->set_node_value(sigma, j);
-        sigma = 0;
+        sigma = 0.0f;
     }
 
     //apply activation function
     out_lyr->apply_act_func_all_nodes();
 }
 
-void CpuAccelerator::do_backwardpass_dense_layer_output_layer(float* pfExpOut, BaseLossFunction* lossFunc)
+void CpuAccelerator::do_backwardpass_from_output_layer(float* pfExpOut, BaseLossFunction* lossFunc)
 {
     //i = layer index
     uint j = 0; //current layer node index
@@ -88,9 +88,130 @@ void CpuAccelerator::do_backwardpass_dense_layer()
             temp[j] += m_pLayer->GetNextLayer()->get_node_delta_idx(k) * m_pLayer->GetNextLayer()->get_transform_matrix_parameter(mtx_idx);
         }
     }
-        // temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
+    // temp *= m_pActFunc->apply_act_func_derv(m_ppLys[i]->get_node_value_idx(j));
     m_pLayer->get_delta_all_nodes(temp);
     for(j = 0; j < m_pLayer->get_num_nodes(); j++)
+    {
+        m_pLayer->set_node_delta(temp[j], j);
+    }
+
+    delete [] temp;
+}
+
+
+void CpuAccelerator::do_forwardpass_conv_layer(sLayer_Dimensions t_dims)
+{
+    uint input_rows = t_dims.unInputRows;
+    uint input_columns = t_dims.unInputColumns;
+    uint filter_rows = t_dims.unTransformParametersRows;
+    uint filter_columns = t_dims.unTransformParametersColumns;
+    uint output_rows = t_dims.unInputRows - t_dims.unTransformParametersRows + 1; //per filter
+    uint output_columns = t_dims.unInputColumns - t_dims.unTransformParametersColumns + 1; //per filter
+    
+
+    BaseLayer* in_lyr = m_pLayer->GetPreviousLayer();
+
+    uint kernalSz = filter_rows * filter_columns;
+
+    uint outSz = output_rows * output_columns;
+
+    float sigma = 0.0f;
+
+    for(uint f = 0; f < t_dims.unNoTransformParameterMtx; f++)
+    {
+
+        for(uint i = 0; i < output_rows; i++)
+        {
+            for(uint j = 0; j < output_columns; j++)
+            {
+                for(uint k = 0; k < filter_rows; k++)
+                {
+                    for(uint l = 0; l < filter_columns; l++)
+                    {
+                        //output[i][j] += input[i + k][j + l] * filter[k][l];
+                        sigma += in_lyr->get_node_value_idx(((i + k) * input_columns) + (j + l)) * m_pLayer->get_transform_matrix_parameter(((k * filter_columns) + l) + (f * kernalSz));
+                    }
+                }
+
+                sigma += m_pLayer->get_node_bias_idx(((i * output_columns) + j) + (f * outSz));
+                sigma /= kernalSz;
+                m_pLayer->set_node_value(sigma, ((i * output_columns) + j) + (f * outSz));
+                sigma = 0.0f;
+            }
+        }
+    }
+
+    //apply activation function
+    m_pLayer->apply_act_func_all_nodes();
+}
+
+void CpuAccelerator::do_backwardpass_conv_layer(sLayer_Dimensions t_dims)
+{
+    uint input_rows = t_dims.unInputRows;
+    uint input_columns = t_dims.unInputColumns;
+    uint filter_rows = t_dims.unTransformParametersRows;
+    uint filter_columns = t_dims.unTransformParametersColumns;
+
+    uint kernelSz = filter_rows * filter_columns;
+   
+
+    float * temp = new float[m_pLayer->get_num_nodes()];
+
+    for(uint i = 0; i < m_pLayer->get_num_nodes(); i++)
+    {
+        temp[i] = 0.0f;
+    }
+
+    uint out_rows = input_rows - filter_rows + 1;
+    uint out_columns = input_columns - filter_columns + 1;
+
+    uint outSz = out_rows * out_columns;
+
+    uint p = 0; //out_rows
+    uint q = 0; //out_columns
+
+    uint m = 0; //filter_rows
+    uint n = 0; //filter_columns
+
+    uint rm = 0;
+    uint rn = 0;
+    uint rot_filter_idx = 0;
+
+
+    float next_lyr_idx = 0.0f;
+    float filter_idx = 0.0f;
+
+    for(uint f  = 0; f < t_dims.unNoTransformParameterMtx; f++)
+    {
+
+        for (p = 0; p < out_rows; ++p) 
+        {
+            for (q = 0; q < out_columns; ++q) 
+            {
+                for (m = 0; m < filter_rows; ++m) 
+                {
+                    for (n = 0; n < filter_columns; ++n) 
+                    {
+                        // dX[p + m][q + n] += dOut[p][q] * kernel[m][n];
+
+                        next_lyr_idx = (p * out_columns) + q;
+                        next_lyr_idx += (f * outSz);
+                        // compute rotated indices
+                        rm = filter_rows  - 1 - m;
+                        rn = filter_columns  - 1 - n;
+                        rot_filter_idx = rm * filter_columns + rn;
+                        rot_filter_idx += (f * kernelSz);
+
+                        temp[((p + m) * input_columns) + (q + n)] += m_pLayer->GetNextLayer()->get_node_delta_idx(next_lyr_idx) * m_pLayer->GetNextLayer()->get_transform_matrix_parameter(rot_filter_idx);
+                    }
+                }
+            }
+        }
+    }
+
+    m_pLayer->get_delta_all_nodes(temp);
+    
+    for(uint j = 0; j < m_pLayer->get_num_nodes(); j++)
     {
         m_pLayer->set_node_delta(temp[j], j);
     }

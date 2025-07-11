@@ -13,7 +13,13 @@
 #define TEST_MAX 10000 //max number of lines in testing set
 #define NORM_FACTOR 254.0 //max value in data set for normalization
 #define VAL_SIZE 784 //input layer size
-#define EPOCH_MAX 3 //number epochs of training and testing 
+#define EPOCH_MAX 1 //number epochs of training and testing 
+
+/*
+Observation
+Adam doesnt seem to be working with default values for beta1, beta2 and epsilon
+from trial and error found that beta1=0.9f, beta2 = 0.9f and epsilon = 0.1f works
+*/
 
 /*
 getLineNumber : gets particular line from file
@@ -58,7 +64,8 @@ int main()
 
     uint j = 0;
 
-    uint sz[4] = {784,32,32,10};
+    uint sz[4] = {784,2028,32,10}; //28x28
+    //26x26
     eAct_func actFuncs[4] = {eAct_func::TANH, eAct_func::TANH, eAct_func::TANH, eAct_func::TANH};
 
     float* out = (float*)malloc(10*sizeof(float));
@@ -92,47 +99,49 @@ int main()
 
     initData->unNoLys = 4;
 
-    set_layer_info(sz, initData->unNoLys, initData);
+    // set_layer_info(sz, initData->unNoLys, initData);
 
-    for(uint l = 0; l < initData->unNoLys; l++)
-    {
-        if(l != 0)
-        {
-            initData->e_layer_type[l] = eLayer_type::DENSE;
-        }
-        else
-        {
-            initData->e_layer_type[l] = eLayer_type::INPUT;
-        }
-        initData->eAct_Funcs[l] = actFuncs[l];
-    }
+    initData->e_layer_type[0] = eLayer_type::INPUT;
+    initData->layer_dimensions[0].unInputColumns = 0;
+    initData->layer_dimensions[0].unInputRows = 0;
+    initData->layer_dimensions[0].unNoTransformParameterMtx = 0;
+    initData->layer_dimensions[0].unOutputColumns = 784;
+    initData->layer_dimensions[0].unOutputRows = 1;
+    initData->layer_dimensions[0].unTransformParametersColumns = 0;
+    initData->layer_dimensions[0].unTransformParametersRows = 0;
 
-/*
-Observation
-Adam doesnt seem to be working with default values for beta1, beta2 and epsilon
-from trial and error found that beta1=0.9f, beta2 = 0.9f and epsilon = 0.1f works
-RMF Prop sometimes works with default others it works with below
-beta = 0.999f epsilon = 0.00000001f
-idhu oru manda kolaru bro
-*/
-    initData->eOpt = eOptimizers::RMSPROP;
-    //SGD
-    // initData->eOpt = eOptimizers::SGD;
-    // initData->fLearningRate = 0.01f;
-    //ADAM
-    initData->eOpt = eOptimizers::ADAM;
-    initData->optParam1 = 0.9f;
-    initData->optParam2 = 0.99f;
-    initData->optParam3 = 0.01f;
-    initData->fLearningRate = 0.01f;
-    //RMSPROP
-    // initData->eOpt = eOptimizers::RMSPROP;
-    // initData->optParam1 = 0.999f;
-    // initData->optParam2 = 0.00000001f;
-    // initData->fLearningRate = 0.1f;
+    
+    initData->e_layer_type[1] = eLayer_type::CONV;
+    initData->layer_dimensions[1].unInputColumns = 28;
+    initData->layer_dimensions[1].unInputRows = 28;
+    initData->layer_dimensions[1].unNoTransformParameterMtx = 3;
+    initData->layer_dimensions[1].unOutputColumns = 26;
+    initData->layer_dimensions[1].unOutputRows = 78;
+    initData->layer_dimensions[1].unTransformParametersColumns = 3;
+    initData->layer_dimensions[1].unTransformParametersRows = 3;
 
 
+    initData->e_layer_type[2] = eLayer_type::DENSE;
+    initData->layer_dimensions[2].unInputColumns = 2028;
+    initData->layer_dimensions[2].unInputRows = 1;
+    initData->layer_dimensions[2].unNoTransformParameterMtx = 1;
+    initData->layer_dimensions[2].unOutputColumns = 32;
+    initData->layer_dimensions[2].unOutputRows = 1;
+    initData->layer_dimensions[2].unTransformParametersColumns = 32;
+    initData->layer_dimensions[2].unTransformParametersRows = 2028;
+
+    initData->e_layer_type[3] = eLayer_type::DENSE;
+    initData->layer_dimensions[3].unInputColumns = 32;
+    initData->layer_dimensions[3].unInputRows = 1;
+    initData->layer_dimensions[3].unNoTransformParameterMtx = 1;
+    initData->layer_dimensions[3].unOutputColumns = 10;
+    initData->layer_dimensions[3].unOutputRows = 1;
+    initData->layer_dimensions[3].unTransformParametersColumns = 10;
+    initData->layer_dimensions[3].unTransformParametersRows = 32;
+
+    initData->eOpt = eOptimizers::SGD;
     initData->eLossFunc = eLossFuncs::HUBER;
+    initData->fLearningRate = 0.01f;
 
     NeuralNet *nn = new NeuralNet(initData);
 
@@ -240,9 +249,6 @@ idhu oru manda kolaru bro
     
     pbThread.join();
     
-
-    
-
     delete nn;
 
     delete pb;

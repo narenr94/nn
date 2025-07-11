@@ -1,28 +1,27 @@
-#ifndef DenseLayer_H
-#define DenseLayer_H
+#ifndef ConvLayer_H
+#define ConvLayer_H
 
 #include "baseLayer.h"
 
 
-class DenseLayer : public BaseLayer{
+class ConvLayer : public BaseLayer{
 
-    
-
-    
+     
     public:
 
     /*
-        DenseLayer() : constructor for layer
+        ConvLayer() : constructor for layer
         @n_nodes : number of nodes in layer
         @prevLyr : pointer to previous layer, nullptr for input layer
     */
-    DenseLayer(sLayer_Dimensions t_dims, eAct_func eActFunc, float actParam1);
+    ConvLayer(sLayer_Dimensions t_dims, eAct_func eActFunc, float actParam1);
 
     /*
-        ~DenseLayer() : destruct and frees layer resources
+        ~ConvLayer() : destruct and frees layer resources
     */
-    ~DenseLayer();
+    ~ConvLayer();
 
+    
     void SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr) override;
 
     void do_forwardpass_to_current_layer() override;
