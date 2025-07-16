@@ -20,7 +20,8 @@ set(TEST_SOURCES    convLayer_tests_main.cpp
 
 set(NN_SOURCES ${NN_SRC}/Layers/convLayer.cpp
 	${NN_SRC}/Layers/baseLayer.cpp
-	${NN_SRC}/Layers/inputLayer.cpp)
+	${NN_SRC}/Layers/inputLayer.cpp
+	${NN_SRC}/nn_defines.cpp)
 
 set(FAKE_SOURCES ${UTESTS_ROOT}/fakes/fake_sigmoidActFunc.cpp
 ${UTESTS_ROOT}/fakes/fake_leakyReluActFunc.cpp

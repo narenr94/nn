@@ -25,7 +25,8 @@ ${NN_SRC}/Layers/baseLayer.cpp
 ${NN_SRC}/Layers/denseLayer.cpp
 ${NN_SRC}/Layers/convLayer.cpp
 ${NN_SRC}/Layers/inputLayer.cpp
-${NN_SRC}/nn_math.cpp)
+${NN_SRC}/nn_math.cpp
+${NN_SRC}/nn_defines.cpp)
 
 set(ACT_SOURCES ${NN_SRC}/ActivationFunctions/sigmoidActFunc.cpp
 ${NN_SRC}/ActivationFunctions/leakyReluActFunc.cpp

@@ -25,7 +25,8 @@ ${NN_SRC}/Layers/inputLayer.cpp
 ${NN_SRC}/Layers/baseLayer.cpp
 ${NN_SRC}/nn_math.cpp
 ${NN_SRC}/nn_defines.cpp
-${NN_SRC}/nn_core.cpp)
+${NN_SRC}/nn_core.cpp
+${NN_SRC}/nn_defines.cpp)
 
 set(ACT_SOURCES ${NN_SRC}/ActivationFunctions/sigmoidActFunc.cpp
 ${NN_SRC}/ActivationFunctions/leakyReluActFunc.cpp
@@ -43,7 +44,8 @@ ${NN_SRC}/LossFunctions/meanSquaredError.cpp
 
 set(OPT_SOURCES ${NN_SRC}/Optimizers/adam.cpp
 ${NN_SRC}/Optimizers/rmsprop.cpp
-${NN_SRC}/Optimizers/stochasticGradientDescent.cpp)
+${NN_SRC}/Optimizers/stochasticGradientDescent.cpp
+${NN_SRC}/Optimizers/baseOptimizer.cpp)
 
 add_executable(${EXEC_NAME}	${FAKE_SOURCES} ${LOSS_SOURCES} ${ACT_SOURCES} ${OPT_SOURCES} ${TEST_SOURCES} ${NN_SOURCES})
 

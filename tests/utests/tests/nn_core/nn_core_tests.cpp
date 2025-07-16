@@ -56,7 +56,7 @@ TEST(NN_CORE_TESTS, nn_core_setup_dense_test)
     initData->eLossFunc = eLossFuncs::HUBER;
     initData->fLearningRate = 0.01f;
 
-    NeuralNet* nn = new NeuralNet(initData);
+    NeuralNet* nn = new NeuralNet(*initData);
 
     nn->populate_nodes_bias(1, init_lyr1_biases);
     nn->populate_nodes_bias(2, init_lyr2_biases);
@@ -150,7 +150,7 @@ TEST(NN_CORE_TESTS, nn_core_testrun_dense_test)
     initData->eLossFunc = eLossFuncs::HUBER;
     initData->fLearningRate = 0.01f;
 
-    NeuralNet* nn = new NeuralNet(initData);
+    NeuralNet* nn = new NeuralNet(*initData);
 
     nn->populate_nodes_bias(1, init_lyr1_biases);
     nn->populate_nodes_bias(2, init_lyr2_biases);
@@ -229,7 +229,7 @@ TEST(NN_CORE_TESTS, nn_core_trainrun_dense_test)
     initData->eLossFunc = eLossFuncs::HUBER;
     initData->fLearningRate = 0.01f;
 
-    NeuralNet* nn = new NeuralNet(initData);
+    NeuralNet* nn = new NeuralNet(*initData);
 
     nn->populate_nodes_bias(1, init_lyr1_biases);
     nn->populate_nodes_bias(2, init_lyr2_biases);
@@ -334,7 +334,7 @@ TEST(NN_CORE_TESTS, nn_core_setup_conv_test)
     initData->eLossFunc = eLossFuncs::HUBER;
     initData->fLearningRate = 0.01f;
 
-    NeuralNet* nn = new NeuralNet(initData);
+    NeuralNet* nn = new NeuralNet(*initData);
 
     nn->populate_nodes_bias(1, init_lyr1_biases);
     nn->populate_nodes_bias(2, init_lyr2_biases);
@@ -437,7 +437,7 @@ TEST(NN_CORE_TESTS, nn_core_testrun_conv_test)
     initData->eLossFunc = eLossFuncs::HUBER;
     initData->fLearningRate = 0.01f;
 
-    NeuralNet* nn = new NeuralNet(initData);
+    NeuralNet* nn = new NeuralNet(*initData);
 
     nn->populate_nodes_bias(1, init_lyr1_biases);
     nn->populate_nodes_bias(2, init_lyr2_biases);
@@ -537,7 +537,7 @@ TEST(NN_CORE_TESTS, nn_core_trainrun_conv_test)
     initData->eLossFunc = eLossFuncs::MSE;
     initData->fLearningRate = 0.01f;
 
-    NeuralNet* nn = new NeuralNet(initData);
+    NeuralNet* nn = new NeuralNet(*initData);
 
     nn->populate_nodes_bias(1, init_lyr1_biases);
     nn->populate_nodes_bias(2, init_lyr2_biases);
@@ -672,7 +672,7 @@ TEST(NN_CORE_TESTS, nn_core_testrun_conv_multiKernel_test)
     initData->eLossFunc = eLossFuncs::HUBER;
     initData->fLearningRate = 0.01f;
 
-    NeuralNet* nn = new NeuralNet(initData);
+    NeuralNet* nn = new NeuralNet(*initData);
 
     nn->populate_nodes_bias(1, init_lyr1_biases);
     nn->populate_nodes_bias(2, init_lyr2_biases);
@@ -804,7 +804,7 @@ TEST(NN_CORE_TESTS, nn_core_trainrun_conv_multiKernel_test)
     initData->eLossFunc = eLossFuncs::MSE;
     initData->fLearningRate = 0.01f;
 
-    NeuralNet* nn = new NeuralNet(initData);
+    NeuralNet* nn = new NeuralNet(*initData);
 
     nn->populate_nodes_bias(1, init_lyr1_biases);
     nn->populate_nodes_bias(2, init_lyr2_biases);
