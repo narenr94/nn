@@ -1,5 +1,5 @@
 # Source files in src 
-set(SRC_FILES nn_core.cpp nn_math.cpp)
+set(SRC_FILES nn_core.cpp nn_math.cpp nn_defines.cpp)
 set(LYR_FILES Layers/baseLayer.cpp
     Layers/denseLayer.cpp
     Layers/convLayer.cpp
