@@ -36,28 +36,11 @@ struct sLayer_Dimensions{
     uint unTransformParametersColumns;
     uint unNoTransformParameterMtx;
 
-    sLayer_Dimensions()
-    {
-        unInputRows;
-        unInputColumns;
-        unOutputRows;
-        unOutputColumns;
-        unTransformParametersRows;
-        unTransformParametersColumns;
-        unNoTransformParameterMtx;
-    }
+    sLayer_Dimensions();
 
-    sLayer_Dimensions(uint in_rows, uint in_columns, uint out_rows, uint out_cols, uint trans_rows, uint trans_cols, uint no_trans_mtx)
-    {
-        unInputRows = in_rows;
-        unInputColumns = in_columns;
-        unOutputRows = out_rows;
-        unOutputColumns = out_cols;
-        unTransformParametersRows = trans_rows;
-        unTransformParametersColumns = trans_cols;
-        unNoTransformParameterMtx = no_trans_mtx;
-    }
+    sLayer_Dimensions(const sLayer_Dimensions& other);
 
+    sLayer_Dimensions(uint in_rows, uint in_columns, uint out_rows, uint out_cols, uint trans_rows, uint trans_cols, uint no_trans_mtx);
 };
 
 
@@ -74,8 +57,6 @@ enum eLossFuncs{
 };
 
 
-
-
 /*
     list of activation functions
     Note : keep ADAM in bottom to keep tests intact
@@ -87,43 +68,52 @@ enum eOptimizers{
 };
 
 
+enum eKernelSize{
+    Sz3x3,
+    Sz5x5,
+    Sz7x7
+};
+
+
 //when below changed make sure to update get set save and load in nn_core
 struct nnInitData{
 
-    uint unNoLys = 0;
+    //for debug
+    uint ID;
+    
+    //layer stuff
     std::vector<sLayer_Dimensions> layer_dimensions;
     std::vector<eAct_func> eAct_Funcs;
     std::vector<eLayer_type> e_layer_type;
-    float fLearningRate = 0.5f;
-    uint ID = 0;
-    eOptimizers eOpt = eOptimizers::SGD;
-    eLossFuncs eLossFunc = eLossFuncs::MSE;
-    float optParam1 = 0.0f; //RMS_PROP : beta, ADAM : beta1
-    float optParam2 = 0.0f; //RMS_PROP : epsilon, ADAM : beta2
-    float optParam3 = 0.0f; //ADAM : epsilon
     std::vector<float>actParam1; //LEAKY_RELU : delta
-    float lossParam1 = 0.0f; //HUBER : delta
-    //ToDo: parameters for actFunc and Optimizers
-    
-    nnInitData(uint NumLys)
-    {
-        unNoLys = NumLys;
-        layer_dimensions.resize(unNoLys);
-        eAct_Funcs.resize(unNoLys);
-        e_layer_type.resize(unNoLys);
-        actParam1.resize(unNoLys);
+    uint unNoLys = 0;
 
-        for(uint i = 0; i < NumLys; i++)
-        {
-            eAct_Funcs[i] = eAct_func::TANH;
-            e_layer_type[i] = eLayer_type::DENSE;
-            actParam1[i] = 0.0f;
-        }
-    };
+    //entire network stuff
+    float fLearningRate = 0.5f;
+    eOptimizers eOpt = eOptimizers::SGD;
+    float optParam[3] = {0.0f, 0.0f, 0.0f}; 
+    //optParam[0]RMS_PROP : beta, ADAM : beta1
+    //optParam[1]RMS_PROP : epsilon, ADAM : beta2
+    //optParam[2]ADAM : epsilon    
+    eLossFuncs eLossFunc = eLossFuncs::MSE;
+    float lossParam = 0.0f; //HUBER : delta
+
+    nnInitData()
+    {}
+
+    nnInitData(uint sz);
+
+    nnInitData(uint InLyrSz, eOptimizers t_opt, std::vector<float> t_optParam, eLossFuncs t_loss_func, float t_loss_param, float t_learning_rate);
+
+    nnInitData(const nnInitData& other);
 
     ~nnInitData()
     {
     }
+
+    void add_dense_layer(uint OutSz, eAct_func t_act_func, float t_act_param);
+
+    void add_conv_layer(uint t_in_rows, uint t_in_cols, eKernelSize t_kernel_size, uint t_num_kernels, eAct_func t_act_func, float t_act_param);
 
 };
 

@@ -76,7 +76,9 @@ int main()
 
     float accuracy = 0.0;   
 
-    nnInitData * initData = new nnInitData(4); 
+    uint u_sz = 4;
+
+    nnInitData * initData = new nnInitData(u_sz);
     /*
     struct nnInitData{
 
@@ -149,14 +151,14 @@ idhu oru manda kolaru bro
     // initData->fLearningRate = 0.01f;
     //RMSPROP
     initData->eOpt = eOptimizers::RMSPROP;
-    initData->optParam1 = 0.999f;
-    initData->optParam2 = 0.00000001f;
+    initData->optParam[0] = 0.999f;
+    initData->optParam[1] = 0.00000001f;
     initData->fLearningRate = 0.1f;
 
 
     initData->eLossFunc = eLossFuncs::HUBER;
 
-    NeuralNet *nn = new NeuralNet(initData);
+    NeuralNet *nn = new NeuralNet(*initData);
 
     nn->populateWeightsAndBiasesWithRandomNumbers();
 

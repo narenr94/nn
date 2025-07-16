@@ -51,7 +51,7 @@ static Batch_Training_Args ** args = nullptr;
 
 
 
-NeuralNet::NeuralNet(nnInitData* initData):
+NeuralNet::NeuralNet(nnInitData& initData):
 m_ppLys(nullptr)
 {
 
@@ -63,20 +63,17 @@ m_ppLys(nullptr)
 
 NeuralNet::NeuralNet(NeuralNet* other)
 {
-    nnInitData *ret = new nnInitData(m_unNumLys);
+    nnInitData ret = other->Get_Init_Data();
 
     //debug
     static uint i = 1;
 
-    other->Get_Init_Data(ret);
-
-    ret->ID = i;
+    ret.ID = i;
     i++;
 
     Set_Init_Data(ret);
     populateWeightsAndBiasesWithExistingNN(other);
 
-    delete ret;
 }
 
 NeuralNet::NeuralNet(const char* fileName)
@@ -129,11 +126,11 @@ NeuralNet::NeuralNet(const char* fileName)
     temp_initData->eLossFunc = (eLossFuncs)temp_int;
 
     fscanf(file, "%f", &temp_float);
-    temp_initData->optParam1 = temp_float;
+    temp_initData->optParam[0] = temp_float;
     fscanf(file, "%f", &temp_float);
-    temp_initData->optParam2 = temp_float;
+    temp_initData->optParam[1] = temp_float;
     fscanf(file, "%f", &temp_float);
-    temp_initData->optParam3 = temp_float;
+    temp_initData->optParam[2] = temp_float;
 
     for(i = 0; i < temp_numLys; i++)
     {
@@ -144,10 +141,10 @@ NeuralNet::NeuralNet(const char* fileName)
     // temp_initData->actParam1 = temp_float;
 
     fscanf(file, "%f", &temp_float);
-    temp_initData->lossParam1 = temp_float;
+    temp_initData->lossParam = temp_float;
 
     //set nn with temp init data
-    Set_Init_Data(temp_initData);
+    Set_Init_Data(*temp_initData);
 
     delete temp_initData;
 
@@ -177,47 +174,47 @@ NeuralNet::NeuralNet(const char* fileName)
 	fclose(file);
 }
 
-void NeuralNet::Get_Init_Data(nnInitData *ret)
+nnInitData NeuralNet::Get_Init_Data()
 {
-    ret->unNoLys = m_unNumLys;
+    nnInitData ret;
+    ret.unNoLys = m_unNumLys;
     for(uint i = 0; i < m_unNumLys; i++)
     {
-        ret->layer_dimensions[i] = m_ppLys[i]->get_layer_dimensions();
-
-
-        ret->eAct_Funcs[i] = m_ppLys[i]->get_act_func();
-        ret->actParam1[i] = m_ppLys[i]->get_act_param();
+        ret.layer_dimensions.emplace_back(m_ppLys[i]->get_layer_dimensions());
+        ret.eAct_Funcs.emplace_back(m_ppLys[i]->get_act_func());
+        ret.actParam1.emplace_back(m_ppLys[i]->get_act_param());
     }
     
-    ret->fLearningRate = m_fLearningRate;
-    ret->eOpt = m_eOpt;
-    ret->eLossFunc = m_eLossFunc;
+    ret.fLearningRate = m_fLearningRate;
+    ret.eOpt = m_eOpt;
+    ret.eLossFunc = m_eLossFunc;
 
-    ret->optParam1 = m_optParam1;
-    ret->optParam2 = m_optParam2;
-    ret->optParam3 = m_optParam3;
+    ret.optParam[0] = m_optParam1;
+    ret.optParam[1] = m_optParam2;
+    ret.optParam[2] = m_optParam3;
     
-    ret->lossParam1 = m_lossParam1;
+    ret.lossParam = m_lossParam1;
     // ret->ID = nn_id;
+    return ret;
 
 }
 
-void NeuralNet::Set_Init_Data(nnInitData* other_initData)
+void NeuralNet::Set_Init_Data(nnInitData& other_initData)
 {
-    m_unNumLys = other_initData->unNoLys;
+    m_unNumLys = other_initData.unNoLys;
     
-    m_fLearningRate = other_initData->fLearningRate;
+    m_fLearningRate = other_initData.fLearningRate;
     // nn_id = other_initData->ID;
-    m_eOpt = other_initData->eOpt;
+    m_eOpt = other_initData.eOpt;
 
-    m_eLossFunc = other_initData->eLossFunc;
+    m_eLossFunc = other_initData.eLossFunc;
 
     if(m_ppLys)
     {
         delete [] m_ppLys;
     }
 
-    SetupLayersAndWeightMatrices(other_initData->e_layer_type, other_initData->layer_dimensions, other_initData->eAct_Funcs, other_initData->actParam1, other_initData->lossParam1);
+    SetupLayersAndWeightMatrices(other_initData.e_layer_type, other_initData.layer_dimensions, other_initData.eAct_Funcs, other_initData.actParam1, other_initData.lossParam);
 
     switch(m_eOpt)
     {
@@ -225,10 +222,10 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
             m_pOptimizer = new StochasticGradientDescent(this);
             break;
         case eOptimizers::RMSPROP:
-            m_pOptimizer = new RMSProp(this, other_initData->optParam1 != 0.0f ? other_initData->optParam1 : RMS_PROP_DEFAULT_BETA, other_initData->optParam2 != 0.0f ? other_initData->optParam2 : RMS_PROP_DEFAULT_EPSILON);
+            m_pOptimizer = new RMSProp(this, other_initData.optParam[0] != 0.0f ? other_initData.optParam[0] : RMS_PROP_DEFAULT_BETA, other_initData.optParam[1] != 0.0f ? other_initData.optParam[1] : RMS_PROP_DEFAULT_EPSILON);
             break;
         case eOptimizers::ADAM:
-            m_pOptimizer = new ADAMOPT(this, other_initData->optParam1 != 0.0f ? other_initData->optParam1 : ADAM_DEFAULT_BETA1, other_initData->optParam2 != 0.0f ? other_initData->optParam2 : ADAM_DEFAULT_BETA1, other_initData->optParam3 != 0.0f ? other_initData->optParam3 : ADAM_DEFAULT_EPSILON);
+            m_pOptimizer = new ADAMOPT(this, other_initData.optParam[0] != 0.0f ? other_initData.optParam[0] : ADAM_DEFAULT_BETA1, other_initData.optParam[1] != 0.0f ? other_initData.optParam[1] : ADAM_DEFAULT_BETA1, other_initData.optParam[2] != 0.0f ? other_initData.optParam[2] : ADAM_DEFAULT_EPSILON);
             break;
         default:
             m_pOptimizer = new StochasticGradientDescent(this);
@@ -236,11 +233,11 @@ void NeuralNet::Set_Init_Data(nnInitData* other_initData)
     }
 
     //store param values locally
-    m_optParam1 = other_initData->optParam1;
-    m_optParam2 = other_initData->optParam2;
-    m_optParam3 = other_initData->optParam3;
+    m_optParam1 = other_initData.optParam[0];
+    m_optParam2 = other_initData.optParam[1];
+    m_optParam3 = other_initData.optParam[2];
 
-    m_lossParam1 = other_initData->lossParam1;
+    m_lossParam1 = other_initData.lossParam;
 
 }
 

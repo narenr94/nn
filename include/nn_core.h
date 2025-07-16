@@ -62,7 +62,7 @@ class NeuralNet{
     /*
         Constructor
     */
-    NeuralNet(nnInitData* initData);
+    NeuralNet(nnInitData& initData);
 
     // Copy constructor
     NeuralNet(NeuralNet* other);
@@ -77,7 +77,7 @@ class NeuralNet{
 
     void Get_OutputLayer_Data(float* fVal);
 
-    void Get_Init_Data(nnInitData *ret);
+    nnInitData Get_Init_Data();
 
     void Init_Batch_Training(uint batchSz);
 
@@ -202,7 +202,7 @@ class NeuralNet{
 
     // void apply_delats_to_weights_and_biases_batch_training(float* deltas);
 
-    void Set_Init_Data(nnInitData* other_initData);
+    void Set_Init_Data(nnInitData& other_initData);
 
     void SetupLayersAndWeightMatrices(std::vector<eLayer_type>& layer_types, std::vector<sLayer_Dimensions>& dims, std::vector<eAct_func>& actFuncs, std::vector<float>& actParam1, float lossParam);
 

@@ -13,9 +13,7 @@
 #define TEST_MAX 10000 //max number of lines in testing set
 #define NORM_FACTOR 254.0 //max value in data set for normalization
 #define VAL_SIZE 784 //input layer size
-#define EPOCH_MAX 3 //number epochs of training and testing
-#define NUMBER_TO_IDENTIFY 5
-#define TEST_SAMPLE_COUNT 20
+#define EPOCH_MAX 1 //number epochs of training and testing 
 
 /*
 Observation
@@ -54,8 +52,6 @@ returns : NA
 */
 void setOutArray(uint label, float* out);
 
-void setOutArrayBCE(uint label, float* out);
-
 int main()
 {
     char* line_buff = (char*)malloc(BUFF_SIZE); 
@@ -68,7 +64,7 @@ int main()
 
     uint j = 0;
 
-    uint sz[4] = {784,32,32,1};
+    uint sz[4] = {784,32,32,10};
     eAct_func actFuncs[4] = {eAct_func::TANH, eAct_func::TANH, eAct_func::TANH, eAct_func::TANH};
 
     float* out = (float*)malloc(10*sizeof(float));
@@ -82,53 +78,55 @@ int main()
     std::chrono::high_resolution_clock::time_point start, end;
     std::chrono::duration<double> time_taken;
 
-    uint u_sz = 4;
+    float correct_count = 0;
 
-    nnInitData * initData = new nnInitData(u_sz);
+    float accuracy = 0.0;   
 
-    uint num_to_iden_count = 0;
-    uint non_num_to_iden_count = 0;
+    std::vector<float> optParam;
+    optParam.push_back(0.0f);
+    optParam.push_back(0.0f);
+    optParam.push_back(0.0f);
 
-    float * nn_output = new float[sz[3]];
-    
-    /*
-    struct nnInitData{
+    nnInitData* initData = new nnInitData(784, eOptimizers::SGD, optParam, eLossFuncs::HUBER, 0.0f, 0.01f);
+    initData->add_dense_layer(32, eAct_func::TANH, 0.0f);
+    initData->add_dense_layer(32, eAct_func::TANH, 0.0f);
+    initData->add_dense_layer(10, eAct_func::TANH, 0.0f);
+    // uint u_sz = 4;
 
-    uint unNoLys = 0;
-    uint* unSzLys = nullptr;
-    eAct_func eAct_Func = eAct_func::SIGMOID;
-    elog_level eLogLevel = elog_level::eLOGLEVEL_WARN;
-    bool bConsolePrint = false;
-    float fLearningRate = 0.5f;
+    // nnInitData * initData = new nnInitData(u_sz);
+    // /*
+    // struct nnInitData{
 
-    };
-    */
+    // uint unNoLys = 0;
+    // uint* unSzLys = nullptr;
+    // eAct_func eAct_Func = eAct_func::SIGMOID;
+    // elog_level eLogLevel = elog_level::eLOGLEVEL_WARN;
+    // bool bConsolePrint = false;
+    // float fLearningRate = 0.5f;
 
-    initData->unNoLys = 4;
+    // };
+    // */
 
-    set_layer_info(sz, initData->unNoLys, initData);
+    // initData->unNoLys = 4;
 
-    for(uint l = 0; l < initData->unNoLys; l++)
-    {
-        if(l != 0)
-        {
-            initData->e_layer_type[l] = eLayer_type::DENSE;
-        }
-        else
-        {
-            initData->e_layer_type[l] = eLayer_type::INPUT;
-        }
-        initData->eAct_Funcs[l] = actFuncs[l];
-        if(l == (initData->unNoLys - 1))
-        {
-            initData->eAct_Funcs[l] = eAct_func::SIGMOID;
-        }
-    }
-    initData->eOpt = eOptimizers::SGD;
-    initData->eLossFunc = eLossFuncs::BCE;
-    initData->fLearningRate = 0.01f;
+    // set_layer_info(sz, initData->unNoLys, initData);
 
-    
+    // for(uint l = 0; l < initData->unNoLys; l++)
+    // {
+    //     if(l != 0)
+    //     {
+    //         initData->e_layer_type[l] = eLayer_type::DENSE;
+    //     }
+    //     else
+    //     {
+    //         initData->e_layer_type[l] = eLayer_type::INPUT;
+    //     }
+        
+    //     initData->eAct_Funcs[l] = actFuncs[l];
+    // }
+    // initData->eOpt = eOptimizers::SGD;
+    // initData->eLossFunc = eLossFuncs::HUBER;
+    // initData->fLearningRate = 0.01f;
 
     NeuralNet *nn = new NeuralNet(*initData);
 
@@ -159,21 +157,12 @@ int main()
 
             label = parseLabelAndNormalizedValues(line_buff, norm_values, NORM_FACTOR);
 
-            setOutArrayBCE(label, out);            
+            setOutArray(label, out);            
 
-            //balance dataset by training 9 times over for correct label
-            if(label == NUMBER_TO_IDENTIFY)
+            if(nn->Train(norm_values, out))
             {
-                for(uint a = 0; a < 9; a++)
-                {
-                    nn->Train(norm_values, out);
-                }
+                correct_count += 1.0;
             }
-            else
-            {
-                nn->Train(norm_values, out);
-            }
-            
 
             pb->update_progress_bar(i + 1);            
 
@@ -183,12 +172,17 @@ int main()
 
         pb->reset();
 
+        accuracy = correct_count / ((float)TRAIN_MAX);
+
+        printf("\nTrain Accuracy:%f\n", accuracy);
         end = std::chrono::high_resolution_clock::now();
 
         time_taken = end - start;
 
-        printf("\nTime taken for Train Epoch[%d]:%fSeconds\n", j + 1, time_taken.count());
+        printf("Time taken for Train Epoch[%d]:%fSeconds\n", j + 1, time_taken.count());
         
+        correct_count = 0.0;
+
         pb->setMax(TEST_MAX);
 
         start = std::chrono::high_resolution_clock::now();
@@ -209,9 +203,12 @@ int main()
 
             label = parseLabelAndNormalizedValues(line_buff, norm_values, NORM_FACTOR);
 
-            setOutArrayBCE(label, out);            
+            setOutArray(label, out);            
 
-            nn->Test(norm_values, out);
+            if(nn->Test(norm_values, out))
+            {
+                correct_count += 1.0;
+            }
 
             pb->update_progress_bar(i + 1);
         }
@@ -220,56 +217,16 @@ int main()
 
         pb->reset();
 
+        accuracy = correct_count / ((float)TEST_MAX);
+
+        printf("\nTest Accuracy:%f\n", accuracy);
         end = std::chrono::high_resolution_clock::now();
 
         time_taken = end - start;
 
-        printf("\nTime taken for test Epoch[%d]:%fSeconds\n", j + 1, time_taken.count());
+        printf("Time taken for test Epoch[%d]:%fSeconds\n", j + 1, time_taken.count());
         
-        fdr = fopen("MNIST/mnist_test.csv","r");
-        //test for 10 NUMBER_TO_IDENTIFY and 10 non NUMBER_TO_IDENTIFY
-        do
-        {
-            if(!fdr)
-            {
-                printf("fdr open fail!!!\n");
-                return 0;
-            }
-            getNextLine(fdr, line_buff);
-
-            label = parseLabelAndNormalizedValues(line_buff, norm_values, NORM_FACTOR);
-            if(label == NUMBER_TO_IDENTIFY)
-            {
-                if(num_to_iden_count >= TEST_SAMPLE_COUNT)
-                {
-                    continue;
-                }
-                else
-                {
-                    num_to_iden_count++;
-                }
-            }
-            else
-            {
-                if(non_num_to_iden_count >= TEST_SAMPLE_COUNT)
-                {
-                    continue;
-                }
-                else
-                {
-                    non_num_to_iden_count++;
-                }
-            }
-            setOutArrayBCE(label, out);
-            nn->Test(norm_values, out);
-            nn->Get_OutputLayer_Data(nn_output);
-            printf("\nTest Sample, for label:%d output:%f\n", label, nn_output[0]);
-
-            /* code */
-        } while ((num_to_iden_count < TEST_SAMPLE_COUNT)||(non_num_to_iden_count < TEST_SAMPLE_COUNT));
-        non_num_to_iden_count = 0;
-        num_to_iden_count = 0;
-        fclose(fdr);
+        correct_count = 0.0;
 
     }
 
@@ -277,9 +234,6 @@ int main()
     
     pbThread.join();
     
-
-    
-
     delete nn;
 
     delete pb;
@@ -304,25 +258,6 @@ void setOutArray(uint label, float* out)
         else
         {
             out[i] = 0.0;
-        }
-
-    }
-}
-
-void setOutArrayBCE(uint label, float* out)
-{
-
-    uint i = 0;
-
-    for(i = 0; i < 1; i++)
-    {
-        if(label == NUMBER_TO_IDENTIFY)
-        {
-            out[i] = 1.0f;
-        }
-        else
-        {
-            out[i] = 0.0f;
         }
 
     }
