@@ -81,9 +81,11 @@ int main()
 
     float correct_count = 0;
 
-    float accuracy = 0.0;   
+    float accuracy = 0.0;  
 
-    nnInitData * initData = new nnInitData(4); 
+    uint u_sz = 4;
+
+    nnInitData * initData = new nnInitData(u_sz);
     /*
     struct nnInitData{
 
@@ -143,7 +145,7 @@ int main()
     initData->eLossFunc = eLossFuncs::HUBER;
     initData->fLearningRate = 0.01f;
 
-    NeuralNet *nn = new NeuralNet(initData);
+    NeuralNet *nn = new NeuralNet(*initData);
 
     nn->populateWeightsAndBiasesWithRandomNumbers();
 

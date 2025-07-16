@@ -98,7 +98,9 @@ int main()
     for(uint k = 0; k < 4; k++)
     {
 
-        nnInitData * initData = new nnInitData(4);
+        uint u_sz = 4;
+
+        nnInitData * initData = new nnInitData(u_sz);
 
         switch(k)
         {
@@ -156,7 +158,7 @@ int main()
 
         }
 
-        NeuralNet *nn = new NeuralNet(initData);
+        NeuralNet *nn = new NeuralNet(*initData);
 
         nn->populateWeightsAndBiasesWithRandomNumbers();
 

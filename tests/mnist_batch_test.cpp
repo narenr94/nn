@@ -90,7 +90,9 @@ int main()
 
     float accuracy = 0.0;   
 
-    nnInitData * initData = new nnInitData(4); 
+    uint u_sz = 4;
+
+    nnInitData * initData = new nnInitData(u_sz);
     /*
     struct nnInitData{
 
@@ -124,7 +126,7 @@ int main()
     initData->fLearningRate = LEARNING_RATE;
     initData->eOpt = eOptimizers::ADAM;
     
-    NeuralNet *nn = new NeuralNet(initData);
+    NeuralNet *nn = new NeuralNet(*initData);
 
     nn->populateWeightsAndBiasesWithRandomNumbers();
 

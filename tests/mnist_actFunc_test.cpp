@@ -86,7 +86,9 @@ int main()
 
         float accuracy = 0.0;   
 
-        nnInitData * initData = new nnInitData(4);
+        uint u_sz = 4;
+
+        nnInitData * initData = new nnInitData(u_sz);
 
         
         initData->unNoLys = 4;
@@ -140,7 +142,7 @@ int main()
 
         }
 
-        NeuralNet *nn = new NeuralNet(initData);
+        NeuralNet *nn = new NeuralNet(*initData);
 
         nn->populateWeightsAndBiasesWithRandomNumbers();
 
