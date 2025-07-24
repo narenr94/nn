@@ -183,6 +183,7 @@ nnInitData NeuralNet::Get_Init_Data()
         ret.layer_dimensions.emplace_back(m_ppLys[i]->get_layer_dimensions());
         ret.eAct_Funcs.emplace_back(m_ppLys[i]->get_act_func());
         ret.actParam1.emplace_back(m_ppLys[i]->get_act_param());
+        ret.e_layer_type.emplace_back(m_ppLys[i]->get_layer_type());
     }
     
     ret.fLearningRate = m_fLearningRate;

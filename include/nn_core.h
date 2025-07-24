@@ -26,26 +26,26 @@ class NeuralNet{
 
     
 
-    BaseLayer** m_ppLys; //starting address of layers
+    BaseLayer** m_ppLys = nullptr; //starting address of layers
 
-    uint m_unNumLys; //total number of layers in NN, including input and output layer
+    uint m_unNumLys = 0; //total number of layers in NN, including input and output layer
 
-    float m_fLearningRate; //current learning rate of nn
+    float m_fLearningRate = 0.01f; //current learning rate of nn
 
-    uint m_unTotalCorrectableNodes;
+    uint m_unTotalCorrectableNodes = 0;
 
     //Optimizer
     eOptimizers m_eOpt = eOptimizers::SGD;
-    BaseOptimizer* m_pOptimizer;
-    float m_optParam1;
-    float m_optParam2;
-    float m_optParam3;
+    BaseOptimizer* m_pOptimizer = nullptr;
+    float m_optParam1 = 0.0f;
+    float m_optParam2 = 0.0f;
+    float m_optParam3 = 0.0f;
 
     
     //Loss Function
-    eLossFuncs m_eLossFunc;
-    BaseLossFunction* m_pLossFunc;
-    float m_lossParam1;
+    eLossFuncs m_eLossFunc = eLossFuncs::HUBER;
+    BaseLossFunction* m_pLossFunc = nullptr;
+    float m_lossParam1 = 0.0f;
 
     //Batch Training Specific 
     bool initBatchTrain = false;
