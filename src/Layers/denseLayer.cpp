@@ -7,24 +7,12 @@ DenseLayer::DenseLayer(sLayer_Dimensions t_dims, eAct_func eActFunc, float actPa
 {
 }
 
-DenseLayer::~DenseLayer()
+DenseLayer::DenseLayer(std::string load_data):BaseLayer(eLayer_type::DENSE, load_data)
 {
 }
 
-void DenseLayer::SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr)
+DenseLayer::~DenseLayer()
 {
-    m_pPrevLyr = prevLyr;
-    m_pNextLyr = nxtLyr;
-
-    m_unTransformMatrixSize = 0;
-
-    if(m_pPrevLyr)
-    {
-        m_unTransformMatrixSize = m_unNumNodes * (m_pPrevLyr->get_num_nodes());
-        m_pfTransformParameters = new float[m_unTransformMatrixSize];
-    }
-
-    m_bPrevNxtLyrsSet = true;
 }
 
 void DenseLayer::do_forwardpass_to_current_layer()
@@ -66,4 +54,11 @@ void DenseLayer::set_all_transform_matrix_parameter(float* fWt)
         }
     }
 }
+
+
+std::string DenseLayer::get_serialized_save_data()
+{
+    return get_serialized_general_layer_data() + get_serialized_biases_data() + get_serialized_transform_mtx_data();
+}
+
 

@@ -18,59 +18,30 @@
 
 void validate_input_data_layers(eLayer_type t_layer_type, sLayer_Dimensions t_dims);
 
+std::vector<std::string> split_by_lines(const std::string& block);
+
+std::pair<std::string, std::vector<std::string>> parse_line(const std::string& line);
+
 BaseLayer::BaseLayer(eLayer_type t_layer_type, sLayer_Dimensions t_dims, eAct_func eActFunc, float actParam1)
+{
+    setup_layer(t_layer_type, t_dims, eActFunc, actParam1);
+}
+
+BaseLayer::BaseLayer(eLayer_type t_layer_type, std::string load_data)
 {
     m_layer_type = t_layer_type;
 
-    validate_input_data_layers(t_layer_type, t_dims);
-    
-    m_Dimensions = t_dims;
+    std::vector<std::string> all_lines = split_by_lines(load_data);
 
-    m_Dimensions.unInputRows = t_dims.unInputRows;
-    m_Dimensions.unInputColumns = t_dims.unInputColumns;
+    std::vector<std::pair<std::string, std::vector<std::string>>> parsed_lines;
 
-    m_Dimensions.unOutputRows = t_dims.unOutputRows;
-    m_Dimensions.unOutputColumns = t_dims.unOutputColumns;
-
-    m_unNumNodes = m_Dimensions.unOutputRows * m_Dimensions.unOutputColumns;
-
-    m_eActFunc = eActFunc;
-    m_actParam1 = actParam1;
-
-    //filter = (1 + in) - out
-    m_Dimensions.unTransformParametersRows = t_dims.unTransformParametersRows;
-    m_Dimensions.unTransformParametersColumns = t_dims.unTransformParametersColumns;
-
-    m_pfValues = new float[m_unNumNodes];
-    m_pfBiases = new float[m_unNumNodes];
-    m_pfDeltas = new float[m_unNumNodes];
-
-    switch(m_eActFunc)
+    for(uint i = 0; i < all_lines.size(); i++)
     {
-        case eAct_func::SIGMOID:
-            m_pActFunc = new SigmoidActFunc(this);
-            break;
-        case eAct_func::RELU:
-            m_pActFunc = new ReluActFunc(this);
-            break;
-        case eAct_func::LEAKY_RELU:
-            m_pActFunc = new LeakyReluActFunc(this, m_actParam1 != 0.0f ? m_actParam1 : LEAKY_RELU_DEFAULT_ALPHA);
-            break;
-        case eAct_func::SOFTMAX:
-            m_pActFunc = new SoftmaxActFunc(this);
-            break;
-        case eAct_func::TANH:
-            m_pActFunc = new TanhActFunc(this);
-            break;
-        default:
-            m_pActFunc = new SigmoidActFunc(this);
+        parsed_lines.push_back(parse_line(all_lines[i]));
     }
 
-#ifdef OPENCL_ACC
-    m_pAccelerator = new OpenclAccelerator(this);
-#else
-    m_pAccelerator = new CpuAccelerator(this);
-#endif
+    apply_parsed_load_data(t_layer_type, parsed_lines);
+
 }
 
 BaseLayer::~BaseLayer()
@@ -350,4 +321,244 @@ void validate_input_data_layers(eLayer_type t_layer_type, sLayer_Dimensions t_di
         assert(((t_dims.unInputRows * t_dims.unInputColumns) * (t_dims.unOutputRows * t_dims.unOutputColumns)) == (t_dims.unTransformParametersColumns * t_dims.unTransformParametersRows));
     }
 
+}
+
+
+std::string BaseLayer::get_serialized_general_layer_data()
+{
+    std::ostringstream ss;
+    ss << "dims: ";
+    ss << m_Dimensions.unInputColumns << " ";
+    ss << m_Dimensions.unInputRows << " ";
+    ss << m_Dimensions.unNoTransformParameterMtx << " ";
+    ss << m_Dimensions.unOutputColumns << " ";
+    ss << m_Dimensions.unOutputRows << " ";
+    ss << m_Dimensions.unTransformParametersColumns << " ";
+    ss << m_Dimensions.unTransformParametersRows << " ";
+    ss << "\n";
+    ss << "act_func: ";
+    ss << (uint)m_eActFunc << " \n";
+    ss << "act_param: ";
+    ss << m_actParam1 << " \n";
+
+    return ss.str();
+}
+
+sLayer_Dimensions extract_dims(std::vector<std::string>& dims_string)
+{
+    assert(dims_string.size() == DIMS_SIZE);
+
+    sLayer_Dimensions r_dims;
+
+    r_dims.unInputColumns = std::stoul(dims_string[0]);
+    r_dims.unInputRows = std::stoul(dims_string[1]);
+    r_dims.unNoTransformParameterMtx = std::stoul(dims_string[2]);
+    r_dims.unOutputColumns = std::stoul(dims_string[3]);
+    r_dims.unOutputRows = std::stoul(dims_string[4]);
+    r_dims.unTransformParametersColumns = std::stoul(dims_string[5]);
+    r_dims.unTransformParametersRows = std::stoul(dims_string[6]);
+
+    return r_dims;
+
+}
+
+eAct_func extract_act_function(std::vector<std::string>& act_string)
+{
+    assert(act_string.size() == 1);
+
+    eAct_func r_act_func;
+
+    r_act_func = (eAct_func)std::stoul(act_string[0]);
+
+    return r_act_func;
+}
+
+float extract_act_param(std::vector<std::string>& act_string)
+{
+    assert(act_string.size() == 1);
+
+    float r_act_param;
+
+    r_act_param = std::stof(act_string[0]);
+
+    return r_act_param;
+}
+
+void BaseLayer::extract_apply_biases(std::vector<std::string>& biases_string)
+{
+    assert(biases_string.size() == m_unNumNodes);
+
+    for(uint i = 0; i < m_unNumNodes; i++)
+    {
+        set_node_bias(std::stof(biases_string[i]), i);
+    }
+}
+
+void BaseLayer::extract_apply_transform_param(std::vector<std::string>& wt_string)
+{
+    assert(wt_string.size() == (m_Dimensions.unTransformParametersRows * m_Dimensions.unTransformParametersColumns * m_Dimensions.unNoTransformParameterMtx));
+
+    m_unTransformMatrixSize = wt_string.size();
+    m_pfTransformParameters = new float[m_unTransformMatrixSize];
+
+    for(uint i = 0; i < m_unTransformMatrixSize; i++)
+    {
+        m_pfTransformParameters[i] = std::stof(wt_string[i]);
+    }
+}
+
+void BaseLayer::apply_parsed_load_data(eLayer_type t_layer_type, std::vector<std::pair<std::string, std::vector<std::string>>>& parsed_lines)
+{
+
+    sLayer_Dimensions dims;
+    eAct_func act_func;
+    float act_param = 0.0f;
+
+    bool dims_set = false;
+    bool act_func_set = false;
+    bool act_param_set = false;
+
+    for(uint i = 0; i < parsed_lines.size(); i++)
+    {
+        if(parsed_lines[i].first == "dims:")
+        {
+            dims = extract_dims(parsed_lines[i].second);
+            dims_set = true;
+        }
+        else if(parsed_lines[i].first == "act_func:")
+        {
+            act_func = extract_act_function(parsed_lines[i].second);
+            act_func_set = true;
+        }
+        else if(parsed_lines[i].first == "act_param:")
+        {
+            act_param = extract_act_param(parsed_lines[i].second);
+            act_param_set = true;
+        }
+        else
+        {
+            //ignore
+        }
+    }
+
+    assert(dims_set);
+    assert(act_func_set);
+    assert(act_param_set);
+
+    setup_layer(t_layer_type, dims, act_func, act_param);
+
+    for(uint i = 0; i < parsed_lines.size(); i++)
+    {
+        if(parsed_lines[i].first == "biases:")
+        {
+            extract_apply_biases(parsed_lines[i].second);
+        }
+        else if(parsed_lines[i].first == "transform_mtx:")
+        {
+            if(parsed_lines[i].second.size())
+            {
+                extract_apply_transform_param(parsed_lines[i].second);
+            }            
+        }
+        else
+        {
+            //ignore
+        }
+    }
+
+}
+
+void BaseLayer::setup_layer(eLayer_type t_layer_type, sLayer_Dimensions t_dims, eAct_func eActFunc, float actParam1)
+{
+    m_layer_type = t_layer_type;
+
+    validate_input_data_layers(t_layer_type, t_dims);
+    
+    m_Dimensions = t_dims;
+
+    m_Dimensions.unInputRows = t_dims.unInputRows;
+    m_Dimensions.unInputColumns = t_dims.unInputColumns;
+
+    m_Dimensions.unOutputRows = t_dims.unOutputRows;
+    m_Dimensions.unOutputColumns = t_dims.unOutputColumns;
+
+    m_unNumNodes = m_Dimensions.unOutputRows * m_Dimensions.unOutputColumns;
+
+    m_eActFunc = eActFunc;
+    m_actParam1 = actParam1;
+
+    //filter = (1 + in) - out
+    m_Dimensions.unTransformParametersRows = t_dims.unTransformParametersRows;
+    m_Dimensions.unTransformParametersColumns = t_dims.unTransformParametersColumns;
+
+    m_pfValues = new float[m_unNumNodes];
+    m_pfBiases = new float[m_unNumNodes];
+    m_pfDeltas = new float[m_unNumNodes];
+
+    switch(m_eActFunc)
+    {
+        case eAct_func::SIGMOID:
+            m_pActFunc = new SigmoidActFunc(this);
+            break;
+        case eAct_func::RELU:
+            m_pActFunc = new ReluActFunc(this);
+            break;
+        case eAct_func::LEAKY_RELU:
+            m_pActFunc = new LeakyReluActFunc(this, m_actParam1 != 0.0f ? m_actParam1 : LEAKY_RELU_DEFAULT_ALPHA);
+            break;
+        case eAct_func::SOFTMAX:
+            m_pActFunc = new SoftmaxActFunc(this);
+            break;
+        case eAct_func::TANH:
+            m_pActFunc = new TanhActFunc(this);
+            break;
+        default:
+            m_pActFunc = new SigmoidActFunc(this);
+    }
+
+#ifdef OPENCL_ACC
+    m_pAccelerator = new OpenclAccelerator(this);
+#else
+    m_pAccelerator = new CpuAccelerator(this);
+#endif
+}
+
+void BaseLayer::SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr)
+{
+    m_pPrevLyr = prevLyr;
+    m_pNextLyr = nxtLyr;
+
+    if((m_pfTransformParameters == nullptr) && (m_layer_type != eLayer_type::INPUT))
+    {
+        m_unTransformMatrixSize = m_Dimensions.unTransformParametersRows * m_Dimensions.unTransformParametersColumns * m_Dimensions.unNoTransformParameterMtx;
+        m_pfTransformParameters = new float[m_unTransformMatrixSize];
+    }
+
+    m_bPrevNxtLyrsSet = true;
+}
+
+std::string BaseLayer::get_serialized_biases_data()
+{
+    std::ostringstream ss;
+    ss << "biases: ";
+    for(uint i = 0; i < m_unNumNodes; i++)
+    {
+        ss << m_pfBiases[i] << " ";
+    }
+    ss << "\n";
+
+    return ss.str();
+}
+
+std::string BaseLayer::get_serialized_transform_mtx_data()
+{
+    std::ostringstream ss;
+    ss << "transform_mtx: ";
+    for(uint i = 0; i < m_unTransformMatrixSize; i++)
+    {
+        ss << m_pfTransformParameters[i] << " ";
+    }
+    ss << "\n";
+    
+    return ss.str();
 }

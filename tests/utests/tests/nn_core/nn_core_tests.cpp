@@ -956,7 +956,7 @@ TEST(NN_CORE_TESTS, nn_core_copy_conv_test)
 
     NeuralNet *nn2 = new NeuralNet(nn);
 
-    for(uint i = 0; i < 3; i++)
+    for(uint i = 0; i < 12; i++)
     {
         EXPECT_EQ(init_lyr1_biases[i], nn2->GetBias(1, i));
     }
@@ -965,14 +965,92 @@ TEST(NN_CORE_TESTS, nn_core_copy_conv_test)
         EXPECT_EQ(init_lyr2_biases[i], nn2->GetBias(2, i));
     }
 
-    for(uint i = 0; i < 3; i++)
+    for(uint i = 0; i < 27; i++)
     {
         EXPECT_EQ(init_lyr1_wts[i], nn2->GetWeight(1, i));
     }
-    for(uint i = 0; i < 2; i++)
+    for(uint i = 0; i < 24; i++)
     {
         EXPECT_EQ(init_lyr2_wts[i], nn2->GetWeight(2, i));
     }
 
+
+}
+
+
+TEST(NN_CORE_TESTS, nn_core_save_load_test)
+{
+    float init_lyr1_biases[12] = {0.11f, 0.12f, 0.13f, 0.14f,
+                                    0.111f, 0.122f, 0.133f, 0.144f,
+                                    0.1111f, 0.1222f, 0.1333f, 0.1444f};
+
+    float init_lyr2_biases[2] = {0.21f, 0.22f};
+
+    float init_lyr1_wts[27] = {0.21f, 0.22f, 0.23f, 
+                                0.24f, 0.25f, 0.26f,
+                                0.27f, 0.28f, 0.29f,
+                                0.211f, 0.222f, 0.233f,
+                                0.244f, 0.255f, 0.266f,
+                                0.277f, 0.288f, 0.299f,
+                                0.2111f, 0.2222f, 0.2333f,
+                                0.2444f, 0.2555f, 0.2666f,
+                                0.2777f, 0.2888f, 0.2999f};
+
+    float init_lyr2_wts[24] = {0.1f, 0.2f,
+                                0.3f, 0.4f,
+                                0.31f, 0.41f,
+                                0.11f, 0.21f,
+                                0.111f, 0.211f,
+                                0.32f, 0.42f,
+                                0.322f, 0.422f,
+                                0.13, 0.23f,
+                                0.133f, 0.233f,
+                                0.34f, 0.44f,
+                                0.344f, 0.444f,
+                                0.15f, 0.25f};
+
+
+    std::vector<float> optParam;
+    optParam.push_back(0.0f);
+    optParam.push_back(0.0f);
+    optParam.push_back(0.0f);
+
+    nnInitData * initData = new nnInitData(16, eOptimizers::SGD, optParam, eLossFuncs::HUBER, 0.0f, 0.01f);
+    initData->add_conv_layer(4, 4, eKernelSize::Sz3x3, 3, eAct_func::TANH, 0.0f);
+    initData->add_dense_layer(2, eAct_func::TANH, 0.0f);
+
+    //sz = 16, 12, 2
+
+    NeuralNet* nn = new NeuralNet(*initData);
+
+    nn->populate_nodes_bias(1, init_lyr1_biases);
+    nn->populate_nodes_bias(2, init_lyr2_biases);
+
+    nn->populate_weights(1, init_lyr1_wts);
+    nn->populate_weights(2, init_lyr2_wts);
+
+    nn->SaveNN("saveTest.sav");
+
+    std::string sav_loc = "saveTest.sav";
+
+    NeuralNet *nn2 = new NeuralNet(sav_loc);
+
+    for(uint i = 0; i < 12; i++)
+    {
+        EXPECT_EQ(init_lyr1_biases[i], nn2->GetBias(1, i));
+    }
+    for(uint i = 0; i < 2; i++)
+    {
+        EXPECT_EQ(init_lyr2_biases[i], nn2->GetBias(2, i));
+    }
+
+    for(uint i = 0; i < 27; i++)
+    {
+        EXPECT_EQ(init_lyr1_wts[i], nn2->GetWeight(1, i));
+    }
+    for(uint i = 0; i < 24; i++)
+    {
+        EXPECT_EQ(init_lyr2_wts[i], nn2->GetWeight(2, i));
+    }
 
 }

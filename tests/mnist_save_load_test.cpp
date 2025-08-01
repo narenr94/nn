@@ -109,7 +109,7 @@ int main()
         }
         initData->eAct_Funcs[l] = actFuncs[l];
     }
-    // initData->eAct_Func = eAct_func::RELU;
+    
     initData->fLearningRate = 0.01f;
 
     NeuralNet *nn = new NeuralNet(*initData);
@@ -218,7 +218,9 @@ int main()
     printf("start save\n");
     start = std::chrono::high_resolution_clock::now();
 
-    nn->SaveNN("MNIST_EPOCH5.sav");
+    std::string sav_loc = "MNIST_EPOCH5.sav";
+
+    nn->Save_NN(sav_loc);
 
     end = std::chrono::high_resolution_clock::now();
 
@@ -229,10 +231,11 @@ int main()
     printf("done save\n");
 
     
+    
     printf("start load and init\n");
     start = std::chrono::high_resolution_clock::now();
 
-    NeuralNet *nn2 = new NeuralNet("MNIST_EPOCH5.sav");
+    NeuralNet *nn2 = new NeuralNet(sav_loc);
 
     end = std::chrono::high_resolution_clock::now();
 
@@ -297,7 +300,7 @@ int main()
 
     
 
-    delete nn;
+    // delete nn;
 
     delete nn2;
 

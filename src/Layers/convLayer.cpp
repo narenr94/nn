@@ -8,25 +8,12 @@ ConvLayer::ConvLayer(sLayer_Dimensions t_dims, eAct_func eActFunc, float actPara
 {
 }
 
-ConvLayer::~ConvLayer()
+ConvLayer::ConvLayer(std::string load_data):BaseLayer(eLayer_type::CONV, load_data)
 {
 }
 
-void ConvLayer::SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr)
+ConvLayer::~ConvLayer()
 {
-    m_pPrevLyr = prevLyr;
-    m_pNextLyr = nxtLyr;
-
-    m_unTransformMatrixSize = 0;
-
-    if(m_pPrevLyr)
-    {
-        assert(m_pPrevLyr->get_num_nodes() == (m_Dimensions.unInputRows * m_Dimensions.unInputColumns));
-        m_unTransformMatrixSize = m_Dimensions.unTransformParametersRows * m_Dimensions.unTransformParametersColumns * m_Dimensions.unNoTransformParameterMtx;
-        m_pfTransformParameters = new float[m_unTransformMatrixSize];
-    }
-
-    m_bPrevNxtLyrsSet = true;
 }
 
 void ConvLayer::do_forwardpass_to_current_layer()
@@ -77,4 +64,8 @@ void ConvLayer::set_all_transform_matrix_parameter(float* fWt)
     }
 }
 
+std::string ConvLayer::get_serialized_save_data()
+{
+    return get_serialized_general_layer_data() + get_serialized_biases_data() + get_serialized_transform_mtx_data();
+}
 

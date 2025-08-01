@@ -18,12 +18,12 @@ class DenseLayer : public BaseLayer{
     */
     DenseLayer(sLayer_Dimensions t_dims, eAct_func eActFunc, float actParam1);
 
+    DenseLayer(std::string load_data);
+
     /*
         ~DenseLayer() : destruct and frees layer resources
     */
     ~DenseLayer();
-
-    void SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr) override;
 
     void do_forwardpass_to_current_layer() override;
 
@@ -32,7 +32,8 @@ class DenseLayer : public BaseLayer{
     void set_transform_matrix_parameter(uint Idx, float fWt) override;
 
     void set_all_transform_matrix_parameter(float* wt) override;
-    
+
+    std::string get_serialized_save_data() override;
 
 };
 

@@ -6,16 +6,12 @@
 #include <unistd.h>
 #include <thread>
 #include <cassert>
-#include "nn_math.h"
-
-#include "baseLayer.h"
-
-#include "baseOptimizer.h"
-
-#include "baseLossFunction.h"
-
 #include <vector>
 
+#include "nn_math.h"
+#include "baseLayer.h"
+#include "baseOptimizer.h"
+#include "baseLossFunction.h"
 #include "nn_defines.h"
 
 
@@ -68,7 +64,7 @@ class NeuralNet{
     NeuralNet(NeuralNet* other);
 
     // Constructor to load pre-existing data
-    NeuralNet(const char* fileName);
+    NeuralNet(std::string& fileName);
 
     /* 
         Destructor
@@ -173,7 +169,7 @@ class NeuralNet{
 
     void SetWeight(uint MtxId, uint Idx, float val);
 
-    void SaveNN(const char* fileName);   
+    void Save_NN(std::string fileName);   
 
     BaseLayer* GetLayer(uint idx);
 
@@ -184,29 +180,27 @@ class NeuralNet{
     eLayer_type get_layer_type(uint idx);
 
 
-
-
     private:
      
-    /*
-        isCorrectPrediction() : compares neural net output with expected output and return true is correct.
-
-        @out : expected output array
-    */
     bool isCorrectPrediction(float* pfOut);   
 
     void Batch_Training(uint i);
+
     void Populate_Batch_Processing_Args(float** in, float** out, uint numIn);
-
-    // void Batch_Training();
-
-    // void apply_delats_to_weights_and_biases_batch_training(float* deltas);
 
     void Set_Init_Data(nnInitData& other_initData);
 
     void SetupLayersAndWeightMatrices(std::vector<eLayer_type>& layer_types, std::vector<sLayer_Dimensions>& dims, std::vector<eAct_func>& actFuncs, std::vector<float>& actParam1, float lossParam);
 
     void MergeBiasAndWeights(uint i);
+
+    void Set_Load_Data(std::vector<std::string> blocks);
+
+    void Set_General_Data(sNN_General_Data gen_data);
+
+    void Set_Layer_Data(sNN_General_Data gen_data, std::vector<std::string> blocks);
+
+    void Set_Layer_Order(float m_lossParam);
     
 };
 

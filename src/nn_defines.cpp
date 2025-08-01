@@ -1,5 +1,6 @@
 #include "nn_defines.h"
 #include <cassert>
+#include <fstream>
 
 sLayer_Dimensions::sLayer_Dimensions()
 {
@@ -133,3 +134,68 @@ void nnInitData::add_conv_layer(uint t_in_rows, uint t_in_cols, eKernelSize t_ke
 
 }
 
+std::vector<std::string> split_by_lines(const std::string& block)
+{
+    std::vector<std::string> lines;
+    std::istringstream ss(block);
+    std::string line;
+
+    while (std::getline(ss, line)) {
+        // Optional: Trim whitespace or skip empty lines
+        if (!line.empty())
+            lines.push_back(line);
+    }
+
+    return lines;
+}
+
+std::pair<std::string, std::vector<std::string>> parse_line(const std::string& line)
+{
+    std::istringstream iss(line);
+    std::string tag;
+    std::vector<std::string> values;
+
+    if (iss >> tag) {
+        std::string value;
+        while (iss >> value) {
+            values.push_back(value);
+        }
+    }
+
+    return {tag, values};
+}
+
+std::string read_file(const std::string& fileName)
+{
+    std::ifstream in(fileName);
+    assert(in);
+    std::ostringstream ss;
+    ss << in.rdbuf(); // Reads full content
+    return ss.str();
+}
+
+void save_to_file(const std::string& data, const std::string& filename)
+{
+    std::ofstream out(filename);
+    assert(out);
+    out << data;
+    out.close();
+}
+
+std::vector<std::string> split_by_delimiter(const std::string& data, const std::string& delimiter)
+{
+    std::vector<std::string> parts;
+    size_t start = 0;
+    size_t end = data.find(delimiter);
+
+    while (end != std::string::npos) {
+        parts.push_back(data.substr(start, end - start));
+        start = end + delimiter.length();
+        end = data.find(delimiter, start);
+    }
+
+    // Add last segment
+    parts.push_back(data.substr(start));
+
+    return parts;
+}
