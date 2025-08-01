@@ -16,13 +16,12 @@ class ConvLayer : public BaseLayer{
     */
     ConvLayer(sLayer_Dimensions t_dims, eAct_func eActFunc, float actParam1);
 
+    ConvLayer(std::string load_data);
+
     /*
         ~ConvLayer() : destruct and frees layer resources
     */
     ~ConvLayer();
-
-    
-    void SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr) override;
 
     void do_forwardpass_to_current_layer() override;
 
@@ -31,8 +30,8 @@ class ConvLayer : public BaseLayer{
     void set_transform_matrix_parameter(uint Idx, float fWt) override;
 
     void set_all_transform_matrix_parameter(float* wt) override;
-    
 
+    std::string get_serialized_save_data() override;
 };
 
 #endif

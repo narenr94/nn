@@ -1,8 +1,11 @@
 #ifndef NN_DEFINES_H
 #define NN_DEFINES_H
 
-#include "nn_math.h"
 #include <vector>
+#include <string>
+#include <sstream>
+
+#include "nn_math.h"
 
 /*
     list of activation functions
@@ -26,6 +29,8 @@ enum eLayer_type{
     DENSE
 };
 
+#define DIMS_SIZE 7
+
 struct sLayer_Dimensions{
 
     uint unInputRows;
@@ -42,7 +47,6 @@ struct sLayer_Dimensions{
 
     sLayer_Dimensions(uint in_rows, uint in_columns, uint out_rows, uint out_cols, uint trans_rows, uint trans_cols, uint no_trans_mtx);
 };
-
 
 /*
     list of activation functions
@@ -116,5 +120,25 @@ struct nnInitData{
     void add_conv_layer(uint t_in_rows, uint t_in_cols, eKernelSize t_kernel_size, uint t_num_kernels, eAct_func t_act_func, float t_act_param);
 
 };
+
+struct sNN_General_Data{
+    uint m_unNumLys;
+    float m_fLearningRate;
+    eOptimizers m_eOpt;
+    eLossFuncs m_eLossFunc;
+    float m_optParam[3];
+    float m_lossParam;
+    std::vector<eLayer_type> layer_types;
+};
+
+std::vector<std::string> split_by_lines(const std::string& block);
+
+std::pair<std::string, std::vector<std::string>> parse_line(const std::string& line);
+
+std::string read_file(const std::string& fileName);
+
+void save_to_file(const std::string& data, const std::string& filename);
+
+std::vector<std::string> split_by_delimiter(const std::string& data, const std::string& delimiter = "***");
 
 #endif

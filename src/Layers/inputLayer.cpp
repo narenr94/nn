@@ -13,14 +13,9 @@ InputLayer::~InputLayer()
 {
 }
 
-void InputLayer::SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr)
+InputLayer::InputLayer(std::string load_data):BaseLayer(eLayer_type::INPUT, load_data)
 {
-    assert(prevLyr == nullptr);
-    m_pPrevLyr = prevLyr;
-    m_pNextLyr = nxtLyr;
 
-    m_unTransformMatrixSize = 0;
-    m_bPrevNxtLyrsSet = true;
 }
 
 void InputLayer::do_forwardpass_to_current_layer()
@@ -41,4 +36,9 @@ void InputLayer::set_transform_matrix_parameter(uint Idx, float fWt)
 void InputLayer::set_all_transform_matrix_parameter(float* fWt)
 {
     NOT_APPLICABLE_FOR_INPUT_LAYER;
+}
+
+std::string InputLayer::get_serialized_save_data()
+{
+    return get_serialized_general_layer_data();
 }

@@ -25,14 +25,11 @@
 
 #include <string.h>
 #include <stdio.h>
-
 #include <cassert>
 
 static const char* static_NNDumpFilePath = "./"; //dump file path
 
 static int static_nDumpFileNum = 0; //number postfix fro dump files
-
-
 
 struct Batch_Training_Instance_data{
     float* deltas;
@@ -48,8 +45,6 @@ struct Batch_Training_Args{
 static Batch_Training_Args ** args = nullptr;
 
 // std::mutex argsMutex;
-
-
 
 NeuralNet::NeuralNet(nnInitData& initData):
 m_ppLys(nullptr)
@@ -76,102 +71,229 @@ NeuralNet::NeuralNet(NeuralNet* other)
 
 }
 
-NeuralNet::NeuralNet(const char* fileName)
+sNN_General_Data get_general_nn_data(std::vector<std::pair<std::string, std::vector<std::string>>> parsed_lines)
 {
-    FILE* file = fopen(fileName, "r"); 
-	if (file == nullptr) 
-	{ 
-		perror("Failed to open file for reading"); 
-		return; 
-	} 
-	
-    uint i = 0;
-    uint j = 0;
+    sNN_General_Data ret_data;
+    bool m_unNumLys_set = false;
+    bool m_fLearningRate_set = false;
+    bool m_eOpt_set = false;
+    bool m_eLossFunc_set = false;
+    bool layer_types_set = false;
 
-    uint temp_numLys = 0;
-    int temp_int = 0;
-    float temp_float = 0.0f;
-
-    //load init data
-    fscanf(file, "%d", &temp_numLys);
-
-    nnInitData* temp_initData = new nnInitData(temp_numLys);
-
-    temp_initData->unNoLys = temp_numLys;
-
-    for(i = 0; i < temp_numLys; i++)
+    for(uint i = 0; i < parsed_lines.size(); i++)
     {
-        fscanf(file, "%d", &(temp_initData->layer_dimensions[i].unInputRows));
-        fscanf(file, "%d", &(temp_initData->layer_dimensions[i].unInputColumns));
-        fscanf(file, "%d", &(temp_initData->layer_dimensions[i].unOutputRows));
-        fscanf(file, "%d", &(temp_initData->layer_dimensions[i].unOutputColumns));
-        fscanf(file, "%d", &(temp_initData->layer_dimensions[i].unTransformParametersRows));
-        fscanf(file, "%d", &(temp_initData->layer_dimensions[i].unTransformParametersColumns));
-        fscanf(file, "%d", &(temp_initData->layer_dimensions[i].unNoTransformParameterMtx));
-    }
-
-    for(i = 0; i < temp_numLys; i++)
-    {
-        // fscanf(file, "%d", &(temp_initData->eAct_Funcs[i]));
-        fscanf(file, "%d", &temp_int);
-        temp_initData->eAct_Funcs[i] = (eAct_func)temp_int;
-    }
-
-    // fscanf(file, "%d", &temp_int);
-    // temp_initData->eAct_Func = (eAct_func)temp_int;
-    fscanf(file, "%f", &temp_initData->fLearningRate);
-    fscanf(file, "%d", &temp_int);
-    temp_initData->eOpt = (eOptimizers)temp_int;
-    fscanf(file, "%d", &temp_int);
-    temp_initData->eLossFunc = (eLossFuncs)temp_int;
-
-    fscanf(file, "%f", &temp_float);
-    temp_initData->optParam[0] = temp_float;
-    fscanf(file, "%f", &temp_float);
-    temp_initData->optParam[1] = temp_float;
-    fscanf(file, "%f", &temp_float);
-    temp_initData->optParam[2] = temp_float;
-
-    for(i = 0; i < temp_numLys; i++)
-    {
-        fscanf(file, "%f", &(temp_initData->actParam1[i]));
-    }
-
-    // fscanf(file, "%f", &temp_float);
-    // temp_initData->actParam1 = temp_float;
-
-    fscanf(file, "%f", &temp_float);
-    temp_initData->lossParam = temp_float;
-
-    //set nn with temp init data
-    Set_Init_Data(*temp_initData);
-
-    delete temp_initData;
-
-    //store bias values
-	for(i = 0; i < temp_numLys; ++i) 
-	{ 
-        for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
+        if(parsed_lines[i].first == "m_unNumLys:")
         {
-            fscanf(file, "%f", &temp_float);
-            m_ppLys[i]->set_node_bias(temp_float, j);
+            assert(parsed_lines[i].second.size() == 1);
+            ret_data.m_unNumLys = std::stoul(parsed_lines[i].second[0]);
+            m_unNumLys_set = true;
         }
-		 
-	} 
-
-    //store weight values
-    for(i = 1; i < m_unNumLys; ++i) 
-	{ 
-        for(j = 0; j < m_ppLys[i]->get_transform_matrix_parameter_size(); j++)
+        else if(parsed_lines[i].first == "m_fLearningRate:")
         {
-            fscanf(file, "%f", &temp_float);
-            m_ppLys[i]->set_transform_matrix_parameter(j, temp_float);
+            assert(parsed_lines[i].second.size() == 1);
+            ret_data.m_fLearningRate = std::stof(parsed_lines[i].second[0]);
+            m_fLearningRate_set = true;
         }
-		 
-	} 
+        else if(parsed_lines[i].first == "m_eOpt:")
+        {
+            assert(parsed_lines[i].second.size() == 1);
+            ret_data.m_eOpt = (eOptimizers)std::stoul(parsed_lines[i].second[0]);
+            m_eOpt_set = true;
+        }
+        else if(parsed_lines[i].first == "m_eLossFunc:")
+        {
+            assert(parsed_lines[i].second.size() == 1);
+            ret_data.m_eLossFunc = (eLossFuncs)std::stoul(parsed_lines[i].second[0]);
+            m_eLossFunc_set = true;
+        }
+        else if(parsed_lines[i].first == "m_optParam1:")
+        {
+            assert(parsed_lines[i].second.size() == 1);
+            ret_data.m_optParam[0] = std::stof(parsed_lines[i].second[0]);
+        }
+        else if(parsed_lines[i].first == "m_optParam2:")
+        {
+            assert(parsed_lines[i].second.size() == 1);
+            ret_data.m_optParam[1] = std::stof(parsed_lines[i].second[0]);
+        }
+        else if(parsed_lines[i].first == "m_optParam3:")
+        {
+            assert(parsed_lines[i].second.size() == 1);
+            ret_data.m_optParam[2] = std::stof(parsed_lines[i].second[0]);
+        }
+        else if(parsed_lines[i].first == "m_lossParam1:")
+        {
+            assert(parsed_lines[i].second.size() == 1);
+            ret_data.m_lossParam = std::stof(parsed_lines[i].second[0]);
+        }
+        else if(parsed_lines[i].first == "layer_types:")
+        {
+            assert(parsed_lines[i].second.size() == ret_data.m_unNumLys);
+            for(uint j = 0; j < ret_data.m_unNumLys; j++)
+            {
+                ret_data.layer_types.push_back((eLayer_type)std::stoul(parsed_lines[i].second[j]));
+            }
+            layer_types_set = true;
+        }
+        else
+        {
+            //ignore
+        }
+    }
 
+    assert(m_unNumLys_set);
+    assert(m_fLearningRate_set);
+    assert(m_eOpt_set);
+    assert(m_eLossFunc_set);
+    assert(layer_types_set);
 
-	fclose(file);
+    return ret_data;
+}
+
+NeuralNet::NeuralNet(std::string& fileName)
+{
+
+    std::string file_data = read_file(fileName);
+
+    std::vector<std::string> blocks = split_by_delimiter(file_data);
+
+    Set_Load_Data(blocks);
+
+}
+
+void NeuralNet::Set_Load_Data(std::vector<std::string> blocks)
+{
+    std::vector<std::string> lines = split_by_lines(blocks[0]);
+
+    std::vector<std::pair<std::string, std::vector<std::string>>> parsed_lines;
+
+    for(uint i = 0; i < lines.size(); i++)
+    {
+        parsed_lines.push_back(parse_line(lines[i]));
+    }
+
+    sNN_General_Data gen_data = get_general_nn_data(parsed_lines);
+
+    Set_General_Data(gen_data);
+    Set_Layer_Data(gen_data, blocks);
+}
+
+void NeuralNet::Set_Layer_Data(sNN_General_Data gen_data, std::vector<std::string> blocks)
+{
+    m_ppLys = new BaseLayer*[m_unNumLys];
+    
+    //create layers
+    for(uint i = 0; i < m_unNumLys; i++)
+    {
+        switch(gen_data.layer_types[i])
+        {
+            case eLayer_type::INPUT:
+                m_ppLys[i] = new InputLayer(blocks[i + 1]);
+                break;
+
+            case eLayer_type::CONV:
+                m_ppLys[i] = new ConvLayer(blocks[i + 1]);
+                break;
+            
+            case eLayer_type::DENSE:
+            default:
+                m_ppLys[i] = new DenseLayer(blocks[i + 1]);
+                break;
+        }
+
+        if(i != 0)
+        {
+            m_unTotalCorrectableNodes += m_ppLys[i]->get_num_nodes();
+        }
+
+    }
+
+    Set_Layer_Order(gen_data.m_lossParam);
+    
+}
+
+void NeuralNet::Set_Layer_Order(float m_lossParam)
+{
+    //setup layers order
+    for(uint i = 0; i < m_unNumLys; i++)
+    {
+        if((i != 0) && (i != (m_unNumLys - 1))) //hidden layers
+        {
+            m_ppLys[i]->SetPreviousNextLayers(m_ppLys[i - 1], m_ppLys[i + 1]);
+        }
+        else if(i == 0) //input layer
+        {
+            m_ppLys[i]->SetPreviousNextLayers(nullptr, m_ppLys[i + 1]);
+        }
+        else// output layer
+        {
+            m_ppLys[i]->SetPreviousNextLayers(m_ppLys[i - 1], nullptr);
+            switch(m_eLossFunc)
+            {
+                case eLossFuncs::MSE:
+                    m_pLossFunc = new MeanSquaredError(m_ppLys[i]);
+                    break;
+                case eLossFuncs::MAE:
+                    m_pLossFunc = new MeanAbsoluteError(m_ppLys[i]);
+                    break;
+                case eLossFuncs::HUBER:
+                    m_pLossFunc = new HuberLoss(m_ppLys[i], m_lossParam != 0.0f ? m_lossParam : HUBER_DEFAULT_DELTA);
+                    break;
+                case eLossFuncs::CCE:
+                    m_pLossFunc = new CompetitiveCrossEntropyLoss(m_ppLys[i]);
+                    break;
+                case eLossFuncs::BCE:
+                    m_pLossFunc = new BinaryCrossEntropyLoss(m_ppLys[i]);
+                    break;
+                default:
+                    m_pLossFunc = new MeanSquaredError(m_ppLys[i]);
+                    break;
+            }
+            
+        }
+        
+    }
+}
+
+void NeuralNet::Set_General_Data(sNN_General_Data gen_data)
+{
+    m_unNumLys = gen_data.m_unNumLys;
+    
+    m_fLearningRate = gen_data.m_fLearningRate;
+    // nn_id = other_initData->ID;
+    m_eOpt = gen_data.m_eOpt;
+
+    m_eLossFunc = gen_data.m_eLossFunc;
+
+    if(m_ppLys)
+    {
+        delete [] m_ppLys;
+    }
+
+    //SetupLayersAndWeightMatrices
+    
+    switch(m_eOpt)
+    {
+        case eOptimizers::SGD:
+            m_pOptimizer = new StochasticGradientDescent(this);
+            break;
+        case eOptimizers::RMSPROP:
+            m_pOptimizer = new RMSProp(this, gen_data.m_optParam[0] != 0.0f ? gen_data.m_optParam[0] : RMS_PROP_DEFAULT_BETA, gen_data.m_optParam[1] != 0.0f ? gen_data.m_optParam[1] : RMS_PROP_DEFAULT_EPSILON);
+            break;
+        case eOptimizers::ADAM:
+            m_pOptimizer = new ADAMOPT(this, gen_data.m_optParam[0] != 0.0f ? gen_data.m_optParam[0] : ADAM_DEFAULT_BETA1, gen_data.m_optParam[1] != 0.0f ? gen_data.m_optParam[1] : ADAM_DEFAULT_BETA1, gen_data.m_optParam[2] != 0.0f ? gen_data.m_optParam[2] : ADAM_DEFAULT_EPSILON);
+            break;
+        default:
+            m_pOptimizer = new StochasticGradientDescent(this);
+            break;
+    }
+
+    //store param values locally
+    m_optParam1 = gen_data.m_optParam[0];
+    m_optParam2 = gen_data.m_optParam[1];
+    m_optParam3 = gen_data.m_optParam[2];
+
+    m_lossParam1 = gen_data.m_lossParam;
 }
 
 nnInitData NeuralNet::Get_Init_Data()
@@ -305,45 +427,7 @@ void NeuralNet::SetupLayersAndWeightMatrices(std::vector<eLayer_type>& layer_typ
 
     }
 
-    //setup layers order
-    for(uint i = 0; i < m_unNumLys; i++)
-    {
-        if((i != 0) && (i != (m_unNumLys - 1))) //hidden layers
-        {
-            m_ppLys[i]->SetPreviousNextLayers(m_ppLys[i - 1], m_ppLys[i + 1]);
-        }
-        else if(i == 0) //input layer
-        {
-            m_ppLys[i]->SetPreviousNextLayers(nullptr, m_ppLys[i + 1]);
-        }
-        else// output layer
-        {
-            m_ppLys[i]->SetPreviousNextLayers(m_ppLys[i - 1], nullptr);
-            switch(m_eLossFunc)
-            {
-                case eLossFuncs::MSE:
-                    m_pLossFunc = new MeanSquaredError(m_ppLys[i]);
-                    break;
-                case eLossFuncs::MAE:
-                    m_pLossFunc = new MeanAbsoluteError(m_ppLys[i]);
-                    break;
-                case eLossFuncs::HUBER:
-                    m_pLossFunc = new HuberLoss(m_ppLys[i], lossParam != 0.0f ? lossParam : HUBER_DEFAULT_DELTA);
-                    break;
-                case eLossFuncs::CCE:
-                    m_pLossFunc = new CompetitiveCrossEntropyLoss(m_ppLys[i]);
-                    break;
-                case eLossFuncs::BCE:
-                    m_pLossFunc = new BinaryCrossEntropyLoss(m_ppLys[i]);
-                    break;
-                default:
-                    m_pLossFunc = new MeanSquaredError(m_ppLys[i]);
-                    break;
-            }
-            
-        }
-        
-    }
+    Set_Layer_Order(lossParam);
     
 }
 
@@ -781,69 +865,33 @@ void NeuralNet::SetWeight(uint MtxId, uint Idx, float val)
     m_ppLys[MtxId]->set_transform_matrix_parameter(Idx, val);
 }
 
-void NeuralNet::SaveNN(const char* fileName)
+void NeuralNet::Save_NN(std::string fileName)
 {
-    FILE* file = fopen(fileName, "w"); 
-	if (file == nullptr) 
-	{ 
-		perror("Failed to open file for writing"); 
-		return; 
-	}
+    std::ostringstream ss;
 
-    uint i = 0;
-    uint j = 0;
-
-    //store init data
-    fprintf(file, "%d ", m_unNumLys);
-    for(i = 0; i < m_unNumLys; i++)
+    ss << "m_unNumLys: " << m_unNumLys << " \n";
+    ss << "m_fLearningRate: " << m_fLearningRate << " \n";
+    ss << "m_eOpt: " << (uint)m_eOpt << " \n";
+    ss << "m_eLossFunc: " << (uint)m_eLossFunc << " \n";
+    ss << "m_optParam1: " << m_optParam1 << " \n";
+    ss << "m_optParam2: " << m_optParam2 << " \n";
+    ss << "m_optParam3: " << m_optParam3 << " \n";
+    ss << "m_lossParam1: " << m_lossParam1 << " \n";
+    ss << "layer_types: ";
+    for(uint i = 0; i < m_unNumLys; i++)
     {
-        fprintf(file, "%d ", m_ppLys[i]->get_num_nodes());
+        ss << (uint)m_ppLys[i]->get_layer_type() << " ";
+    }
+    ss << "\n";
+
+    for(uint i = 0; i < m_unNumLys; i++)
+    {
+        ss << "***\n";
+        ss << m_ppLys[i]->get_serialized_save_data();
     }
 
-    for(i = 0; i < m_unNumLys; i++)
-    {
-        fprintf(file, "%d ", m_ppLys[i]->get_act_func());
-    }
+    save_to_file(ss.str(), fileName);
 
-    // fprintf(file, "%d ", (int)m_eActFunc);
-    fprintf(file, "%f ", m_fLearningRate);
-    fprintf(file, "%d ", (int)m_eOpt);
-    fprintf(file, "%d ", (int)m_eLossFunc);
-
-    fprintf(file, "%f ", m_optParam1);
-    fprintf(file, "%f ", m_optParam2);
-    fprintf(file, "%f ", m_optParam3);
-
-    for(i = 0; i < m_unNumLys; i++)
-    {
-        fprintf(file, "%f ", m_ppLys[i]->get_act_param());
-    }
-
-    // fprintf(file, "%f ", m_actParam1);
-
-    fprintf(file, "%f ", m_lossParam1);
-
-
-    //store bias values
-	for(i = 0; i < m_unNumLys; ++i) 
-	{ 
-        for(j = 0; j < m_ppLys[i]->get_num_nodes(); j++)
-        {
-            fprintf(file, "%f ", m_ppLys[i]->get_node_bias_idx(j));
-        }
-		 
-	} 
-
-    //store weight values
-    for(i = 1; i < m_unNumLys; ++i) 
-	{ 
-        for(j = 0; j < m_ppLys[i]->get_transform_matrix_parameter_size(); j++)
-        {
-            fprintf(file, "%f ", m_ppLys[i]->get_transform_matrix_parameter(j));
-        }
-		 
-	} 
-	fclose(file);
 }
 
 void NeuralNet::Get_OutputLayer_Data(float* fVal)

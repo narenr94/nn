@@ -45,7 +45,7 @@ protected:
 
     bool m_bPrevNxtLyrsSet;
 
-    uint m_unTransformMatrixSize;
+    uint m_unTransformMatrixSize = 0;
 
     eLayer_type m_layer_type;
 
@@ -53,6 +53,8 @@ protected:
 public:
 
     BaseLayer(eLayer_type t_layer_type, sLayer_Dimensions t_dims, eAct_func eActFunc, float actParam1);
+
+    BaseLayer(eLayer_type t_layer_type, std::string load_data);
 
     virtual ~BaseLayer();
 
@@ -156,6 +158,14 @@ public:
 
     void populate_transform_matrix_parameter_with_random_numbers();
 
+    std::string get_serialized_general_layer_data();
+
+    std::string get_serialized_biases_data();
+
+    std::string get_serialized_transform_mtx_data();
+
+    void SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr);
+
     //---------- End Layer APIs-------------
 
     //---------- Pure Virtual APIs------------
@@ -165,13 +175,25 @@ public:
     virtual void set_transform_matrix_parameter(uint Idx, float fWt) = 0;
 
     virtual void set_all_transform_matrix_parameter(float* wt) = 0;
-
-    virtual void SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr) = 0;
     
     virtual void do_forwardpass_to_current_layer() = 0;
 
+    virtual std::string get_serialized_save_data() = 0;
+    
+
+    // virtual void deserialize_set_load_data(std::string data) = 0;
+
     //---------- Pure Virtual APIs------------
 
+    private:
+    
+    void apply_parsed_load_data(eLayer_type t_layer_type, std::vector<std::pair<std::string, std::vector<std::string>>>& parsed_lines);
+
+    void setup_layer(eLayer_type t_layer_type, sLayer_Dimensions t_dims, eAct_func eActFunc, float actParam1);
+
+    void extract_apply_biases(std::vector<std::string>& biases_string);
+
+    void extract_apply_transform_param(std::vector<std::string>& wt_string);
 };
 
 

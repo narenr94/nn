@@ -21,12 +21,12 @@ class InputLayer : public BaseLayer{
     */
     InputLayer(sLayer_Dimensions t_dims, eAct_func eActFunc, float actParam1);
 
+    InputLayer(std::string load_data);
+
     /*
         ~DenseLayer() : destruct and frees layer resources
     */
     ~InputLayer();
-
-    void SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr) override;
 
     void do_forwardpass_to_current_layer() override;
 
@@ -36,7 +36,8 @@ class InputLayer : public BaseLayer{
 
     void set_all_transform_matrix_parameter(float* wt) override;
 
-
+    std::string get_serialized_save_data() override;
+    
 };
 
 #endif
