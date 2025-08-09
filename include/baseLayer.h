@@ -166,6 +166,8 @@ public:
 
     void SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr);
 
+    sLayer_Parsed_Dim get_prev_layer_parsed_output_dims();
+
     //---------- End Layer APIs-------------
 
     //---------- Pure Virtual APIs------------

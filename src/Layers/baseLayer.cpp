@@ -303,7 +303,7 @@ void validate_input_data_layers(eLayer_type t_layer_type, sLayer_Dimensions t_di
     {
         assert(t_dims.unInputRows == 0);
         assert(t_dims.unInputColumns == 0);
-        assert(t_dims.unNoTransformParameterMtx == 0);
+        assert(t_dims.unNoTransformParameterMtx == 1);
         assert(t_dims.unTransformParametersColumns == 0);
         assert(t_dims.unTransformParametersRows == 0);
     }
@@ -561,4 +561,9 @@ std::string BaseLayer::get_serialized_transform_mtx_data()
     ss << "\n";
     
     return ss.str();
+}
+
+sLayer_Parsed_Dim BaseLayer::get_prev_layer_parsed_output_dims()
+{
+    return get_parsed_dims(GetPreviousLayer()->get_layer_dimensions());
 }

@@ -47,7 +47,7 @@ nnInitData::nnInitData(uint InLyrSz, eOptimizers t_opt, std::vector<float> t_opt
 {
     assert(t_optParam.size() == 3); //need three params for optimizer
     unNoLys++;
-    layer_dimensions.emplace_back(0, 0, 1, InLyrSz, 0, 0, 0);
+    layer_dimensions.emplace_back(0, 0, 1, InLyrSz, 0, 0, 1);
     eAct_Funcs.emplace_back(eAct_func::TANH); //doesnt matter
     e_layer_type.emplace_back(eLayer_type::INPUT);
     actParam1.emplace_back(0.0f); //doesnt matter
@@ -95,7 +95,7 @@ void nnInitData::add_dense_layer(uint OutSz, eAct_func t_act_func, float t_act_p
     actParam1.emplace_back(t_act_param);
 }
 
-void nnInitData::add_conv_layer(uint t_in_rows, uint t_in_cols, eKernelSize t_kernel_size, uint t_num_kernels, eAct_func t_act_func, float t_act_param)
+void nnInitData::add_conv_layer(uint t_in_rows, uint t_in_cols, eConvKernelSize t_kernel_size, uint t_num_kernels, eAct_func t_act_func, float t_act_param)
 {
     assert((t_in_rows * t_in_cols) == (layer_dimensions[unNoLys - 1].unOutputColumns * layer_dimensions[unNoLys - 1].unOutputRows));
     unNoLys++;
@@ -106,15 +106,15 @@ void nnInitData::add_conv_layer(uint t_in_rows, uint t_in_cols, eKernelSize t_ke
 
     switch(t_kernel_size)
     {
-        case eKernelSize::Sz3x3:
+        case eConvKernelSize::Sz3x3:
             kernelRow = 3;
             kernelColumn = 3;
             break;
-        case eKernelSize::Sz5x5:
+        case eConvKernelSize::Sz5x5:
             kernelRow = 5;
             kernelColumn = 5;
             break;
-        case eKernelSize::Sz7x7:
+        case eConvKernelSize::Sz7x7:
             kernelRow = 7;
             kernelColumn = 7;
             break;
@@ -131,6 +131,21 @@ void nnInitData::add_conv_layer(uint t_in_rows, uint t_in_cols, eKernelSize t_ke
     eAct_Funcs.emplace_back(t_act_func);
     e_layer_type.emplace_back(eLayer_type::CONV);
     actParam1.emplace_back(t_act_param);
+
+}
+
+void nnInitData::add_pooling_layer(ePooling_type type, ePoolingKernelSize krSz, uint stride)
+{
+    unNoLys++;
+
+    sLayer_Parsed_Dim prev_dim = get_parsed_dims(layer_dimensions[unNoLys - 2]);
+    std::pair<uint,uint> kr_row_col = get_pooling_window_rows_cols(krSz, prev_dim);
+    std::pair<uint,uint> out_dim = find_pooling_output_dims(prev_dim, kr_row_col);
+
+    layer_dimensions.emplace_back(layer_dimensions[unNoLys - 2].unOutputRows, layer_dimensions[unNoLys - 2].unOutputColumns, out_dim.first * layer_dimensions[unNoLys - 2].unNoTransformParameterMtx, out_dim.second, kr_row_col.first, kr_row_col.second, layer_dimensions[unNoLys - 2].unNoTransformParameterMtx);
+    eAct_Funcs.emplace_back(eAct_func::RELU);
+    e_layer_type.emplace_back(eLayer_type::POOLING);
+    actParam1.emplace_back(stride);
 
 }
 
@@ -198,4 +213,67 @@ std::vector<std::string> split_by_delimiter(const std::string& data, const std::
     parts.push_back(data.substr(start));
 
     return parts;
+}
+
+std::pair<uint,uint> get_pooling_window_rows_cols(ePoolingKernelSize t_pooling_kernel_sz, sLayer_Parsed_Dim& prev_dim)
+{
+    std::pair<uint,uint> ret;
+
+    switch(t_pooling_kernel_sz)
+    {
+        case ePoolingKernelSize::Sz2x2:
+            ret.first = 2;
+            ret.second = 2;
+            break;
+        case ePoolingKernelSize::Sz3x3:
+            ret.first = 3;
+            ret.second = 3;
+            break;
+        case ePoolingKernelSize::GLOBAL:
+            ret.first = prev_dim.rows / prev_dim.num_mtx;
+            ret.second = prev_dim.cols;
+            break;
+        default:
+            assert(0);
+            break;
+    }
+
+    return ret;
+}
+
+std::pair<uint, uint> find_pooling_output_dims(sLayer_Parsed_Dim& in_dims, std::pair<uint,uint> krSz)
+{
+    uint col_slide = in_dims.cols/krSz.second;
+    if(in_dims.cols%krSz.second)
+    {
+        col_slide += 1;
+    }
+
+    uint row_slide = in_dims.rows/krSz.first;
+    if(in_dims.rows%krSz.first)
+    {
+        row_slide += 1;
+    }
+
+    return std::pair<uint, uint>(row_slide, col_slide);
+
+}
+
+sLayer_Parsed_Dim get_parsed_dims(const sLayer_Dimensions& dims)
+{
+    sLayer_Parsed_Dim ret_dims;
+
+    ret_dims.num_mtx = dims.unNoTransformParameterMtx;
+    ret_dims.rows = dims.unOutputRows;
+
+    if(ret_dims.num_mtx == 0)//incase of prev layer = input layer
+    {
+        ret_dims.num_mtx = 1;
+    }
+
+    ret_dims.rows /= ret_dims.num_mtx;
+
+    ret_dims.cols = dims.unOutputColumns;
+
+    return ret_dims;
 }

@@ -941,7 +941,7 @@ TEST(NN_CORE_TESTS, nn_core_copy_conv_test)
     optParam.push_back(0.0f);
 
     nnInitData * initData = new nnInitData(16, eOptimizers::SGD, optParam, eLossFuncs::HUBER, 0.0f, 0.01f);
-    initData->add_conv_layer(4, 4, eKernelSize::Sz3x3, 3, eAct_func::TANH, 0.0f);
+    initData->add_conv_layer(4, 4, eConvKernelSize::Sz3x3, 3, eAct_func::TANH, 0.0f);
     initData->add_dense_layer(2, eAct_func::TANH, 0.0f);
 
     //sz = 16, 12, 2
@@ -1016,7 +1016,7 @@ TEST(NN_CORE_TESTS, nn_core_save_load_test)
     optParam.push_back(0.0f);
 
     nnInitData * initData = new nnInitData(16, eOptimizers::SGD, optParam, eLossFuncs::HUBER, 0.0f, 0.01f);
-    initData->add_conv_layer(4, 4, eKernelSize::Sz3x3, 3, eAct_func::TANH, 0.0f);
+    initData->add_conv_layer(4, 4, eConvKernelSize::Sz3x3, 3, eAct_func::TANH, 0.0f);
     initData->add_dense_layer(2, eAct_func::TANH, 0.0f);
 
     //sz = 16, 12, 2

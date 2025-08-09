@@ -89,7 +89,7 @@ int main()
     optParam.push_back(0.0f);
 
     nnInitData * initData = new nnInitData(784, eOptimizers::SGD, optParam, eLossFuncs::HUBER, 0.0f, 0.01f);
-    initData->add_conv_layer(28, 28, eKernelSize::Sz3x3, 5, eAct_func::TANH, 0.0f);
+    initData->add_conv_layer(28, 28, eConvKernelSize::Sz3x3, 5, eAct_func::TANH, 0.0f);
     initData->add_dense_layer(64, eAct_func::TANH, 0.0f);
     initData->add_dense_layer(10, eAct_func::TANH, 0.0f);
 

@@ -26,6 +26,7 @@ enum eAct_func{
 enum eLayer_type{
     INPUT,
     CONV,
+    POOLING,
     DENSE
 };
 
@@ -72,10 +73,29 @@ enum eOptimizers{
 };
 
 
-enum eKernelSize{
+enum eConvKernelSize{
     Sz3x3,
     Sz5x5,
     Sz7x7
+};
+
+enum ePooling_type{
+    AVERAGE,
+    MAX
+};
+
+enum ePoolingKernelSize{
+    Sz3x3,
+    Sz2x2,
+    GLOBAL
+};
+
+struct sLayer_Parsed_Dim{
+
+    uint rows;
+    uint cols;
+    uint num_mtx;
+
 };
 
 
@@ -117,7 +137,9 @@ struct nnInitData{
 
     void add_dense_layer(uint OutSz, eAct_func t_act_func, float t_act_param);
 
-    void add_conv_layer(uint t_in_rows, uint t_in_cols, eKernelSize t_kernel_size, uint t_num_kernels, eAct_func t_act_func, float t_act_param);
+    void add_conv_layer(uint t_in_rows, uint t_in_cols, eConvKernelSize t_kernel_size, uint t_num_kernels, eAct_func t_act_func, float t_act_param);
+
+    void add_pooling_layer(ePooling_type type, ePoolingKernelSize krSz, uint stride);
 
 };
 
@@ -140,5 +162,11 @@ std::string read_file(const std::string& fileName);
 void save_to_file(const std::string& data, const std::string& filename);
 
 std::vector<std::string> split_by_delimiter(const std::string& data, const std::string& delimiter = "***");
+
+std::pair<uint,uint> get_pooling_window_rows_cols(ePoolingKernelSize t_pooling_kernel_sz, sLayer_Parsed_Dim prev_dim);
+
+std::pair<uint, uint> find_pooling_output_dims(sLayer_Parsed_Dim& in_dims, std::pair<uint,uint> krSz);
+
+sLayer_Parsed_Dim get_parsed_dims(const sLayer_Dimensions& dims);
 
 #endif

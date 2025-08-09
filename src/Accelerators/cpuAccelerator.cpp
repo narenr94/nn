@@ -1,6 +1,8 @@
 #include "cpuAccelerator.h"
 #include "baseLayer.h"
 #include <stdio.h>
+#include <cassert>
+#include <functional>
 
 CpuAccelerator::CpuAccelerator(BaseLayer* pLayer):BaseAccelerator(pLayer)
 {
@@ -217,4 +219,117 @@ void CpuAccelerator::do_backwardpass_conv_layer(sLayer_Dimensions t_dims)
     }
 
     delete [] temp;
+}
+
+void CpuAccelerator::do_forwardpass_pooling_layer(ePooling_type t_pooling_type, ePoolingKernelSize t_pooling_kernel_sz, uint t_stride)
+{
+    uint kernel_rows = 0;
+    uint kernel_cols = 0;
+
+    sLayer_Parsed_Dim prev_dim = m_pLayer->get_prev_layer_parsed_output_dims();
+
+    std::pair<uint,uint> row_col_window = get_pooling_window_rows_cols(t_pooling_kernel_sz, prev_dim);
+    kernel_rows = row_col_window.first;
+    kernel_cols = row_col_window.second;
+
+    std::pair<uint,uint> out_dim = find_pooling_output_dims(prev_dim, row_col_window);
+
+    uint row_slide = out_dim.first;
+    uint col_slide = out_dim.second;
+
+    for(uint k = 0; k < prev_dim.num_mtx; k++)
+    {
+        for(uint i = 0; i < row_slide; i++)
+        {
+            for(uint j = 0; j < col_slide; j++)
+            {
+                std::pair<uint, uint>row_col_pos;
+                row_col_pos.first = i * kernel_rows;
+                row_col_pos.second = j * kernel_cols;
+                uint val = 0.0f;
+                    
+                if(ePooling_type::MAX == t_pooling_type)
+                {
+                    val = find_max_in_window_at(row_col_pos, prev_dim, row_col_window, k);                    
+                }
+                else if(ePooling_type::AVERAGE == t_pooling_type)
+                {
+                    val = find_avg_in_window_at(row_col_pos, prev_dim, row_col_window, k);
+                }
+
+                m_pLayer->set_node_value(val, ((k * row_slide * col_slide) + (i * col_slide) + j));
+            }
+        }
+    }
+
+}
+
+uint CpuAccelerator::find_max_in_window_at(std::pair<uint, uint>row_col_pos, sLayer_Parsed_Dim prev_dim, std::pair<uint, uint>row_col_window, uint curr_mtx_idx)
+{
+
+    uint absolute_row = ((curr_mtx_idx * prev_dim.rows) + row_col_pos.first);
+
+    float ret_max = m_pLayer->GetPreviousLayer()->get_node_value_idx((absolute_row * prev_dim.cols) + row_col_pos.second);
+
+    for(uint i = 0; ((i < row_col_window.first) && ((i + row_col_pos.first) < prev_dim.rows)); i++)
+    {
+        for(uint j = 0; ((j < row_col_window.second) && ((j + row_col_pos.second) < prev_dim.cols)); j++)
+        {
+            float val = m_pLayer->GetPreviousLayer()->get_node_value_idx(((absolute_row + i) * prev_dim.cols) + (j + row_col_pos.second));
+            if(val > ret_max)
+            {
+                ret_max = val;
+            }
+        }
+    }
+
+    return ret_max;
+}
+
+uint window_cell_count(std::pair<uint, uint>row_col_pos, sLayer_Parsed_Dim prev_dim, std::pair<uint, uint>row_col_window)
+{
+    uint rows = 0;
+    uint cols = 0;
+
+    if(prev_dim.rows > row_col_pos.first + row_col_window.first)
+    {
+        rows = row_col_window.first;
+    }
+    else
+    {
+        rows = row_col_window.first - ((row_col_pos.first + row_col_window.first) - prev_dim.rows);
+    }
+
+    if(prev_dim.cols > row_col_pos.second + row_col_window.second)
+    {
+        cols = row_col_window.second;
+    }
+    else
+    {
+        cols = row_col_window.second - ((row_col_pos.second + row_col_window.second) - prev_dim.cols);
+    }
+
+    return (rows * cols);
+
+}
+
+float CpuAccelerator::find_avg_in_window_at(std::pair<uint, uint>row_col_pos, sLayer_Parsed_Dim prev_dim, std::pair<uint, uint>row_col_window, uint curr_mtx_idx)
+{
+
+    uint cell_count = window_cell_count(row_col_pos, prev_dim, row_col_window);
+    uint absolute_row = ((curr_mtx_idx * prev_dim.rows) + row_col_pos.first);
+
+    float ret_avg = 0.0f;
+
+    for(uint i = 0; ((i < row_col_window.first) && ((i + row_col_pos.first) < prev_dim.rows)); i++)
+    {
+        for(uint j = 0; ((j < row_col_window.second) && ((j + row_col_pos.second) < prev_dim.cols)); j++)
+        {
+            ret_avg += m_pLayer->GetPreviousLayer()->get_node_value_idx(((absolute_row + i) * prev_dim.cols) + (j + row_col_pos.second));
+        }
+    }
+
+    ret_avg /= cell_count;
+
+    return ret_avg;
 }
