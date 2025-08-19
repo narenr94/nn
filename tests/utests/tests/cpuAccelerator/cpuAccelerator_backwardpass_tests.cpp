@@ -13,7 +13,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_relu_test)
 
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 0;
+    dims1.unNoTransformParameterMtx = 1;
     dims1.unOutputColumns = 2;
     dims1.unOutputRows = 1;
     dims1.unTransformParametersColumns = 0;
@@ -85,7 +85,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_leakyRelu_test)
 
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 0;
+    dims1.unNoTransformParameterMtx = 1;
     dims1.unOutputColumns = 2;
     dims1.unOutputRows = 1;
     dims1.unTransformParametersColumns = 0;
@@ -157,7 +157,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_tanh_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 0;
+    dims1.unNoTransformParameterMtx = 1;
     dims1.unOutputColumns = 2;
     dims1.unOutputRows = 1;
     dims1.unTransformParametersColumns = 0;
@@ -229,7 +229,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_sigmoid_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 0;
+    dims1.unNoTransformParameterMtx = 1;
     dims1.unOutputColumns = 2;
     dims1.unOutputRows = 1;
     dims1.unTransformParametersColumns = 0;
@@ -301,7 +301,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_softmax_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 0;
+    dims1.unNoTransformParameterMtx = 1;
     dims1.unOutputColumns = 2;
     dims1.unOutputRows = 1;
     dims1.unTransformParametersColumns = 0;
@@ -373,7 +373,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_conv_backwardpass_leakyRelu_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 0;
+    dims1.unNoTransformParameterMtx = 1;
     dims1.unOutputColumns = 6;
     dims1.unOutputRows = 6;
     dims1.unTransformParametersColumns = 0;
@@ -455,7 +455,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_conv_backwardpass_multiKernel_leakyRelu_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 0;
+    dims1.unNoTransformParameterMtx = 1;
     dims1.unOutputColumns = 6;
     dims1.unOutputRows = 6;
     dims1.unTransformParametersColumns = 0;

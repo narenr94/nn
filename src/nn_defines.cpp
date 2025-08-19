@@ -24,14 +24,14 @@ sLayer_Dimensions::sLayer_Dimensions(const sLayer_Dimensions& other)
     unNoTransformParameterMtx = other.unNoTransformParameterMtx;
 }
 
-sLayer_Dimensions::sLayer_Dimensions(uint in_rows, uint in_columns, uint out_rows, uint out_cols, uint trans_rows, uint trans_cols, uint no_trans_mtx)
+sLayer_Dimensions::sLayer_Dimensions(sMtx_Dim in_dim, sMtx_Dim out_dim, sMtx_Dim tran_dim, uint no_trans_mtx)
 {
-    unInputRows = in_rows;
-    unInputColumns = in_columns;
-    unOutputRows = out_rows;
-    unOutputColumns = out_cols;
-    unTransformParametersRows = trans_rows;
-    unTransformParametersColumns = trans_cols;
+    unInputRows = in_dim.rows;
+    unInputColumns = in_dim.columns;
+    unOutputRows = out_dim.rows;
+    unOutputColumns = out_dim.columns;
+    unTransformParametersRows = tran_dim.rows;
+    unTransformParametersColumns = tran_dim.columns;
     unNoTransformParameterMtx = no_trans_mtx;
 }
 
@@ -41,16 +41,25 @@ nnInitData::nnInitData(uint sz)
     eAct_Funcs.reserve(sz);
     e_layer_type.reserve(sz);
     actParam1.reserve(sz);
+    ePoolingType.reserve(sz);
 }
 
 nnInitData::nnInitData(uint InLyrSz, eOptimizers t_opt, std::vector<float> t_optParam, eLossFuncs t_loss_func, float t_loss_param, float t_learning_rate)
 {
     assert(t_optParam.size() == 3); //need three params for optimizer
     unNoLys++;
-    layer_dimensions.emplace_back(0, 0, 1, InLyrSz, 0, 0, 1);
+    sMtx_Dim in_dim, out_dim, tran_dim;
+    in_dim.rows = 0;
+    in_dim.columns = 0;
+    out_dim.rows = 1;
+    out_dim.columns = InLyrSz;
+    tran_dim.rows = 0;
+    tran_dim.columns = 0;
+    layer_dimensions.emplace_back(in_dim, out_dim, tran_dim, 1);
     eAct_Funcs.emplace_back(eAct_func::TANH); //doesnt matter
     e_layer_type.emplace_back(eLayer_type::INPUT);
     actParam1.emplace_back(0.0f); //doesnt matter
+    ePoolingType.emplace_back(ePooling_type::NA);
 
     fLearningRate = t_learning_rate;
 
@@ -81,6 +90,7 @@ nnInitData::nnInitData(const nnInitData& other)
         eAct_Funcs.emplace_back(other.eAct_Funcs[i]);
         e_layer_type.emplace_back(other.e_layer_type[i]);
         actParam1.emplace_back(other.actParam1[i]);
+        ePoolingType.emplace_back(other.ePoolingType[i]);
     }
 }
 
@@ -89,15 +99,25 @@ void nnInitData::add_dense_layer(uint OutSz, eAct_func t_act_func, float t_act_p
     uint InSz = layer_dimensions[unNoLys - 1].unOutputColumns * layer_dimensions[unNoLys - 1].unOutputRows;
 
     unNoLys++;
-    layer_dimensions.emplace_back(1, InSz, 1, OutSz, InSz, OutSz, 1);
+
+    sMtx_Dim in_dim, out_dim, tran_dim;
+    in_dim.rows = 1;
+    in_dim.columns = InSz;
+    out_dim.rows = 1;
+    out_dim.columns = OutSz;
+    tran_dim.rows = InSz;
+    tran_dim.columns = OutSz;
+
+    layer_dimensions.emplace_back(in_dim, out_dim, tran_dim, 1);
     eAct_Funcs.emplace_back(t_act_func);
     e_layer_type.emplace_back(eLayer_type::DENSE);
     actParam1.emplace_back(t_act_param);
+    ePoolingType.emplace_back(ePooling_type::NA);
 }
 
-void nnInitData::add_conv_layer(uint t_in_rows, uint t_in_cols, eConvKernelSize t_kernel_size, uint t_num_kernels, eAct_func t_act_func, float t_act_param)
+void nnInitData::add_conv_layer(sMtx_Dim in_dim, eConvKernelSize t_kernel_size, uint t_num_kernels, eAct_func t_act_func, float t_act_param)
 {
-    assert((t_in_rows * t_in_cols) == (layer_dimensions[unNoLys - 1].unOutputColumns * layer_dimensions[unNoLys - 1].unOutputRows));
+    assert((in_dim.rows * in_dim.columns) == (layer_dimensions[unNoLys - 1].unOutputColumns * layer_dimensions[unNoLys - 1].unOutputRows));
     unNoLys++;
     uint kernelRow;
     uint kernelColumn;
@@ -124,28 +144,46 @@ void nnInitData::add_conv_layer(uint t_in_rows, uint t_in_cols, eConvKernelSize 
             break;
     }
 
-    outRow = (t_in_rows - kernelRow + 1) * t_num_kernels;
-    outCols = t_in_cols - kernelColumn + 1;
+    outRow = (in_dim.rows - kernelRow + 1) * t_num_kernels;
+    outCols = in_dim.columns - kernelColumn + 1;
 
-    layer_dimensions.emplace_back(t_in_rows, t_in_cols, outRow, outCols, kernelRow, kernelColumn, t_num_kernels);
+    sMtx_Dim out_dim, tran_dim;
+    out_dim.rows = outRow;
+    out_dim.columns = outCols;
+    tran_dim.rows = kernelRow;
+    tran_dim.columns = kernelColumn;
+
+    layer_dimensions.emplace_back(in_dim, out_dim, tran_dim, t_num_kernels);
     eAct_Funcs.emplace_back(t_act_func);
     e_layer_type.emplace_back(eLayer_type::CONV);
     actParam1.emplace_back(t_act_param);
+    ePoolingType.emplace_back(ePooling_type::NA);
 
 }
 
-void nnInitData::add_pooling_layer(ePooling_type type, ePoolingKernelSize krSz, uint stride)
+void nnInitData::add_pooling_layer(sMtx_Dim in_dim, ePooling_type type, ePoolingKernelSize krSz, uint stride)
 {
+    assert((in_dim.rows * in_dim.columns) == (layer_dimensions[unNoLys - 1].unOutputColumns * layer_dimensions[unNoLys - 1].unOutputRows));
     unNoLys++;
 
-    sLayer_Parsed_Dim prev_dim = get_parsed_dims(layer_dimensions[unNoLys - 2]);
-    std::pair<uint,uint> kr_row_col = get_pooling_window_rows_cols(krSz, prev_dim);
-    std::pair<uint,uint> out_dim = find_pooling_output_dims(prev_dim, kr_row_col);
+    sLayer_Dimensions prev_dim = layer_dimensions[unNoLys - 2];
+    prev_dim.unOutputRows = in_dim.rows;
+    prev_dim.unOutputColumns = in_dim.columns;
+    sLayer_Parsed_Dim prev_parsed_dim = get_parsed_dims(prev_dim);
+    std::pair<uint,uint> kr_row_col = get_pooling_window_rows_cols(krSz, prev_parsed_dim);
+    std::pair<uint,uint> out_dim = find_pooling_output_dims(prev_parsed_dim, kr_row_col);
 
-    layer_dimensions.emplace_back(layer_dimensions[unNoLys - 2].unOutputRows, layer_dimensions[unNoLys - 2].unOutputColumns, out_dim.first * layer_dimensions[unNoLys - 2].unNoTransformParameterMtx, out_dim.second, kr_row_col.first, kr_row_col.second, layer_dimensions[unNoLys - 2].unNoTransformParameterMtx);
+    sMtx_Dim out_dims, tran_dim;
+    out_dims.rows = out_dim.first * layer_dimensions[unNoLys - 2].unNoTransformParameterMtx;
+    out_dims.columns = out_dim.second;
+    tran_dim.rows = kr_row_col.first;
+    tran_dim.columns = kr_row_col.second;
+
+    layer_dimensions.emplace_back(in_dim, out_dims, tran_dim, layer_dimensions[unNoLys - 2].unNoTransformParameterMtx);
     eAct_Funcs.emplace_back(eAct_func::RELU);
     e_layer_type.emplace_back(eLayer_type::POOLING);
-    actParam1.emplace_back(stride);
+    actParam1.emplace_back((float)stride);
+    ePoolingType.emplace_back(type);
 
 }
 
@@ -221,11 +259,11 @@ std::pair<uint,uint> get_pooling_window_rows_cols(ePoolingKernelSize t_pooling_k
 
     switch(t_pooling_kernel_sz)
     {
-        case ePoolingKernelSize::Sz2x2:
+        case ePoolingKernelSize::KrSz2x2:
             ret.first = 2;
             ret.second = 2;
             break;
-        case ePoolingKernelSize::Sz3x3:
+        case ePoolingKernelSize::KrSz3x3:
             ret.first = 3;
             ret.second = 3;
             break;

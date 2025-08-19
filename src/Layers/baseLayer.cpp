@@ -297,7 +297,7 @@ sLayer_Dimensions BaseLayer::get_layer_dimensions()
 void validate_input_data_layers(eLayer_type t_layer_type, sLayer_Dimensions t_dims)
 {
 
-    
+#ifndef IGNORE_LAYER_INPUT_VALIDATION    
 
     if(t_layer_type == eLayer_type::INPUT)
     {
@@ -320,6 +320,13 @@ void validate_input_data_layers(eLayer_type t_layer_type, sLayer_Dimensions t_di
         assert(t_dims.unNoTransformParameterMtx == 1);
         assert(((t_dims.unInputRows * t_dims.unInputColumns) * (t_dims.unOutputRows * t_dims.unOutputColumns)) == (t_dims.unTransformParametersColumns * t_dims.unTransformParametersRows));
     }
+
+    if(t_layer_type == eLayer_type::POOLING)
+    {
+        
+    }
+
+#endif
 
 }
 

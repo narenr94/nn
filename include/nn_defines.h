@@ -30,6 +30,13 @@ enum eLayer_type{
     DENSE
 };
 
+struct sMtx_Dim{
+
+    uint rows = 0;
+    uint columns = 0;
+
+};
+
 #define DIMS_SIZE 7
 
 struct sLayer_Dimensions{
@@ -46,7 +53,7 @@ struct sLayer_Dimensions{
 
     sLayer_Dimensions(const sLayer_Dimensions& other);
 
-    sLayer_Dimensions(uint in_rows, uint in_columns, uint out_rows, uint out_cols, uint trans_rows, uint trans_cols, uint no_trans_mtx);
+    sLayer_Dimensions(sMtx_Dim in_dim, sMtx_Dim out_dim, sMtx_Dim tran_dim, uint no_trans_mtx);
 };
 
 /*
@@ -81,12 +88,13 @@ enum eConvKernelSize{
 
 enum ePooling_type{
     AVERAGE,
-    MAX
+    MAX,
+    NA // not applicable - for non-pooling layer
 };
 
 enum ePoolingKernelSize{
-    Sz3x3,
-    Sz2x2,
+    KrSz3x3,
+    KrSz2x2,
     GLOBAL
 };
 
@@ -97,7 +105,6 @@ struct sLayer_Parsed_Dim{
     uint num_mtx;
 
 };
-
 
 //when below changed make sure to update get set save and load in nn_core
 struct nnInitData{
@@ -110,6 +117,7 @@ struct nnInitData{
     std::vector<eAct_func> eAct_Funcs;
     std::vector<eLayer_type> e_layer_type;
     std::vector<float>actParam1; //LEAKY_RELU : delta
+    std::vector<ePooling_type>ePoolingType;
     uint unNoLys = 0;
 
     //entire network stuff
@@ -137,9 +145,9 @@ struct nnInitData{
 
     void add_dense_layer(uint OutSz, eAct_func t_act_func, float t_act_param);
 
-    void add_conv_layer(uint t_in_rows, uint t_in_cols, eConvKernelSize t_kernel_size, uint t_num_kernels, eAct_func t_act_func, float t_act_param);
+    void add_conv_layer(sMtx_Dim in_dim, eConvKernelSize t_kernel_size, uint t_num_kernels, eAct_func t_act_func, float t_act_param);
 
-    void add_pooling_layer(ePooling_type type, ePoolingKernelSize krSz, uint stride);
+    void add_pooling_layer(sMtx_Dim in_dim, ePooling_type type, ePoolingKernelSize krSz, uint stride);
 
 };
 
@@ -163,7 +171,7 @@ void save_to_file(const std::string& data, const std::string& filename);
 
 std::vector<std::string> split_by_delimiter(const std::string& data, const std::string& delimiter = "***");
 
-std::pair<uint,uint> get_pooling_window_rows_cols(ePoolingKernelSize t_pooling_kernel_sz, sLayer_Parsed_Dim prev_dim);
+std::pair<uint,uint> get_pooling_window_rows_cols(ePoolingKernelSize t_pooling_kernel_sz, sLayer_Parsed_Dim& prev_dim);
 
 std::pair<uint, uint> find_pooling_output_dims(sLayer_Parsed_Dim& in_dims, std::pair<uint,uint> krSz);
 

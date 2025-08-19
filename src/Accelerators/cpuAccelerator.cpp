@@ -221,16 +221,19 @@ void CpuAccelerator::do_backwardpass_conv_layer(sLayer_Dimensions t_dims)
     delete [] temp;
 }
 
-void CpuAccelerator::do_forwardpass_pooling_layer(ePooling_type t_pooling_type, ePoolingKernelSize t_pooling_kernel_sz, uint t_stride)
+void CpuAccelerator::do_forwardpass_pooling_layer(ePooling_type t_pooling_type, uint t_stride)
 {
     uint kernel_rows = 0;
     uint kernel_cols = 0;
 
     sLayer_Parsed_Dim prev_dim = m_pLayer->get_prev_layer_parsed_output_dims();
 
-    std::pair<uint,uint> row_col_window = get_pooling_window_rows_cols(t_pooling_kernel_sz, prev_dim);
-    kernel_rows = row_col_window.first;
-    kernel_cols = row_col_window.second;
+    kernel_rows = m_pLayer->get_layer_dimensions().unTransformParametersRows;
+    kernel_cols = m_pLayer->get_layer_dimensions().unTransformParametersColumns;
+
+    std::pair<uint, uint> row_col_window;
+    row_col_window.first = kernel_rows;
+    row_col_window.second = kernel_cols;
 
     std::pair<uint,uint> out_dim = find_pooling_output_dims(prev_dim, row_col_window);
 
@@ -246,7 +249,7 @@ void CpuAccelerator::do_forwardpass_pooling_layer(ePooling_type t_pooling_type, 
                 std::pair<uint, uint>row_col_pos;
                 row_col_pos.first = i * kernel_rows;
                 row_col_pos.second = j * kernel_cols;
-                uint val = 0.0f;
+                float val = 0.0f;
                     
                 if(ePooling_type::MAX == t_pooling_type)
                 {

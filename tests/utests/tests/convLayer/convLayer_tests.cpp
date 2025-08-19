@@ -16,7 +16,7 @@ TEST(ConvLayer_TESTS, ConvLayer_setup_test)
 
     dims2.unInputColumns = 0;
     dims2.unInputRows = 0;
-    dims2.unNoTransformParameterMtx = 0;
+    dims2.unNoTransformParameterMtx = 1;
     dims2.unOutputColumns = 16;
     dims2.unOutputRows = 1;
     dims2.unTransformParametersColumns = 0;
@@ -49,7 +49,7 @@ TEST(ConvLayer_TESTS, ConvLayer_set_get_node_data_test)
 
     dims2.unInputColumns = 0;
     dims2.unInputRows = 0;
-    dims2.unNoTransformParameterMtx = 0;
+    dims2.unNoTransformParameterMtx = 1;
     dims2.unOutputColumns = 16;
     dims2.unOutputRows = 1;
     dims2.unTransformParametersColumns = 0;

@@ -3,6 +3,7 @@
 #include "inputLayer.h"
 #include "denseLayer.h"
 #include "convLayer.h"
+#include "poolingLayer.h"
 #include <cmath>
 #include <cstdio>
 
@@ -13,7 +14,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_forwardpass_relu_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 0;
+    dims1.unNoTransformParameterMtx = 1;
     dims1.unOutputColumns = 2;
     dims1.unOutputRows = 1;
     dims1.unTransformParametersColumns = 0;
@@ -76,7 +77,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_forwardpass_sigmoid_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 0;
+    dims1.unNoTransformParameterMtx = 1;
     dims1.unOutputColumns = 2;
     dims1.unOutputRows = 1;
     dims1.unTransformParametersColumns = 0;
@@ -139,7 +140,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_forwardpass_leakyRelu_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 0;
+    dims1.unNoTransformParameterMtx = 1;
     dims1.unOutputColumns = 2;
     dims1.unOutputRows = 1;
     dims1.unTransformParametersColumns = 0;
@@ -202,7 +203,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_forwardpass_softmax_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 0;
+    dims1.unNoTransformParameterMtx = 1;
     dims1.unOutputColumns = 2;
     dims1.unOutputRows = 1;
     dims1.unTransformParametersColumns = 0;
@@ -265,7 +266,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_forwardpass_tanh_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 0;
+    dims1.unNoTransformParameterMtx = 1;
     dims1.unOutputColumns = 2;
     dims1.unOutputRows = 1;
     dims1.unTransformParametersColumns = 0;
@@ -328,7 +329,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_conv_forwardpass_leakyrelu_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 0;
+    dims1.unNoTransformParameterMtx = 1;
     dims1.unOutputColumns = 6;
     dims1.unOutputRows = 6;
     dims1.unTransformParametersColumns = 0;
@@ -402,7 +403,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_conv_forwardpass_multiKernel_leakyrelu_test)
     
     dims1.unInputColumns = 0;
     dims1.unInputRows = 0;
-    dims1.unNoTransformParameterMtx = 0;
+    dims1.unNoTransformParameterMtx = 1;
     dims1.unOutputColumns = 6;
     dims1.unOutputRows = 6;
     dims1.unTransformParametersColumns = 0;
@@ -495,4 +496,187 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_conv_forwardpass_multiKernel_leakyrelu_test)
     delete prev_lyr;
     delete curr_lyr;
     delete nxt_lyr;
+}
+
+
+TEST(CPU_ACC_TESTS, cpuAccelerator_pooling_forwardpass_max)
+{
+    sLayer_Dimensions dims1, dims2, dims3;
+    
+    dims1.unInputColumns = 0;
+    dims1.unInputRows = 0;
+    dims1.unNoTransformParameterMtx = 2;
+    dims1.unOutputColumns = 10;
+    dims1.unOutputRows = 10;
+    dims1.unTransformParametersColumns = 0;
+    dims1.unTransformParametersRows = 0;
+
+    dims2.unInputColumns = 10;
+    dims2.unInputRows = 10;
+    dims2.unNoTransformParameterMtx = 2;
+    dims2.unOutputColumns = 4;
+    dims2.unOutputRows = 4;
+    dims2.unTransformParametersColumns = 3;
+    dims2.unTransformParametersRows = 3;
+
+    InputLayer* prev_lyr = new InputLayer(dims1, eAct_func::LEAKY_RELU, 0.01f);
+    PoolingLayer* curr_lyr = new PoolingLayer(dims2, ePooling_type::MAX, 3);
+
+    float in[100] = {   
+                        0,1,2,      3,4,5,      6,7,8,      9,
+                        10,11,12,   13,14,15,   16,17,18,   19,
+                        20,21,22,   23,24,25,   26,27,28,   29,
+
+                        30,31,32,   33,34,35,   36,37,38,   39,
+                        40,41,42,   43,44,45,   46,47,48,   49,
+
+                        50,51,52,   53,54,55,   56,57,58,   59,
+                        60,61,62,   63,64,65,   66,67,68,   69,
+                        70,71,72,   73,74,75,   76,77,78,   79,
+                        
+                        80,81,82,   83,84,85,   86,87,88,   89,
+                        90,91,92,   93,94,95,   96,97,98,   99
+                    };
+
+    float out[16] = {
+                        22, 25, 28, 29,
+                        42, 45, 48, 49,
+                        72, 75, 78, 79,
+                        92, 95, 98, 99
+
+                    };
+
+    prev_lyr->set_all_node_values(in);
+
+    curr_lyr->SetPreviousNextLayers(prev_lyr, nullptr);
+
+    curr_lyr->do_forwardpass_to_current_layer();
+
+    for(int i = 0; i < 16; i++)
+    {
+        EXPECT_EQ(curr_lyr->get_node_value_idx(i), out[i]);
+    }
+
+    delete prev_lyr;
+    delete curr_lyr;
+}
+
+TEST(CPU_ACC_TESTS, cpuAccelerator_pooling_forwardpass_avg)
+{
+    sLayer_Dimensions dims1, dims2, dims3;
+    
+    dims1.unInputColumns = 0;
+    dims1.unInputRows = 0;
+    dims1.unNoTransformParameterMtx = 2;
+    dims1.unOutputColumns = 10;
+    dims1.unOutputRows = 10;
+    dims1.unTransformParametersColumns = 0;
+    dims1.unTransformParametersRows = 0;
+
+    dims2.unInputColumns = 10;
+    dims2.unInputRows = 10;
+    dims2.unNoTransformParameterMtx = 2;
+    dims2.unOutputColumns = 4;
+    dims2.unOutputRows = 4;
+    dims2.unTransformParametersColumns = 3;
+    dims2.unTransformParametersRows = 3;
+
+    InputLayer* prev_lyr = new InputLayer(dims1, eAct_func::LEAKY_RELU, 0.01f);
+    PoolingLayer* curr_lyr = new PoolingLayer(dims2, ePooling_type::AVERAGE, 3);
+
+    float in[100] = {   
+                        0,1,2,      3,4,5,      6,7,8,      9,
+                        10,11,12,   13,14,15,   16,17,18,   19,
+                        20,21,22,   23,24,25,   26,27,28,   29,
+
+                        30,31,32,   33,34,35,   36,37,38,   39,
+                        40,41,42,   43,44,45,   46,47,48,   49,
+
+                        50,51,52,   53,54,55,   56,57,58,   59,
+                        60,61,62,   63,64,65,   66,67,68,   69,
+                        70,71,72,   73,74,75,   76,77,78,   79,
+                        
+                        80,81,82,   83,84,85,   86,87,88,   89,
+                        90,91,92,   93,94,95,   96,97,98,   99
+                    };
+
+    float out[16] = {
+                        11, 14, 17, 19,
+                        36, 39, 42, 44,
+                        61, 64, 67, 69,
+                        86, 89, 92, 94
+
+                    };
+
+    prev_lyr->set_all_node_values(in);
+
+    curr_lyr->SetPreviousNextLayers(prev_lyr, nullptr);
+
+    curr_lyr->do_forwardpass_to_current_layer();
+
+    for(int i = 0; i < 16; i++)
+    {
+        EXPECT_EQ(curr_lyr->get_node_value_idx(i), out[i]);
+    }
+
+    delete prev_lyr;
+    delete curr_lyr;
+}
+
+TEST(CPU_ACC_TESTS, cpuAccelerator_pooling_forwardpass_gae)
+{
+    sLayer_Dimensions dims1, dims2, dims3;
+    
+    dims1.unInputColumns = 0;
+    dims1.unInputRows = 0;
+    dims1.unNoTransformParameterMtx = 2;
+    dims1.unOutputColumns = 10;
+    dims1.unOutputRows = 10;
+    dims1.unTransformParametersColumns = 0;
+    dims1.unTransformParametersRows = 0;
+
+    dims2.unInputColumns = 10;
+    dims2.unInputRows = 10;
+    dims2.unNoTransformParameterMtx = 2;
+    dims2.unOutputColumns = 2;
+    dims2.unOutputRows = 1;
+    dims2.unTransformParametersColumns = 10;
+    dims2.unTransformParametersRows = 5;
+
+    InputLayer* prev_lyr = new InputLayer(dims1, eAct_func::LEAKY_RELU, 0.01f);
+    PoolingLayer* curr_lyr = new PoolingLayer(dims2, ePooling_type::AVERAGE, 3);
+
+    float in[100] = {   
+                        0,1,2,      3,4,5,      6,7,8,      9,
+                        10,11,12,   13,14,15,   16,17,18,   19,
+                        20,21,22,   23,24,25,   26,27,28,   29,
+
+                        30,31,32,   33,34,35,   36,37,38,   39,
+                        40,41,42,   43,44,45,   46,47,48,   49,
+
+                        50,51,52,   53,54,55,   56,57,58,   59,
+                        60,61,62,   63,64,65,   66,67,68,   69,
+                        70,71,72,   73,74,75,   76,77,78,   79,
+                        
+                        80,81,82,   83,84,85,   86,87,88,   89,
+                        90,91,92,   93,94,95,   96,97,98,   99
+                    };
+
+    float out[2] = {
+                        24.5, 74.5
+                    };
+
+    prev_lyr->set_all_node_values(in);
+
+    curr_lyr->SetPreviousNextLayers(prev_lyr, nullptr);
+
+    curr_lyr->do_forwardpass_to_current_layer();
+
+    for(int i = 0; i < 2; i++)
+    {
+        EXPECT_EQ(curr_lyr->get_node_value_idx(i), out[i]);
+    }
+
+    delete prev_lyr;
+    delete curr_lyr;
 }

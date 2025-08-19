@@ -5,11 +5,10 @@
 
 #define NOT_APPLICABLE_FOR_POOLING_LAYER assert(0)
 
-PoolingLayer::PoolingLayer(sLayer_Dimensions t_dims, ePooling_type t_pooling_type, ePoolingKernelSize t_kernel_size, uint t_stride):BaseLayer(eLayer_type::POOLING, t_dims, eAct_func::TANH, 0.0f)
+PoolingLayer::PoolingLayer(sLayer_Dimensions t_dims, ePooling_type t_pooling_type, uint t_stride):BaseLayer(eLayer_type::POOLING, t_dims, eAct_func::TANH, 0.0f)
 {
     m_pooling_type = t_pooling_type;
     m_stride = t_stride;
-    m_pooling_kernel_size = t_kernel_size;
 }
 
 PoolingLayer::PoolingLayer(std::string load_data):BaseLayer(eLayer_type::DENSE, load_data)
@@ -23,7 +22,7 @@ PoolingLayer::~PoolingLayer()
 void PoolingLayer::do_forwardpass_to_current_layer()
 {
     assert(m_bPrevNxtLyrsSet == true);
-    m_pAccelerator->do_forwardpass_pooling_layer(m_pooling_type, m_pooling_kernel_size, m_stride);
+    m_pAccelerator->do_forwardpass_pooling_layer(m_pooling_type, m_stride);
 }
 
 void PoolingLayer::set_transform_matrix_parameter(uint unInIdx, uint unOutIdx, float fWt)

@@ -25,6 +25,7 @@ ${NN_SRC}/Layers/baseLayer.cpp
 ${NN_SRC}/Layers/denseLayer.cpp
 ${NN_SRC}/Layers/convLayer.cpp
 ${NN_SRC}/Layers/inputLayer.cpp
+${NN_SRC}/Layers/poolingLayer.cpp
 ${NN_SRC}/nn_math.cpp
 ${NN_SRC}/nn_defines.cpp)
 
@@ -41,6 +42,8 @@ ${NN_SRC}/LossFunctions/huberLoss.cpp
 ${NN_SRC}/LossFunctions/meanAbsoluteError.cpp
 ${NN_SRC}/LossFunctions/meanSquaredError.cpp
 )
+
+add_definitions(-DIGNORE_LAYER_INPUT_VALIDATION)
 
 add_executable(${EXEC_NAME} ${TEST_SOURCES} ${LOSS_SOURCES} ${ACT_SOURCES} ${NN_SOURCES})
 

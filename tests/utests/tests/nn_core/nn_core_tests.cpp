@@ -21,7 +21,7 @@ TEST(NN_CORE_TESTS, nn_core_setup_dense_test)
     //input layer
     initData->layer_dimensions[0].unInputColumns = 0;
     initData->layer_dimensions[0].unInputRows = 0;
-    initData->layer_dimensions[0].unNoTransformParameterMtx = 0;
+    initData->layer_dimensions[0].unNoTransformParameterMtx = 1;
     initData->layer_dimensions[0].unOutputColumns = 2;
     initData->layer_dimensions[0].unOutputRows = 1;
     initData->layer_dimensions[0].unTransformParametersColumns = 0;
@@ -114,7 +114,7 @@ TEST(NN_CORE_TESTS, nn_core_testrun_dense_test)
     //input layer
     initData->layer_dimensions[0].unInputColumns = 0;
     initData->layer_dimensions[0].unInputRows = 0;
-    initData->layer_dimensions[0].unNoTransformParameterMtx = 0;
+    initData->layer_dimensions[0].unNoTransformParameterMtx = 1;
     initData->layer_dimensions[0].unOutputColumns = 2;
     initData->layer_dimensions[0].unOutputRows = 1;
     initData->layer_dimensions[0].unTransformParametersColumns = 0;
@@ -193,7 +193,7 @@ TEST(NN_CORE_TESTS, nn_core_trainrun_dense_test)
         //input layer
     initData->layer_dimensions[0].unInputColumns = 0;
     initData->layer_dimensions[0].unInputRows = 0;
-    initData->layer_dimensions[0].unNoTransformParameterMtx = 0;
+    initData->layer_dimensions[0].unNoTransformParameterMtx = 1;
     initData->layer_dimensions[0].unOutputColumns = 2;
     initData->layer_dimensions[0].unOutputRows = 1;
     initData->layer_dimensions[0].unTransformParametersColumns = 0;
@@ -291,7 +291,7 @@ TEST(NN_CORE_TESTS, nn_core_setup_conv_test)
     //input layer
     initData->layer_dimensions[0].unInputColumns = 0;
     initData->layer_dimensions[0].unInputRows = 0;
-    initData->layer_dimensions[0].unNoTransformParameterMtx = 0;
+    initData->layer_dimensions[0].unNoTransformParameterMtx = 1;
     initData->layer_dimensions[0].unOutputColumns = 36;
     initData->layer_dimensions[0].unOutputRows = 1;
     initData->layer_dimensions[0].unTransformParametersColumns = 0;
@@ -394,7 +394,7 @@ TEST(NN_CORE_TESTS, nn_core_testrun_conv_test)
     //input layer
     initData->layer_dimensions[0].unInputColumns = 0;
     initData->layer_dimensions[0].unInputRows = 0;
-    initData->layer_dimensions[0].unNoTransformParameterMtx = 0;
+    initData->layer_dimensions[0].unNoTransformParameterMtx = 1;
     initData->layer_dimensions[0].unOutputColumns = 9;
     initData->layer_dimensions[0].unOutputRows = 1;
     initData->layer_dimensions[0].unTransformParametersColumns = 0;
@@ -491,7 +491,7 @@ TEST(NN_CORE_TESTS, nn_core_trainrun_conv_test)
     //input layer
     initData->layer_dimensions[0].unInputColumns = 0;
     initData->layer_dimensions[0].unInputRows = 0;
-    initData->layer_dimensions[0].unNoTransformParameterMtx = 0;
+    initData->layer_dimensions[0].unNoTransformParameterMtx = 1;
     initData->layer_dimensions[0].unOutputColumns = 9;
     initData->layer_dimensions[0].unOutputRows = 1;
     initData->layer_dimensions[0].unTransformParametersColumns = 0;
@@ -627,7 +627,7 @@ TEST(NN_CORE_TESTS, nn_core_testrun_conv_multiKernel_test)
     //input layer
     initData->layer_dimensions[0].unInputColumns = 0;
     initData->layer_dimensions[0].unInputRows = 0;
-    initData->layer_dimensions[0].unNoTransformParameterMtx = 0;
+    initData->layer_dimensions[0].unNoTransformParameterMtx = 1;
     initData->layer_dimensions[0].unOutputColumns = 9;
     initData->layer_dimensions[0].unOutputRows = 1;
     initData->layer_dimensions[0].unTransformParametersColumns = 0;
@@ -756,7 +756,7 @@ TEST(NN_CORE_TESTS, nn_core_trainrun_conv_multiKernel_test)
     //input layer
     initData->layer_dimensions[0].unInputColumns = 0;
     initData->layer_dimensions[0].unInputRows = 0;
-    initData->layer_dimensions[0].unNoTransformParameterMtx = 0;
+    initData->layer_dimensions[0].unNoTransformParameterMtx = 1;
     initData->layer_dimensions[0].unOutputColumns = 9;
     initData->layer_dimensions[0].unOutputRows = 1;
     initData->layer_dimensions[0].unTransformParametersColumns = 0;
@@ -941,7 +941,10 @@ TEST(NN_CORE_TESTS, nn_core_copy_conv_test)
     optParam.push_back(0.0f);
 
     nnInitData * initData = new nnInitData(16, eOptimizers::SGD, optParam, eLossFuncs::HUBER, 0.0f, 0.01f);
-    initData->add_conv_layer(4, 4, eConvKernelSize::Sz3x3, 3, eAct_func::TANH, 0.0f);
+    sMtx_Dim in_dim;
+    in_dim.rows = 4;
+    in_dim.columns = 4;
+    initData->add_conv_layer(in_dim, eConvKernelSize::Sz3x3, 3, eAct_func::TANH, 0.0f);
     initData->add_dense_layer(2, eAct_func::TANH, 0.0f);
 
     //sz = 16, 12, 2
@@ -1016,7 +1019,10 @@ TEST(NN_CORE_TESTS, nn_core_save_load_test)
     optParam.push_back(0.0f);
 
     nnInitData * initData = new nnInitData(16, eOptimizers::SGD, optParam, eLossFuncs::HUBER, 0.0f, 0.01f);
-    initData->add_conv_layer(4, 4, eConvKernelSize::Sz3x3, 3, eAct_func::TANH, 0.0f);
+    sMtx_Dim in_dim;
+    in_dim.rows = 4;
+    in_dim.columns = 4;
+    initData->add_conv_layer(in_dim, eConvKernelSize::Sz3x3, 3, eAct_func::TANH, 0.0f);
     initData->add_dense_layer(2, eAct_func::TANH, 0.0f);
 
     //sz = 16, 12, 2
@@ -1029,7 +1035,7 @@ TEST(NN_CORE_TESTS, nn_core_save_load_test)
     nn->populate_weights(1, init_lyr1_wts);
     nn->populate_weights(2, init_lyr2_wts);
 
-    nn->SaveNN("saveTest.sav");
+    nn->Save_NN("saveTest.sav");
 
     std::string sav_loc = "saveTest.sav";
 
