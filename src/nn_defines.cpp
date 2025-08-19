@@ -221,11 +221,11 @@ std::pair<uint,uint> get_pooling_window_rows_cols(ePoolingKernelSize t_pooling_k
 
     switch(t_pooling_kernel_sz)
     {
-        case ePoolingKernelSize::Sz2x2:
+        case ePoolingKernelSize::KrSz2x2:
             ret.first = 2;
             ret.second = 2;
             break;
-        case ePoolingKernelSize::Sz3x3:
+        case ePoolingKernelSize::KrSz3x3:
             ret.first = 3;
             ret.second = 3;
             break;

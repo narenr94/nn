@@ -333,3 +333,46 @@ float CpuAccelerator::find_avg_in_window_at(std::pair<uint, uint>row_col_pos, sL
 
     return ret_avg;
 }
+
+void CpuAccelerator::do_backwardpass_pooling_layer(ePooling_type t_pooling_type, ePoolingKernelSize t_pooling_kernel_sz, uint t_stride)
+{
+    uint kernel_rows = 0;
+    uint kernel_cols = 0;
+
+    sLayer_Parsed_Dim prev_dim = m_pLayer->get_prev_layer_parsed_output_dims();
+
+    std::pair<uint,uint> row_col_window = get_pooling_window_rows_cols(t_pooling_kernel_sz, prev_dim);
+    kernel_rows = row_col_window.first;
+    kernel_cols = row_col_window.second;
+
+    std::pair<uint,uint> out_dim = find_pooling_output_dims(prev_dim, row_col_window);
+
+    uint row_slide = out_dim.first;
+    uint col_slide = out_dim.second;
+
+    for(uint k = 0; k < prev_dim.num_mtx; k++)
+    {
+        for(uint i = 0; i < row_slide; i++)
+        {
+            for(uint j = 0; j < col_slide; j++)
+            {
+                std::pair<uint, uint>row_col_pos;
+                row_col_pos.first = i * kernel_rows;
+                row_col_pos.second = j * kernel_cols;
+                uint val = 0.0f;
+                    
+                if(ePooling_type::MAX == t_pooling_type)
+                {
+                    val = find_max_in_window_at(row_col_pos, prev_dim, row_col_window, k);                    
+                }
+                else if(ePooling_type::AVERAGE == t_pooling_type)
+                {
+                    val = find_avg_in_window_at(row_col_pos, prev_dim, row_col_window, k);
+                }
+
+                m_pLayer->set_node_value(val, ((k * row_slide * col_slide) + (i * col_slide) + j));
+            }
+        }
+    }
+
+}

@@ -18,6 +18,7 @@ public:
     void do_backwardpass_conv_layer(sLayer_Dimensions t_tims) override;
 
     void do_forwardpass_pooling_layer(ePooling_type t_pooling_type, ePoolingKernelSize t_pooling_kernel_sz, uint t_stride) override;
+    void do_backwardpass_pooling_layer(ePooling_type t_pooling_type, ePoolingKernelSize t_pooling_kernel_sz, uint t_stride) override;
 
     virtual ~CpuAccelerator();
 

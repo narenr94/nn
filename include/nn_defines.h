@@ -85,8 +85,8 @@ enum ePooling_type{
 };
 
 enum ePoolingKernelSize{
-    Sz3x3,
-    Sz2x2,
+    KrSz3x3,
+    KrSz2x2,
     GLOBAL
 };
 
@@ -163,7 +163,7 @@ void save_to_file(const std::string& data, const std::string& filename);
 
 std::vector<std::string> split_by_delimiter(const std::string& data, const std::string& delimiter = "***");
 
-std::pair<uint,uint> get_pooling_window_rows_cols(ePoolingKernelSize t_pooling_kernel_sz, sLayer_Parsed_Dim prev_dim);
+std::pair<uint,uint> get_pooling_window_rows_cols(ePoolingKernelSize t_pooling_kernel_sz, sLayer_Parsed_Dim& prev_dim);
 
 std::pair<uint, uint> find_pooling_output_dims(sLayer_Parsed_Dim& in_dims, std::pair<uint,uint> krSz);
 

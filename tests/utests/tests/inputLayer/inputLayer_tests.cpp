@@ -2,12 +2,12 @@
 #include "inputLayer.h"
 
 
-TEST(DenseLayer_TESTS, InputLayer_setup_test)
+TEST(InputLayer_TESTS, InputLayer_setup_test)
 {
     sLayer_Dimensions dims;
     dims.unInputColumns = 0;
     dims.unInputRows = 0;
-    dims.unNoTransformParameterMtx = 0;
+    dims.unNoTransformParameterMtx = 1;
     dims.unOutputColumns = 5;
     dims.unOutputRows = 1;
     dims.unTransformParametersColumns = 0;
@@ -23,12 +23,12 @@ TEST(DenseLayer_TESTS, InputLayer_setup_test)
 }
 
 
-TEST(DenseLayer_TESTS, InputLayer_set_get_node_data_test)
+TEST(InputLayer_TESTS, InputLayer_set_get_node_data_test)
 {
     sLayer_Dimensions dims;
     dims.unInputColumns = 0;
     dims.unInputRows = 0;
-    dims.unNoTransformParameterMtx = 0;
+    dims.unNoTransformParameterMtx = 1;
     dims.unOutputColumns = 5;
     dims.unOutputRows = 1;
     dims.unTransformParametersColumns = 0;
@@ -53,12 +53,12 @@ TEST(DenseLayer_TESTS, InputLayer_set_get_node_data_test)
 }
 
 
-TEST(DenseLayer_TESTS, InputLayer_save_load_test)
+TEST(InputLayer_TESTS, InputLayer_save_load_test)
 {
     sLayer_Dimensions dims;
     dims.unInputColumns = 0;
     dims.unInputRows = 0;
-    dims.unNoTransformParameterMtx = 0;
+    dims.unNoTransformParameterMtx = 1;
     dims.unOutputColumns = 5;
     dims.unOutputRows = 1;
     dims.unTransformParametersColumns = 0;
