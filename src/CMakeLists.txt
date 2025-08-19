@@ -3,7 +3,8 @@ set(SRC_FILES nn_core.cpp nn_math.cpp nn_defines.cpp)
 set(LYR_FILES Layers/baseLayer.cpp
     Layers/denseLayer.cpp
     Layers/convLayer.cpp
-    Layers/inputLayer.cpp)
+    Layers/inputLayer.cpp
+    Layers/poolingLayer.cpp)
 set(ACT_FUNC_FILES ActivationFunctions/leakyReluActFunc.cpp 
     ActivationFunctions/reluActFunc.cpp 
     ActivationFunctions/sigmoidActFunc.cpp 
@@ -20,7 +21,7 @@ set(LOSS_FUNC_FILES LossFunctions/huberLoss.cpp
     LossFunctions/binaryCrossEntropyLoss.cpp)
 set(ACC_FUNC_FILES Accelerators/cpuAccelerator.cpp)
 
-option(OPENCL_ACC "Enable this feature" OFF)
+option(OPENCL_ACC "Enable OpenCL feature" OFF)
 
 # Check if the option is enabled
 # cmake -DOPENCL_ACC=ON ..

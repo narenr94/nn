@@ -1035,9 +1035,9 @@ TEST(NN_CORE_TESTS, nn_core_save_load_test)
     nn->populate_weights(1, init_lyr1_wts);
     nn->populate_weights(2, init_lyr2_wts);
 
-    nn->Save_NN("saveTest.sav");
-
     std::string sav_loc = "saveTest.sav";
+
+    nn->Save_NN(sav_loc);    
 
     NeuralNet *nn2 = new NeuralNet(sav_loc);
 
