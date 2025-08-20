@@ -152,6 +152,8 @@ bool BaseLayer::set_all_node_values(float* pfValue)
 
 bool BaseLayer::set_all_node_biases(float* pfBias)
 {
+    assert(m_layer_type != eLayer_type::POOLING);
+
     bool bRet = false;
 
     bRet = true;
@@ -170,6 +172,8 @@ bool BaseLayer::set_all_node_biases(float* pfBias)
 
 bool BaseLayer::set_node_bias(float fBias, uint unIdx)
 {
+    assert(m_layer_type != eLayer_type::POOLING);
+
     bool bRet = false;
 
     if((unIdx < m_unNumNodes))
@@ -513,7 +517,12 @@ void BaseLayer::setup_layer(eLayer_type t_layer_type, sLayer_Dimensions t_dims, 
     m_actParam1 = actParam1;
 
     m_pfValues = new float[m_unNumNodes];
-    m_pfBiases = new float[m_unNumNodes];
+    
+    if(m_layer_type != eLayer_type::POOLING)
+    {
+        m_pfBiases = new float[m_unNumNodes];
+    }
+    
     m_pfDeltas = new float[m_unNumNodes];
 
     setup_activation_function(m_eActFunc);

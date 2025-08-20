@@ -14,6 +14,10 @@ void StochasticGradientDescent::correct_biases()
     {
         for(j = 0; j < m_pNN->GetSzLayer(i); j++)
         {
+            if(m_pNN->GetLayer(i)->get_layer_type() == eLayer_type::POOLING)
+            {
+                continue;
+            }
             m_pNN->SetBias(i, j, m_pNN->GetBias(i, j) - (m_pNN->GetLearningRate() * m_pNN->GetDelta(i, j)));
         }        
     }
