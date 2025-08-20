@@ -868,7 +868,10 @@ TEST(NN_CORE_TESTS, nn_core_copy_dense_test)
     optParam.push_back(0.0f);
     optParam.push_back(0.0f);
 
-    nnInitData* initData = new nnInitData(2, eOptimizers::SGD, optParam, eLossFuncs::HUBER, 0.0f, 0.01f);
+    sMtx_Dim in_dim;
+    in_dim.rows = 1;
+    in_dim.columns = 2;
+    nnInitData* initData = new nnInitData(in_dim, eOptimizers::SGD, optParam, eLossFuncs::HUBER, 0.0f, 0.01f);
     initData->add_dense_layer(3, eAct_func::TANH, 0.0f);
     initData->add_dense_layer(2, eAct_func::TANH, 0.0f);
 
@@ -940,10 +943,11 @@ TEST(NN_CORE_TESTS, nn_core_copy_conv_test)
     optParam.push_back(0.0f);
     optParam.push_back(0.0f);
 
-    nnInitData * initData = new nnInitData(16, eOptimizers::SGD, optParam, eLossFuncs::HUBER, 0.0f, 0.01f);
     sMtx_Dim in_dim;
     in_dim.rows = 4;
     in_dim.columns = 4;
+    nnInitData * initData = new nnInitData(in_dim, eOptimizers::SGD, optParam, eLossFuncs::HUBER, 0.0f, 0.01f);
+    
     initData->add_conv_layer(in_dim, eConvKernelSize::Sz3x3, 3, eAct_func::TANH, 0.0f);
     initData->add_dense_layer(2, eAct_func::TANH, 0.0f);
 
@@ -1009,10 +1013,12 @@ TEST(NN_CORE_TESTS, nn_core_save_load_test)
     optParam.push_back(0.0f);
     optParam.push_back(0.0f);
 
-    nnInitData * initData = new nnInitData(16, eOptimizers::SGD, optParam, eLossFuncs::HUBER, 0.0f, 0.01f);
     sMtx_Dim in_dim;
     in_dim.rows = 4;
     in_dim.columns = 4;
+
+    nnInitData * initData = new nnInitData(in_dim, eOptimizers::SGD, optParam, eLossFuncs::HUBER, 0.0f, 0.01f);
+    
     initData->add_conv_layer(in_dim, eConvKernelSize::Sz3x3, 3, eAct_func::TANH, 0.0f);
     //24x8
     sMtx_Dim pooling_in_dim;

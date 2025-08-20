@@ -5,12 +5,16 @@
 TEST(NN_DEFINES_TESTS, nn_defines_create_input_layer)
 {
     std::vector<float> optParam = {1.0f, 2.0f, 3.0f};
-    nnInitData *initData = new nnInitData(16, eOptimizers::RMSPROP, optParam, eLossFuncs::HUBER, 0.111f, 0.321f);
+    sMtx_Dim in_dim;
+    in_dim.rows = 4;
+    in_dim.columns = 4;
+    nnInitData *initData = new nnInitData(in_dim, eOptimizers::RMSPROP, optParam, eLossFuncs::HUBER, 0.111f, 0.321f);
 
     EXPECT_EQ(initData->unNoLys, 1);
     EXPECT_EQ(initData->layer_dimensions[0].unInputRows, 0);
     EXPECT_EQ(initData->layer_dimensions[0].unInputColumns, 0);
-    EXPECT_EQ(initData->layer_dimensions[0].unOutputRows, 1);
+    EXPECT_EQ(initData->layer_dimensions[0].unOutputRows, 4);
+    EXPECT_EQ(initData->layer_dimensions[0].unOutputColumns, 4);
     EXPECT_EQ(initData->layer_dimensions[0].unTransformParametersRows, 0);
     EXPECT_EQ(initData->layer_dimensions[0].unTransformParametersColumns, 0);
     EXPECT_EQ(initData->layer_dimensions[0].unNoTransformParameterMtx, 1);
@@ -33,7 +37,10 @@ TEST(NN_DEFINES_TESTS, nn_defines_create_input_layer)
 TEST(NN_DEFINES_TESTS, nn_defines_add_dense_layer)
 {
     std::vector<float> optParam = {1.0f, 2.0f, 3.0f};
-    nnInitData *initData = new nnInitData(16, eOptimizers::RMSPROP, optParam, eLossFuncs::HUBER, 0.111f, 0.321f);
+    sMtx_Dim in_dim;
+    in_dim.rows = 4;
+    in_dim.columns = 4;
+    nnInitData *initData = new nnInitData(in_dim, eOptimizers::RMSPROP, optParam, eLossFuncs::HUBER, 0.111f, 0.321f);
     initData->add_dense_layer(10, eAct_func::LEAKY_RELU, 0.312f);
 
     EXPECT_EQ(initData->unNoLys, 2);
@@ -55,10 +62,12 @@ TEST(NN_DEFINES_TESTS, nn_defines_add_dense_layer)
 TEST(NN_DEFINES_TESTS, nn_defines_add_conv_layer)
 {
     std::vector<float> optParam = {1.0f, 2.0f, 3.0f};
-    nnInitData *initData = new nnInitData(16, eOptimizers::RMSPROP, optParam, eLossFuncs::HUBER, 0.111f, 0.321f);
+
     sMtx_Dim conv_in_dim;
     conv_in_dim.rows = 4;
     conv_in_dim.columns = 4;
+    nnInitData *initData = new nnInitData(conv_in_dim, eOptimizers::RMSPROP, optParam, eLossFuncs::HUBER, 0.111f, 0.321f);
+    
     initData->add_conv_layer(conv_in_dim, eConvKernelSize::Sz3x3, 3, eAct_func::LEAKY_RELU, 0.312f);
 
     EXPECT_EQ(initData->unNoLys, 2);
@@ -80,10 +89,11 @@ TEST(NN_DEFINES_TESTS, nn_defines_add_conv_layer)
 TEST(NN_DEFINES_TESTS, nn_defines_add_pooling_layer_single_input_mtx)
 {
     std::vector<float> optParam = {1.0f, 2.0f, 3.0f};
-    nnInitData *initData = new nnInitData(16, eOptimizers::RMSPROP, optParam, eLossFuncs::HUBER, 0.111f, 0.321f);
     sMtx_Dim pooling_in_dim;
     pooling_in_dim.rows = 4;
     pooling_in_dim.columns = 4;
+    nnInitData *initData = new nnInitData(pooling_in_dim, eOptimizers::RMSPROP, optParam, eLossFuncs::HUBER, 0.111f, 0.321f);
+    
     initData->add_pooling_layer(pooling_in_dim, ePooling_type::MAX, ePoolingKernelSize::KrSz2x2);
 
     EXPECT_EQ(initData->unNoLys, 2);
@@ -103,10 +113,11 @@ TEST(NN_DEFINES_TESTS, nn_defines_add_pooling_layer_single_input_mtx)
 TEST(NN_DEFINES_TESTS, nn_defines_add_pooling_layer_multiple_input_mtx)
 {
     std::vector<float> optParam = {1.0f, 2.0f, 3.0f};
-    nnInitData *initData = new nnInitData(100, eOptimizers::RMSPROP, optParam, eLossFuncs::HUBER, 0.111f, 0.321f);
     sMtx_Dim conv_in_dim;
     conv_in_dim.rows = 10;
     conv_in_dim.columns = 10;
+    nnInitData *initData = new nnInitData(conv_in_dim, eOptimizers::RMSPROP, optParam, eLossFuncs::HUBER, 0.111f, 0.321f);
+    
     initData->add_conv_layer(conv_in_dim, eConvKernelSize::Sz3x3, 3, eAct_func::LEAKY_RELU, 0.312f);
     sMtx_Dim pooling_in_dim;
     pooling_in_dim.rows = 24;

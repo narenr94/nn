@@ -159,7 +159,7 @@ struct nnInitData{
 
     nnInitData(uint sz);
 
-    nnInitData(uint InLyrSz, eOptimizers t_opt, std::vector<float> t_optParam, eLossFuncs t_loss_func, float t_loss_param, float t_learning_rate);
+    nnInitData(sMtx_Dim out_dim, eOptimizers t_opt, std::vector<float> t_optParam, eLossFuncs t_loss_func, float t_loss_param, float t_learning_rate);
 
     nnInitData(const nnInitData& other);
 
@@ -167,11 +167,11 @@ struct nnInitData{
     {
     }
 
-    void add_dense_layer(uint OutSz, eAct_func t_act_func, float t_act_param);
+    sMtx_Dim add_dense_layer(uint OutSz, eAct_func t_act_func, float t_act_param);
 
-    void add_conv_layer(sMtx_Dim in_dim, eConvKernelSize t_kernel_size, uint t_num_kernels, eAct_func t_act_func, float t_act_param);
+    sMtx_Dim add_conv_layer(sMtx_Dim in_dim, eConvKernelSize t_kernel_size, uint t_num_kernels, eAct_func t_act_func, float t_act_param);
 
-    void add_pooling_layer(sMtx_Dim in_dim, ePooling_type type, ePoolingKernelSize krSz);
+    sMtx_Dim add_pooling_layer(sMtx_Dim in_dim, ePooling_type type, ePoolingKernelSize krSz);
 
 };
 

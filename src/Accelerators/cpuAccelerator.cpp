@@ -359,7 +359,7 @@ uint CpuAccelerator::find_max_element_idx_in_window(std::pair<uint, uint>row_col
 
     uint absolute_row = ((curr_mtx_idx * prev_dim.rows) + row_col_pos.first);
 
-    float ret_max = m_pLayer->GetPreviousLayer()->get_node_value_idx((absolute_row * prev_dim.cols) + row_col_pos.second);
+    float ret_max = m_pLayer->get_node_value_idx((absolute_row * prev_dim.cols) + row_col_pos.second);
 
     uint ret_idx = (absolute_row * prev_dim.cols) + row_col_pos.second;
 
@@ -368,7 +368,7 @@ uint CpuAccelerator::find_max_element_idx_in_window(std::pair<uint, uint>row_col
         for(uint j = 0; ((j < row_col_window.second) && ((j + row_col_pos.second) < prev_dim.cols)); j++)
         {
             uint idx = ((absolute_row + i) * prev_dim.cols) + (j + row_col_pos.second);
-            float val = m_pLayer->GetPreviousLayer()->get_node_value_idx(idx);
+            float val = m_pLayer->get_node_value_idx(idx);
             if(val > ret_max)
             {
                 ret_max = val;
@@ -377,7 +377,7 @@ uint CpuAccelerator::find_max_element_idx_in_window(std::pair<uint, uint>row_col
         }
     }
 
-    return ret_max;
+    return ret_idx;
 
 }
 
@@ -386,10 +386,10 @@ void CpuAccelerator::do_backwardpass_pooling_layer(ePooling_type t_pooling_type)
     uint kernel_rows = 0;
     uint kernel_cols = 0;
 
-    sLayer_Parsed_Dim prev_dim = m_pLayer->get_prev_layer_parsed_output_dims();
+    sLayer_Parsed_Dim prev_dim = m_pLayer->GetNextLayer()->get_prev_layer_parsed_output_dims();
 
-    kernel_rows = m_pLayer->get_layer_dimensions().unTransformParametersRows;
-    kernel_cols = m_pLayer->get_layer_dimensions().unTransformParametersColumns;
+    kernel_rows = m_pLayer->GetNextLayer()->get_layer_dimensions().unTransformParametersRows;
+    kernel_cols = m_pLayer->GetNextLayer()->get_layer_dimensions().unTransformParametersColumns;
 
     std::pair<uint, uint> row_col_window;
     row_col_window.first = kernel_rows;
@@ -427,7 +427,7 @@ void CpuAccelerator::do_backwardpass_pooling_layer(ePooling_type t_pooling_type)
                     uint cell_count = val.size();
                     for(uint m = 0; m < cell_count; m++)
                     {
-                        float delta_val = (m_pLayer->get_node_delta_idx(val[m]) / (float)cell_count) + m_pLayer->GetNextLayer()->get_node_delta_idx(out_idx);
+                        float delta_val = m_pLayer->get_node_delta_idx(val[m]) + (m_pLayer->GetNextLayer()->get_node_delta_idx(out_idx) / (float)cell_count);
                         m_pLayer->set_node_delta(delta_val, val[m]);
                     }
                 }
