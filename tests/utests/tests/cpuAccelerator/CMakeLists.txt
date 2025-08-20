@@ -43,7 +43,8 @@ ${NN_SRC}/LossFunctions/meanAbsoluteError.cpp
 ${NN_SRC}/LossFunctions/meanSquaredError.cpp
 )
 
-add_definitions(-DIGNORE_LAYER_INPUT_VALIDATION)
+#todo : selectively apply for tests that requires below
+add_definitions(-DIGNORE_LAYER_INPUT_VALIDATION_FOR_TESTING)
 
 add_executable(${EXEC_NAME} ${TEST_SOURCES} ${LOSS_SOURCES} ${ACT_SOURCES} ${NN_SOURCES})
 

@@ -17,9 +17,14 @@ void BaseOptimizer::correct_transform_parameters()
             case eLayer_type::CONV:
                 correct_transform_parameters_conv(i);
                 break;
+            case eLayer_type::POOLING:
+                //not required for pooling layer
+                break;
             case eLayer_type::DENSE:
-            default:
                 correct_transform_parameters_dense(i);
+                break;
+            default:
+                assert(0); //unknown layer type
                 break;
             
         }

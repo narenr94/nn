@@ -1,11 +1,13 @@
 #ifndef NN_DEFINES_H
 #define NN_DEFINES_H
 
+#include "nn_math.h"
+
 #include <vector>
 #include <string>
 #include <sstream>
+#include <map>
 
-#include "nn_math.h"
 
 /*
     list of activation functions
@@ -19,6 +21,10 @@ enum eAct_func{
     TANH    
 };
 
+extern std::map<eAct_func, std::string> actFuncToString;
+
+extern std::map<std::string, eAct_func> stringToActFunc;
+
 /*
     list of layer type
     Note: keep DENSE at last to keep test scripts intact
@@ -30,6 +36,65 @@ enum eLayer_type{
     DENSE
 };
 
+extern std::map<eLayer_type, std::string> layerTypeToString;
+
+extern std::map<std::string, eLayer_type> stringToLayerType;
+
+/*
+    list of activation functions
+    Note : keep CCE in bottom to keep tests intact
+*/
+enum eLossFuncs{
+    MSE, //mean squared error
+    MAE, //mean absolute error
+    HUBER, //huber loss
+    BCE, //binary cross entropy loss
+    CCE //competitive cross entropy loss
+};
+
+extern std::map<eLossFuncs, std::string> lossFuncToString;
+
+extern std::map<std::string, eLossFuncs> stringToLossFunc;
+
+enum ePooling_type{
+    AVERAGE,
+    MAX,
+    NA // not applicable - for non-pooling layer
+};
+
+extern std::map<ePooling_type, std::string> poolingTypeToString;
+
+extern std::map<std::string, ePooling_type> stringToPoolingType;
+
+
+/*
+    list of activation functions
+    Note : keep ADAM in bottom to keep tests intact
+*/
+enum eOptimizers{
+    SGD,
+    RMSPROP,
+    ADAM
+};
+
+extern std::map<eOptimizers, std::string> optimizerToString;
+
+extern std::map<std::string, eOptimizers> stringToOptimizer;
+
+
+enum eConvKernelSize{
+    Sz3x3,
+    Sz5x5,
+    Sz7x7
+};
+
+enum ePoolingKernelSize{
+    KrSz3x3,
+    KrSz2x2,
+    GLOBAL
+};
+
+
 struct sMtx_Dim{
 
     uint rows = 0;
@@ -37,8 +102,7 @@ struct sMtx_Dim{
 
 };
 
-#define DIMS_SIZE 7
-
+#define DIMS_SIZE 7 //number of members in sLayer_Dimensions
 struct sLayer_Dimensions{
 
     uint unInputRows;
@@ -56,47 +120,7 @@ struct sLayer_Dimensions{
     sLayer_Dimensions(sMtx_Dim in_dim, sMtx_Dim out_dim, sMtx_Dim tran_dim, uint no_trans_mtx);
 };
 
-/*
-    list of activation functions
-    Note : keep CCE in bottom to keep tests intact
-*/
-enum eLossFuncs{
-    MSE, //mean squared error
-    MAE, //mean absolute error
-    HUBER, //huber loss
-    BCE, //binary cross entropy loss
-    CCE //competitive cross entropy loss
-};
 
-
-/*
-    list of activation functions
-    Note : keep ADAM in bottom to keep tests intact
-*/
-enum eOptimizers{
-    SGD,
-    RMSPROP,
-    ADAM
-};
-
-
-enum eConvKernelSize{
-    Sz3x3,
-    Sz5x5,
-    Sz7x7
-};
-
-enum ePooling_type{
-    AVERAGE,
-    MAX,
-    NA // not applicable - for non-pooling layer
-};
-
-enum ePoolingKernelSize{
-    KrSz3x3,
-    KrSz2x2,
-    GLOBAL
-};
 
 struct sLayer_Parsed_Dim{
 
@@ -147,7 +171,7 @@ struct nnInitData{
 
     void add_conv_layer(sMtx_Dim in_dim, eConvKernelSize t_kernel_size, uint t_num_kernels, eAct_func t_act_func, float t_act_param);
 
-    void add_pooling_layer(sMtx_Dim in_dim, ePooling_type type, ePoolingKernelSize krSz, uint stride);
+    void add_pooling_layer(sMtx_Dim in_dim, ePooling_type type, ePoolingKernelSize krSz);
 
 };
 

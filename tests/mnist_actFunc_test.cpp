@@ -139,6 +139,9 @@ int main()
                 printf("\n Act Func SOFTMAX \n");
                 initData->eLossFunc = eLossFuncs::CCE;
                 break;
+            default:
+                assert(0); //unknown activation function
+                break;
 
         }
 

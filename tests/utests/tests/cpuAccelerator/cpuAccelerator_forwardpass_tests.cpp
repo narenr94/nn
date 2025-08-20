@@ -520,7 +520,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_pooling_forwardpass_max)
     dims2.unTransformParametersRows = 3;
 
     InputLayer* prev_lyr = new InputLayer(dims1, eAct_func::LEAKY_RELU, 0.01f);
-    PoolingLayer* curr_lyr = new PoolingLayer(dims2, ePooling_type::MAX, 3);
+    PoolingLayer* curr_lyr = new PoolingLayer(dims2, ePooling_type::MAX);
 
     float in[100] = {   
                         0,1,2,      3,4,5,      6,7,8,      9,
@@ -582,7 +582,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_pooling_forwardpass_avg)
     dims2.unTransformParametersRows = 3;
 
     InputLayer* prev_lyr = new InputLayer(dims1, eAct_func::LEAKY_RELU, 0.01f);
-    PoolingLayer* curr_lyr = new PoolingLayer(dims2, ePooling_type::AVERAGE, 3);
+    PoolingLayer* curr_lyr = new PoolingLayer(dims2, ePooling_type::AVERAGE);
 
     float in[100] = {   
                         0,1,2,      3,4,5,      6,7,8,      9,
@@ -644,7 +644,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_pooling_forwardpass_gae)
     dims2.unTransformParametersRows = 5;
 
     InputLayer* prev_lyr = new InputLayer(dims1, eAct_func::LEAKY_RELU, 0.01f);
-    PoolingLayer* curr_lyr = new PoolingLayer(dims2, ePooling_type::AVERAGE, 3);
+    PoolingLayer* curr_lyr = new PoolingLayer(dims2, ePooling_type::AVERAGE);
 
     float in[100] = {   
                         0,1,2,      3,4,5,      6,7,8,      9,

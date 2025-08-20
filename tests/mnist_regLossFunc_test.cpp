@@ -30,9 +30,6 @@ initData->unNoLys = 4;
     MAE alone might require a lower learning rate : 0.001f
 
 above works fine for MSE, MAE and HUBER
-
-ToDo setup fro BCE : single node output , just find if number is 5 or not
-                CCE : implement softmax, should be runnable in existing setup
 */
 
 /*

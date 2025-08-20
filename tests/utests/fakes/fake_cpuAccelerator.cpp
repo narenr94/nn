@@ -28,6 +28,10 @@ void CpuAccelerator::do_backwardpass_conv_layer(sLayer_Dimensions t_tims)
 {
 }
 
-void CpuAccelerator::do_forwardpass_pooling_layer(ePooling_type t_pooling_type, uint t_stride)
+void CpuAccelerator::do_forwardpass_pooling_layer(ePooling_type t_pooling_type)
+{
+}
+
+void CpuAccelerator::do_backwardpass_pooling_layer(ePooling_type t_pooling_type)
 {
 }

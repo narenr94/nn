@@ -16,6 +16,22 @@
 #include <cassert>
 #include <cstdio>
 
+std::map<eAct_func, std::string> actFuncToString = {
+        {SIGMOID, "SIGMOID"},
+        {RELU, "RELU"},
+        {LEAKY_RELU, "LEAKY_RELU"},
+        {SOFTMAX, "SOFTMAX"},
+        {TANH, "TANH"}
+    };
+
+std::map<std::string, eAct_func> stringToActFunc = {
+        {"SIGMOID", SIGMOID},
+        {"RELU", RELU},
+        {"LEAKY_RELU", LEAKY_RELU},
+        {"SOFTMAX", SOFTMAX},
+        {"TANH", TANH}
+    };
+
 void validate_input_data_layers(eLayer_type t_layer_type, sLayer_Dimensions t_dims);
 
 std::vector<std::string> split_by_lines(const std::string& block);
@@ -83,10 +99,15 @@ void BaseLayer::do_backwardpass_to_previous_layer()
         case eLayer_type::CONV :
             m_pAccelerator->do_backwardpass_conv_layer(dims);
             break;
+        case eLayer_type::POOLING :
+            m_pAccelerator->do_backwardpass_pooling_layer(static_cast<ePooling_type>(static_cast<int>(m_pNextLyr->get_act_param())));
+            break;
         case eLayer_type::DENSE :
             m_pAccelerator->do_backwardpass_dense_layer();
+            break;
         default :
-            m_pAccelerator->do_backwardpass_dense_layer();
+            assert(0); //unkown layer type
+            break;
     }
 }
 
@@ -297,7 +318,7 @@ sLayer_Dimensions BaseLayer::get_layer_dimensions()
 void validate_input_data_layers(eLayer_type t_layer_type, sLayer_Dimensions t_dims)
 {
 
-#ifndef IGNORE_LAYER_INPUT_VALIDATION    
+#ifndef IGNORE_LAYER_INPUT_VALIDATION_FOR_TESTING
 
     if(t_layer_type == eLayer_type::INPUT)
     {
@@ -311,7 +332,7 @@ void validate_input_data_layers(eLayer_type t_layer_type, sLayer_Dimensions t_di
     if(t_layer_type == eLayer_type::CONV)
     {
         assert((t_dims.unInputRows > 0) && (t_dims.unInputColumns > 0));
-
+        assert(t_dims.unNoTransformParameterMtx > 0);
     }
 
     if(t_layer_type == eLayer_type::DENSE)
@@ -323,7 +344,8 @@ void validate_input_data_layers(eLayer_type t_layer_type, sLayer_Dimensions t_di
 
     if(t_layer_type == eLayer_type::POOLING)
     {
-        
+        assert((t_dims.unInputRows > 0) && (t_dims.unInputColumns > 0));
+        assert(t_dims.unNoTransformParameterMtx > 0);
     }
 
 #endif
@@ -344,7 +366,8 @@ std::string BaseLayer::get_serialized_general_layer_data()
     ss << m_Dimensions.unTransformParametersRows << " ";
     ss << "\n";
     ss << "act_func: ";
-    ss << (uint)m_eActFunc << " \n";
+    assert(actFuncToString.find(m_eActFunc) != actFuncToString.end());
+    ss << actFuncToString[m_eActFunc] << " \n";
     ss << "act_param: ";
     ss << m_actParam1 << " \n";
 
@@ -375,7 +398,8 @@ eAct_func extract_act_function(std::vector<std::string>& act_string)
 
     eAct_func r_act_func;
 
-    r_act_func = (eAct_func)std::stoul(act_string[0]);
+    assert(stringToActFunc.find(act_string[0]) != stringToActFunc.end());
+    r_act_func = stringToActFunc[act_string[0]];
 
     return r_act_func;
 }
@@ -483,51 +507,19 @@ void BaseLayer::setup_layer(eLayer_type t_layer_type, sLayer_Dimensions t_dims, 
     
     m_Dimensions = t_dims;
 
-    m_Dimensions.unInputRows = t_dims.unInputRows;
-    m_Dimensions.unInputColumns = t_dims.unInputColumns;
-
-    m_Dimensions.unOutputRows = t_dims.unOutputRows;
-    m_Dimensions.unOutputColumns = t_dims.unOutputColumns;
-
     m_unNumNodes = m_Dimensions.unOutputRows * m_Dimensions.unOutputColumns;
 
     m_eActFunc = eActFunc;
     m_actParam1 = actParam1;
 
-    //filter = (1 + in) - out
-    m_Dimensions.unTransformParametersRows = t_dims.unTransformParametersRows;
-    m_Dimensions.unTransformParametersColumns = t_dims.unTransformParametersColumns;
-
     m_pfValues = new float[m_unNumNodes];
     m_pfBiases = new float[m_unNumNodes];
     m_pfDeltas = new float[m_unNumNodes];
 
-    switch(m_eActFunc)
-    {
-        case eAct_func::SIGMOID:
-            m_pActFunc = new SigmoidActFunc(this);
-            break;
-        case eAct_func::RELU:
-            m_pActFunc = new ReluActFunc(this);
-            break;
-        case eAct_func::LEAKY_RELU:
-            m_pActFunc = new LeakyReluActFunc(this, m_actParam1 != 0.0f ? m_actParam1 : LEAKY_RELU_DEFAULT_ALPHA);
-            break;
-        case eAct_func::SOFTMAX:
-            m_pActFunc = new SoftmaxActFunc(this);
-            break;
-        case eAct_func::TANH:
-            m_pActFunc = new TanhActFunc(this);
-            break;
-        default:
-            m_pActFunc = new SigmoidActFunc(this);
-    }
+    setup_activation_function(m_eActFunc);
 
-#ifdef OPENCL_ACC
-    m_pAccelerator = new OpenclAccelerator(this);
-#else
-    m_pAccelerator = new CpuAccelerator(this);
-#endif
+    setup_accelerator();
+
 }
 
 void BaseLayer::SetPreviousNextLayers(BaseLayer* prevLyr, BaseLayer* nxtLyr)
@@ -573,4 +565,38 @@ std::string BaseLayer::get_serialized_transform_mtx_data()
 sLayer_Parsed_Dim BaseLayer::get_prev_layer_parsed_output_dims()
 {
     return get_parsed_dims(GetPreviousLayer()->get_layer_dimensions());
+}
+
+void BaseLayer::setup_accelerator()
+{
+#ifdef OPENCL_ACC
+    m_pAccelerator = new OpenclAccelerator(this);
+#else
+    m_pAccelerator = new CpuAccelerator(this);
+#endif
+}
+
+void BaseLayer::setup_activation_function(eAct_func eActFunc)
+{
+    switch(m_eActFunc)
+    {
+        case eAct_func::SIGMOID:
+            m_pActFunc = new SigmoidActFunc(this);
+            break;
+        case eAct_func::RELU:
+            m_pActFunc = new ReluActFunc(this);
+            break;
+        case eAct_func::LEAKY_RELU:
+            m_pActFunc = new LeakyReluActFunc(this, m_actParam1 != 0.0f ? m_actParam1 : LEAKY_RELU_DEFAULT_ALPHA);
+            break;
+        case eAct_func::SOFTMAX:
+            m_pActFunc = new SoftmaxActFunc(this);
+            break;
+        case eAct_func::TANH:
+            m_pActFunc = new TanhActFunc(this);
+            break;
+        default:
+            assert(0); //unknown activation function
+            break;
+    }
 }

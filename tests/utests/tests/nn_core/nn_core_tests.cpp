@@ -999,18 +999,9 @@ TEST(NN_CORE_TESTS, nn_core_save_load_test)
                                 0.2444f, 0.2555f, 0.2666f,
                                 0.2777f, 0.2888f, 0.2999f};
 
-    float init_lyr2_wts[24] = {0.1f, 0.2f,
+    float init_lyr2_wts[6] = {0.1f, 0.2f,
                                 0.3f, 0.4f,
-                                0.31f, 0.41f,
-                                0.11f, 0.21f,
-                                0.111f, 0.211f,
-                                0.32f, 0.42f,
-                                0.322f, 0.422f,
-                                0.13, 0.23f,
-                                0.133f, 0.233f,
-                                0.34f, 0.44f,
-                                0.344f, 0.444f,
-                                0.15f, 0.25f};
+                                0.31f, 0.41f};
 
 
     std::vector<float> optParam;
@@ -1023,6 +1014,12 @@ TEST(NN_CORE_TESTS, nn_core_save_load_test)
     in_dim.rows = 4;
     in_dim.columns = 4;
     initData->add_conv_layer(in_dim, eConvKernelSize::Sz3x3, 3, eAct_func::TANH, 0.0f);
+    //24x8
+    sMtx_Dim pooling_in_dim;
+    pooling_in_dim.rows = 6;
+    pooling_in_dim.columns = 2;
+    initData->add_pooling_layer(pooling_in_dim, ePooling_type::MAX, ePoolingKernelSize::KrSz2x2);
+    //3x1
     initData->add_dense_layer(2, eAct_func::TANH, 0.0f);
 
     //sz = 16, 12, 2
@@ -1030,10 +1027,10 @@ TEST(NN_CORE_TESTS, nn_core_save_load_test)
     NeuralNet* nn = new NeuralNet(*initData);
 
     nn->populate_nodes_bias(1, init_lyr1_biases);
-    nn->populate_nodes_bias(2, init_lyr2_biases);
+    nn->populate_nodes_bias(3, init_lyr2_biases);
 
     nn->populate_weights(1, init_lyr1_wts);
-    nn->populate_weights(2, init_lyr2_wts);
+    nn->populate_weights(3, init_lyr2_wts);
 
     std::string sav_loc = "saveTest.sav";
 
@@ -1047,16 +1044,18 @@ TEST(NN_CORE_TESTS, nn_core_save_load_test)
     }
     for(uint i = 0; i < 2; i++)
     {
-        EXPECT_EQ(init_lyr2_biases[i], nn2->GetBias(2, i));
+        EXPECT_EQ(init_lyr2_biases[i], nn2->GetBias(3, i));
     }
 
     for(uint i = 0; i < 27; i++)
     {
         EXPECT_EQ(init_lyr1_wts[i], nn2->GetWeight(1, i));
     }
-    for(uint i = 0; i < 24; i++)
+    for(uint i = 0; i < 6; i++)
     {
-        EXPECT_EQ(init_lyr2_wts[i], nn2->GetWeight(2, i));
+        EXPECT_EQ(init_lyr2_wts[i], nn2->GetWeight(3, i));
     }
+
+    EXPECT_EQ(ePooling_type::MAX, static_cast<ePooling_type>(static_cast<int>(nn2->GetLayer(2)->get_act_param())));
 
 }

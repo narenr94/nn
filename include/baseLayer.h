@@ -196,6 +196,10 @@ public:
     void extract_apply_biases(std::vector<std::string>& biases_string);
 
     void extract_apply_transform_param(std::vector<std::string>& wt_string);
+
+    void setup_accelerator();
+
+    void setup_activation_function(eAct_func eActFunc);
 };
 
 

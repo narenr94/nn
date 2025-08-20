@@ -84,7 +84,7 @@ TEST(NN_DEFINES_TESTS, nn_defines_add_pooling_layer_single_input_mtx)
     sMtx_Dim pooling_in_dim;
     pooling_in_dim.rows = 4;
     pooling_in_dim.columns = 4;
-    initData->add_pooling_layer(pooling_in_dim, ePooling_type::MAX, ePoolingKernelSize::KrSz2x2, 2);
+    initData->add_pooling_layer(pooling_in_dim, ePooling_type::MAX, ePoolingKernelSize::KrSz2x2);
 
     EXPECT_EQ(initData->unNoLys, 2);
     EXPECT_EQ(initData->layer_dimensions[1].unInputRows, 4);
@@ -111,7 +111,7 @@ TEST(NN_DEFINES_TESTS, nn_defines_add_pooling_layer_multiple_input_mtx)
     sMtx_Dim pooling_in_dim;
     pooling_in_dim.rows = 24;
     pooling_in_dim.columns = 8;
-    initData->add_pooling_layer(pooling_in_dim, ePooling_type::AVERAGE, ePoolingKernelSize::KrSz2x2, 2);
+    initData->add_pooling_layer(pooling_in_dim, ePooling_type::AVERAGE, ePoolingKernelSize::KrSz2x2);
 
     EXPECT_EQ(initData->unNoLys, 3);
     EXPECT_EQ(initData->layer_dimensions[2].unInputRows, 24);

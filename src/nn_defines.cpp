@@ -139,8 +139,7 @@ void nnInitData::add_conv_layer(sMtx_Dim in_dim, eConvKernelSize t_kernel_size, 
             kernelColumn = 7;
             break;
         default:
-            kernelRow = 3;
-            kernelColumn = 3;
+            assert(0); //uknown kernel size
             break;
     }
 
@@ -161,7 +160,7 @@ void nnInitData::add_conv_layer(sMtx_Dim in_dim, eConvKernelSize t_kernel_size, 
 
 }
 
-void nnInitData::add_pooling_layer(sMtx_Dim in_dim, ePooling_type type, ePoolingKernelSize krSz, uint stride)
+void nnInitData::add_pooling_layer(sMtx_Dim in_dim, ePooling_type type, ePoolingKernelSize krSz)
 {
     assert((in_dim.rows * in_dim.columns) == (layer_dimensions[unNoLys - 1].unOutputColumns * layer_dimensions[unNoLys - 1].unOutputRows));
     unNoLys++;
@@ -182,7 +181,7 @@ void nnInitData::add_pooling_layer(sMtx_Dim in_dim, ePooling_type type, ePooling
     layer_dimensions.emplace_back(in_dim, out_dims, tran_dim, layer_dimensions[unNoLys - 2].unNoTransformParameterMtx);
     eAct_Funcs.emplace_back(eAct_func::RELU);
     e_layer_type.emplace_back(eLayer_type::POOLING);
-    actParam1.emplace_back((float)stride);
+    actParam1.emplace_back(static_cast<float>(static_cast<int>(type)));
     ePoolingType.emplace_back(type);
 
 }
@@ -272,7 +271,7 @@ std::pair<uint,uint> get_pooling_window_rows_cols(ePoolingKernelSize t_pooling_k
             ret.second = prev_dim.cols;
             break;
         default:
-            assert(0);
+            assert(0); //unknown kernel size
             break;
     }
 

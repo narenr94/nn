@@ -221,7 +221,7 @@ void CpuAccelerator::do_backwardpass_conv_layer(sLayer_Dimensions t_dims)
     delete [] temp;
 }
 
-void CpuAccelerator::do_forwardpass_pooling_layer(ePooling_type t_pooling_type, uint t_stride)
+void CpuAccelerator::do_forwardpass_pooling_layer(ePooling_type t_pooling_type)
 {
     uint kernel_rows = 0;
     uint kernel_cols = 0;
@@ -336,3 +336,113 @@ float CpuAccelerator::find_avg_in_window_at(std::pair<uint, uint>row_col_pos, sL
 
     return ret_avg;
 }
+
+std::vector<uint> CpuAccelerator::find_all_elements_idx_in_window(std::pair<uint, uint>row_col_pos, sLayer_Parsed_Dim prev_dim, std::pair<uint, uint>row_col_window, uint curr_mtx_idx)
+{
+    std::vector<uint> ret;
+    uint absolute_row = ((curr_mtx_idx * prev_dim.rows) + row_col_pos.first);
+
+    for(uint i = 0; ((i < row_col_window.first) && ((i + row_col_pos.first) < prev_dim.rows)); i++)
+    {
+        for(uint j = 0; ((j < row_col_window.second) && ((j + row_col_pos.second) < prev_dim.cols)); j++)
+        {
+            ret.push_back(((absolute_row + i) * prev_dim.cols) + (j + row_col_pos.second));
+        }
+    }
+
+    return ret;
+
+}
+
+uint CpuAccelerator::find_max_element_idx_in_window(std::pair<uint, uint>row_col_pos, sLayer_Parsed_Dim prev_dim, std::pair<uint, uint>row_col_window, uint curr_mtx_idx)
+{
+
+    uint absolute_row = ((curr_mtx_idx * prev_dim.rows) + row_col_pos.first);
+
+    float ret_max = m_pLayer->GetPreviousLayer()->get_node_value_idx((absolute_row * prev_dim.cols) + row_col_pos.second);
+
+    uint ret_idx = (absolute_row * prev_dim.cols) + row_col_pos.second;
+
+    for(uint i = 0; ((i < row_col_window.first) && ((i + row_col_pos.first) < prev_dim.rows)); i++)
+    {
+        for(uint j = 0; ((j < row_col_window.second) && ((j + row_col_pos.second) < prev_dim.cols)); j++)
+        {
+            uint idx = ((absolute_row + i) * prev_dim.cols) + (j + row_col_pos.second);
+            float val = m_pLayer->GetPreviousLayer()->get_node_value_idx(idx);
+            if(val > ret_max)
+            {
+                ret_max = val;
+                ret_idx = idx;
+            }
+        }
+    }
+
+    return ret_max;
+
+}
+
+void CpuAccelerator::do_backwardpass_pooling_layer(ePooling_type t_pooling_type)
+{
+    uint kernel_rows = 0;
+    uint kernel_cols = 0;
+
+    sLayer_Parsed_Dim prev_dim = m_pLayer->get_prev_layer_parsed_output_dims();
+
+    kernel_rows = m_pLayer->get_layer_dimensions().unTransformParametersRows;
+    kernel_cols = m_pLayer->get_layer_dimensions().unTransformParametersColumns;
+
+    std::pair<uint, uint> row_col_window;
+    row_col_window.first = kernel_rows;
+    row_col_window.second = kernel_cols;
+
+    std::pair<uint,uint> out_dim = find_pooling_output_dims(prev_dim, row_col_window);
+
+    uint row_slide = out_dim.first;
+    uint col_slide = out_dim.second;
+
+    reset_layer_deltas();
+
+    for(uint k = 0; k < prev_dim.num_mtx; k++)
+    {
+        for(uint i = 0; i < row_slide; i++)
+        {
+            for(uint j = 0; j < col_slide; j++)
+            {
+                std::pair<uint, uint>row_col_pos;
+                row_col_pos.first = i * kernel_rows;
+                row_col_pos.second = j * kernel_cols;
+
+                uint out_idx = ((k * row_slide * col_slide) + (i * col_slide) + j);
+
+                if(ePooling_type::MAX == t_pooling_type)
+                {
+                    uint val;
+                    val = find_max_element_idx_in_window(row_col_pos, prev_dim, row_col_window, k);
+                    m_pLayer->set_node_delta(m_pLayer->get_node_delta_idx(val) + m_pLayer->GetNextLayer()->get_node_delta_idx(out_idx), val);                 
+                }
+                else if(ePooling_type::AVERAGE == t_pooling_type)
+                {
+                    std::vector<uint> val;
+                    val = find_all_elements_idx_in_window(row_col_pos, prev_dim, row_col_window, k);
+                    uint cell_count = val.size();
+                    for(uint m = 0; m < cell_count; m++)
+                    {
+                        float delta_val = (m_pLayer->get_node_delta_idx(val[m]) / (float)cell_count) + m_pLayer->GetNextLayer()->get_node_delta_idx(out_idx);
+                        m_pLayer->set_node_delta(delta_val, val[m]);
+                    }
+                }
+
+            }
+        }
+    }
+
+}
+
+void CpuAccelerator::reset_layer_deltas()
+{
+    for(uint i = 0; i < m_pLayer->get_num_nodes(); i++)
+    {
+        m_pLayer->set_node_delta(0.0f, i);
+    }
+}
+

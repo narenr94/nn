@@ -8,8 +8,7 @@
 class PoolingLayer : public BaseLayer{
 
 
-    ePooling_type m_pooling_type = ePooling_type::AVERAGE; 
-    uint m_stride = 2;
+    ePooling_type m_pooling_type = ePooling_type::AVERAGE;
     
     public:
 
@@ -18,7 +17,7 @@ class PoolingLayer : public BaseLayer{
         @n_nodes : number of nodes in layer
         @prevLyr : pointer to previous layer, nullptr for input layer
     */
-    PoolingLayer(sLayer_Dimensions t_dims, ePooling_type t_pooling_type, uint t_stride);
+    PoolingLayer(sLayer_Dimensions t_dims, ePooling_type t_pooling_type);
 
     PoolingLayer(std::string load_data);
 
@@ -36,6 +35,12 @@ class PoolingLayer : public BaseLayer{
     void set_all_transform_matrix_parameter(float* wt) override;
 
     std::string get_serialized_save_data() override;
+
+    ePooling_type get_pooling_type();
+
+    private:
+
+    void deserialize_load_data(std::string load_data);
 
 };
 
