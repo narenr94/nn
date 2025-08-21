@@ -221,13 +221,15 @@ void BaseLayer::populateBiasesWithRandomNumbers()
     uint i = 0;
     float tmp;
 
-    for(i = 0; i < m_unNumNodes; i++)
+    if(eLayer_type::POOLING != m_layer_type)
     {
-        tmp = (float)getRandomNumber(RAND_MIN_PARAMETER_BIAS, RAND_MAX_PARAMETER_BIAS);
-        tmp /= 10.0;
-        m_pfBiases[i] = tmp;
+        for(i = 0; i < m_unNumNodes; i++)
+        {
+            tmp = (float)getRandomNumber(RAND_MIN_PARAMETER_BIAS, RAND_MAX_PARAMETER_BIAS);
+            tmp /= 10.0;
+            m_pfBiases[i] = tmp;
+        }
     }
-
 
 }
 
@@ -300,12 +302,14 @@ uint BaseLayer::get_transform_matrix_parameter_size()
 void BaseLayer::populate_transform_matrix_parameter_with_random_numbers()
 {
     assert(m_bPrevNxtLyrsSet == true);
-    uint i = 0;
 
-    for(i = 0; i < m_unTransformMatrixSize; i++)
-    {
-        m_pfTransformParameters[i] = (float)getRandomNumber(RAND_MIN_PARAMETER_BIAS, RAND_MAX_PARAMETER_BIAS);
-        m_pfTransformParameters[i] /= 10.0;
+    if(eLayer_type::POOLING != m_layer_type)
+    {    
+        for(uint i = 0; i < m_unTransformMatrixSize; i++)
+        {
+            m_pfTransformParameters[i] = (float)getRandomNumber(RAND_MIN_PARAMETER_BIAS, RAND_MAX_PARAMETER_BIAS);
+            m_pfTransformParameters[i] /= 10.0;
+        }
     }
 }
 

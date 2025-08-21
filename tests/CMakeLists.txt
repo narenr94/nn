@@ -12,7 +12,8 @@ set(TESTS mnist_basic_test.cpp
     mnist_opt_test_conv_multi_kernel.cpp
     mnist_basic_test_new_init.cpp
     mnist_basic_test_conv_layer_multi_kernel_new_init.cpp
-    mnist_conv_copy_test.cpp) 
+    mnist_conv_copy_test.cpp
+    mnist_basic_test_pooling_layer_multi_kernel_new_init.cpp) 
 
 set(EXECUTABLE_TARGETS)
 
