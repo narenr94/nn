@@ -190,7 +190,7 @@ class NeuralNet{
 
     void Set_Init_Data(nnInitData& other_initData);
 
-    void SetupLayersAndWeightMatrices(std::vector<eLayer_type>& layer_types, std::vector<sLayer_Dimensions>& dims, std::vector<eAct_func>& actFuncs, std::vector<float>& actParam1, float lossParam);
+    void SetupLayersAndWeightMatrices(std::vector<eLayer_type>& layer_types, std::vector<sLayer_Dimensions>& dims, std::vector<eAct_func>& actFuncs, std::vector<float>& actParam1, float lossParam, std::vector<ePooling_type>& ePoolingType);
 
     void MergeBiasAndWeights(uint i);
 

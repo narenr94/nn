@@ -22,10 +22,54 @@
 #include "denseLayer.h"
 #include "convLayer.h"
 #include "inputLayer.h"
+#include "poolingLayer.h"
 
 #include <string.h>
 #include <stdio.h>
 #include <cassert>
+
+std::map<eLayer_type, std::string> layerTypeToString = {
+        {INPUT, "INPUT"},
+        {CONV, "CONV"},
+        {POOLING, "POOLING"},
+        {DENSE, "DENSE"}
+    };
+
+std::map<std::string, eLayer_type> stringToLayerType = {
+        {"INPUT", INPUT},
+        {"CONV", CONV},
+        {"POOLING", POOLING},
+        {"DENSE", DENSE}
+    };
+
+std::map<eLossFuncs, std::string> lossFuncToString = {
+        {MSE, "MSE"},
+        {MAE, "MAE"},
+        {HUBER, "HUBER"},
+        {BCE, "BCE"},
+        {CCE, "CCE"}
+    };
+
+std::map<std::string, eLossFuncs> stringToLossFunc = {
+        {"MSE", MSE},
+        {"MAE", MAE},
+        {"HUBER", HUBER},
+        {"BCE", BCE},
+        {"CCE", CCE}
+    };
+
+std::map<eOptimizers, std::string> optimizerToString = {
+        {SGD, "SGD"},
+        {RMSPROP, "RMSPROP"},
+        {ADAM, "ADAM"}
+    };
+
+std::map<std::string, eOptimizers> stringToOptimizer = {
+        {"SGD", SGD},
+        {"RMSPROP", RMSPROP},
+        {"ADAM", ADAM}
+    };
+
 
 static const char* static_NNDumpFilePath = "./"; //dump file path
 
@@ -97,13 +141,15 @@ sNN_General_Data get_general_nn_data(std::vector<std::pair<std::string, std::vec
         else if(parsed_lines[i].first == "m_eOpt:")
         {
             assert(parsed_lines[i].second.size() == 1);
-            ret_data.m_eOpt = (eOptimizers)std::stoul(parsed_lines[i].second[0]);
+            assert(stringToOptimizer.find(parsed_lines[i].second[0]) != stringToOptimizer.end());
+            ret_data.m_eOpt = stringToOptimizer[parsed_lines[i].second[0]];
             m_eOpt_set = true;
         }
         else if(parsed_lines[i].first == "m_eLossFunc:")
         {
             assert(parsed_lines[i].second.size() == 1);
-            ret_data.m_eLossFunc = (eLossFuncs)std::stoul(parsed_lines[i].second[0]);
+            assert(stringToLossFunc.find(parsed_lines[i].second[0]) != stringToLossFunc.end());
+            ret_data.m_eLossFunc = stringToLossFunc[parsed_lines[i].second[0]];
             m_eLossFunc_set = true;
         }
         else if(parsed_lines[i].first == "m_optParam1:")
@@ -131,7 +177,8 @@ sNN_General_Data get_general_nn_data(std::vector<std::pair<std::string, std::vec
             assert(parsed_lines[i].second.size() == ret_data.m_unNumLys);
             for(uint j = 0; j < ret_data.m_unNumLys; j++)
             {
-                ret_data.layer_types.push_back((eLayer_type)std::stoul(parsed_lines[i].second[j]));
+                assert(stringToLayerType.find(parsed_lines[i].second[j]) != stringToLayerType.end());
+                ret_data.layer_types.push_back(stringToLayerType[parsed_lines[i].second[j]]);
             }
             layer_types_set = true;
         }
@@ -194,10 +241,17 @@ void NeuralNet::Set_Layer_Data(sNN_General_Data gen_data, std::vector<std::strin
             case eLayer_type::CONV:
                 m_ppLys[i] = new ConvLayer(blocks[i + 1]);
                 break;
+
+            case eLayer_type::POOLING:
+                m_ppLys[i] = new PoolingLayer(blocks[i + 1]);
+                break;
             
             case eLayer_type::DENSE:
-            default:
                 m_ppLys[i] = new DenseLayer(blocks[i + 1]);
+                break;
+
+            default:
+                assert(0); //unknown layer type
                 break;
         }
 
@@ -246,7 +300,7 @@ void NeuralNet::Set_Layer_Order(float m_lossParam)
                     m_pLossFunc = new BinaryCrossEntropyLoss(m_ppLys[i]);
                     break;
                 default:
-                    m_pLossFunc = new MeanSquaredError(m_ppLys[i]);
+                    assert(0); //unknown loss function
                     break;
             }
             
@@ -284,7 +338,7 @@ void NeuralNet::Set_General_Data(sNN_General_Data gen_data)
             m_pOptimizer = new ADAMOPT(this, gen_data.m_optParam[0] != 0.0f ? gen_data.m_optParam[0] : ADAM_DEFAULT_BETA1, gen_data.m_optParam[1] != 0.0f ? gen_data.m_optParam[1] : ADAM_DEFAULT_BETA1, gen_data.m_optParam[2] != 0.0f ? gen_data.m_optParam[2] : ADAM_DEFAULT_EPSILON);
             break;
         default:
-            m_pOptimizer = new StochasticGradientDescent(this);
+            assert(0); //uknown optimizer
             break;
     }
 
@@ -306,6 +360,14 @@ nnInitData NeuralNet::Get_Init_Data()
         ret.eAct_Funcs.emplace_back(m_ppLys[i]->get_act_func());
         ret.actParam1.emplace_back(m_ppLys[i]->get_act_param());
         ret.e_layer_type.emplace_back(m_ppLys[i]->get_layer_type());
+        if(m_ppLys[i]->get_layer_type() != eLayer_type::POOLING)
+        {
+            ret.ePoolingType.emplace_back(ePooling_type::NA);
+        }
+        else
+        {
+            ret.ePoolingType.emplace_back(static_cast<ePooling_type>(static_cast<int>(m_ppLys[i]->get_act_param())));
+        }
     }
     
     ret.fLearningRate = m_fLearningRate;
@@ -337,7 +399,7 @@ void NeuralNet::Set_Init_Data(nnInitData& other_initData)
         delete [] m_ppLys;
     }
 
-    SetupLayersAndWeightMatrices(other_initData.e_layer_type, other_initData.layer_dimensions, other_initData.eAct_Funcs, other_initData.actParam1, other_initData.lossParam);
+    SetupLayersAndWeightMatrices(other_initData.e_layer_type, other_initData.layer_dimensions, other_initData.eAct_Funcs, other_initData.actParam1, other_initData.lossParam, other_initData.ePoolingType);
 
     switch(m_eOpt)
     {
@@ -351,7 +413,7 @@ void NeuralNet::Set_Init_Data(nnInitData& other_initData)
             m_pOptimizer = new ADAMOPT(this, other_initData.optParam[0] != 0.0f ? other_initData.optParam[0] : ADAM_DEFAULT_BETA1, other_initData.optParam[1] != 0.0f ? other_initData.optParam[1] : ADAM_DEFAULT_BETA1, other_initData.optParam[2] != 0.0f ? other_initData.optParam[2] : ADAM_DEFAULT_EPSILON);
             break;
         default:
-            m_pOptimizer = new StochasticGradientDescent(this);
+            assert(0); //uknown optimizer
             break;
     }
 
@@ -397,7 +459,7 @@ NeuralNet::~NeuralNet()
     }
 }
 
-void NeuralNet::SetupLayersAndWeightMatrices(std::vector<eLayer_type>& layer_types, std::vector<sLayer_Dimensions>& dims, std::vector<eAct_func>& actFuncs, std::vector<float>& actParam1, float lossParam)
+void NeuralNet::SetupLayersAndWeightMatrices(std::vector<eLayer_type>& layer_types, std::vector<sLayer_Dimensions>& dims, std::vector<eAct_func>& actFuncs, std::vector<float>& actParam1, float lossParam, std::vector<ePooling_type>& ePoolingType)
 {
     m_ppLys = new BaseLayer*[m_unNumLys];
     
@@ -414,9 +476,16 @@ void NeuralNet::SetupLayersAndWeightMatrices(std::vector<eLayer_type>& layer_typ
                 m_ppLys[i] = new ConvLayer(dims[i], actFuncs[i], actParam1[i]);
                 break;
             
+            case eLayer_type::POOLING:
+                m_ppLys[i] = new PoolingLayer(dims[i], ePoolingType[i]);
+                break;
+            
             case eLayer_type::DENSE:
-            default:
                 m_ppLys[i] = new DenseLayer(dims[i], actFuncs[i], actParam1[i]);
+                break;
+            
+            default:
+                assert(0); //unknown layer type
                 break;
         }
 
@@ -871,8 +940,9 @@ void NeuralNet::Save_NN(std::string fileName)
 
     ss << "m_unNumLys: " << m_unNumLys << " \n";
     ss << "m_fLearningRate: " << m_fLearningRate << " \n";
-    ss << "m_eOpt: " << (uint)m_eOpt << " \n";
-    ss << "m_eLossFunc: " << (uint)m_eLossFunc << " \n";
+    assert(optimizerToString.find(m_eOpt) != optimizerToString.end());
+    ss << "m_eOpt: " << optimizerToString[m_eOpt] << " \n";
+    ss << "m_eLossFunc: " << lossFuncToString[m_eLossFunc] << " \n";
     ss << "m_optParam1: " << m_optParam1 << " \n";
     ss << "m_optParam2: " << m_optParam2 << " \n";
     ss << "m_optParam3: " << m_optParam3 << " \n";
@@ -880,7 +950,8 @@ void NeuralNet::Save_NN(std::string fileName)
     ss << "layer_types: ";
     for(uint i = 0; i < m_unNumLys; i++)
     {
-        ss << (uint)m_ppLys[i]->get_layer_type() << " ";
+        assert(layerTypeToString.find(m_ppLys[i]->get_layer_type()) != layerTypeToString.end());
+        ss << layerTypeToString[m_ppLys[i]->get_layer_type()] << " ";
     }
     ss << "\n";
 

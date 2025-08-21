@@ -1,11 +1,13 @@
 #ifndef NN_DEFINES_H
 #define NN_DEFINES_H
 
+#include "nn_math.h"
+
 #include <vector>
 #include <string>
 #include <sstream>
+#include <map>
 
-#include "nn_math.h"
 
 /*
     list of activation functions
@@ -19,6 +21,10 @@ enum eAct_func{
     TANH    
 };
 
+extern std::map<eAct_func, std::string> actFuncToString;
+
+extern std::map<std::string, eAct_func> stringToActFunc;
+
 /*
     list of layer type
     Note: keep DENSE at last to keep test scripts intact
@@ -26,11 +32,77 @@ enum eAct_func{
 enum eLayer_type{
     INPUT,
     CONV,
+    POOLING,
     DENSE
 };
 
-#define DIMS_SIZE 7
+extern std::map<eLayer_type, std::string> layerTypeToString;
 
+extern std::map<std::string, eLayer_type> stringToLayerType;
+
+/*
+    list of activation functions
+    Note : keep CCE in bottom to keep tests intact
+*/
+enum eLossFuncs{
+    MSE, //mean squared error
+    MAE, //mean absolute error
+    HUBER, //huber loss
+    BCE, //binary cross entropy loss
+    CCE //competitive cross entropy loss
+};
+
+extern std::map<eLossFuncs, std::string> lossFuncToString;
+
+extern std::map<std::string, eLossFuncs> stringToLossFunc;
+
+enum ePooling_type{
+    AVERAGE,
+    MAX,
+    NA // not applicable - for non-pooling layer
+};
+
+extern std::map<ePooling_type, std::string> poolingTypeToString;
+
+extern std::map<std::string, ePooling_type> stringToPoolingType;
+
+
+/*
+    list of activation functions
+    Note : keep ADAM in bottom to keep tests intact
+*/
+enum eOptimizers{
+    SGD,
+    RMSPROP,
+    ADAM
+};
+
+extern std::map<eOptimizers, std::string> optimizerToString;
+
+extern std::map<std::string, eOptimizers> stringToOptimizer;
+
+
+enum eConvKernelSize{
+    Sz3x3,
+    Sz5x5,
+    Sz7x7
+};
+
+enum ePoolingKernelSize{
+    KrSz3x3,
+    KrSz2x2,
+    GLOBAL
+};
+
+
+struct sMtx_Dim{
+
+    uint rows = 0;
+    uint columns = 0;
+
+};
+
+#define DIMS_SIZE 7 //number of members in sLayer_Dimensions
 struct sLayer_Dimensions{
 
     uint unInputRows;
@@ -45,39 +117,18 @@ struct sLayer_Dimensions{
 
     sLayer_Dimensions(const sLayer_Dimensions& other);
 
-    sLayer_Dimensions(uint in_rows, uint in_columns, uint out_rows, uint out_cols, uint trans_rows, uint trans_cols, uint no_trans_mtx);
-};
-
-/*
-    list of activation functions
-    Note : keep CCE in bottom to keep tests intact
-*/
-enum eLossFuncs{
-    MSE, //mean squared error
-    MAE, //mean absolute error
-    HUBER, //huber loss
-    BCE, //binary cross entropy loss
-    CCE //competitive cross entropy loss
+    sLayer_Dimensions(sMtx_Dim in_dim, sMtx_Dim out_dim, sMtx_Dim tran_dim, uint no_trans_mtx);
 };
 
 
-/*
-    list of activation functions
-    Note : keep ADAM in bottom to keep tests intact
-*/
-enum eOptimizers{
-    SGD,
-    RMSPROP,
-    ADAM
+
+struct sLayer_Parsed_Dim{
+
+    uint rows;
+    uint cols;
+    uint num_mtx;
+
 };
-
-
-enum eKernelSize{
-    Sz3x3,
-    Sz5x5,
-    Sz7x7
-};
-
 
 //when below changed make sure to update get set save and load in nn_core
 struct nnInitData{
@@ -90,6 +141,7 @@ struct nnInitData{
     std::vector<eAct_func> eAct_Funcs;
     std::vector<eLayer_type> e_layer_type;
     std::vector<float>actParam1; //LEAKY_RELU : delta
+    std::vector<ePooling_type>ePoolingType;
     uint unNoLys = 0;
 
     //entire network stuff
@@ -107,7 +159,7 @@ struct nnInitData{
 
     nnInitData(uint sz);
 
-    nnInitData(uint InLyrSz, eOptimizers t_opt, std::vector<float> t_optParam, eLossFuncs t_loss_func, float t_loss_param, float t_learning_rate);
+    nnInitData(sMtx_Dim out_dim, eOptimizers t_opt, std::vector<float> t_optParam, eLossFuncs t_loss_func, float t_loss_param, float t_learning_rate);
 
     nnInitData(const nnInitData& other);
 
@@ -115,9 +167,11 @@ struct nnInitData{
     {
     }
 
-    void add_dense_layer(uint OutSz, eAct_func t_act_func, float t_act_param);
+    sMtx_Dim add_dense_layer(uint OutSz, eAct_func t_act_func, float t_act_param);
 
-    void add_conv_layer(uint t_in_rows, uint t_in_cols, eKernelSize t_kernel_size, uint t_num_kernels, eAct_func t_act_func, float t_act_param);
+    sMtx_Dim add_conv_layer(sMtx_Dim in_dim, eConvKernelSize t_kernel_size, uint t_num_kernels, eAct_func t_act_func, float t_act_param);
+
+    sMtx_Dim add_pooling_layer(sMtx_Dim in_dim, ePooling_type type, ePoolingKernelSize krSz);
 
 };
 
@@ -140,5 +194,11 @@ std::string read_file(const std::string& fileName);
 void save_to_file(const std::string& data, const std::string& filename);
 
 std::vector<std::string> split_by_delimiter(const std::string& data, const std::string& delimiter = "***");
+
+std::pair<uint,uint> get_pooling_window_rows_cols(ePoolingKernelSize t_pooling_kernel_sz, sLayer_Parsed_Dim& prev_dim);
+
+std::pair<uint, uint> find_pooling_output_dims(sLayer_Parsed_Dim& in_dims, std::pair<uint,uint> krSz);
+
+sLayer_Parsed_Dim get_parsed_dims(const sLayer_Dimensions& dims);
 
 #endif

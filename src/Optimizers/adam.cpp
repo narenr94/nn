@@ -60,6 +60,10 @@ void ADAMOPT::correct_biases()
     {
         for(j = 0; j < m_pNN->GetSzLayer(i); j++)
         {
+            if(m_pNN->GetLayer(i)->get_layer_type() == eLayer_type::POOLING)
+            {
+                continue;
+            }
             m_ppLyrRep[i]->M_Val[j] = m_fBeta1 * m_ppLyrRep[i]->M_Val[j] + (1.0f - m_fBeta1) * m_pNN->GetDelta(i, j);
             m_ppLyrRep[i]->V_Val[j] = m_fBeta2 * m_ppLyrRep[i]->V_Val[j] + (1.0f - m_fBeta2) * m_pNN->GetDelta(i, j) * m_pNN->GetDelta(i, j);
             m_hat = m_ppLyrRep[i]->M_Val[j] / (1.0f - std::pow(m_fBeta1, m_unTimeStep));
