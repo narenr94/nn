@@ -96,7 +96,9 @@ int main()
     nn->Init_Batch_Training(BATCH_SIZE);
 
     
-    std::thread pbThread(&nn_progress_bar::print_progress_bar_periodic, pb, 0, 1000);
+    std::thread pbThread([&]() {
+        pb->print_progress_bar_periodic();
+    });
 
     
     for(j = 0; j < EPOCH_MAX; j++)

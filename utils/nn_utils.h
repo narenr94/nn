@@ -28,7 +28,7 @@ public:
 
     void print_progress_bar(uint unVal);
 
-    void print_progress_bar_periodic(uint unVal, uint unMs);
+    void print_progress_bar_periodic(uint unMs = 1000);
 
     void update_progress_bar(uint unVal);
 
@@ -37,6 +37,10 @@ public:
     void stop();
 
     void setMax(uint mVal);
+
+private:
+
+    void display_progress_bar();
 
 };
 #endif

@@ -30,30 +30,38 @@ nn_progress_bar::nn_progress_bar(const char* vName, uint mVal)
     m_bStopped = false;
 }
 
-void nn_progress_bar::print_progress_bar(uint cVal)
+void nn_progress_bar::display_progress_bar()
 {
     uint percentComplete = 0;
+
+    std::cout<<"\r["<<m_parrValName<<":"<<m_unCurrVal<<"/"<<m_unMaxVal<<"]";
+    percentComplete = m_unCurrVal * 100;
+    percentComplete /= m_unMaxVal;
+
+    for(uint i = 0; i < percentComplete; i++)
+    {
+        std::cout<<"#";
+    }
+
+    for(uint i = 0; i < (100 - percentComplete); i++)
+    {
+        std::cout<<" ";
+    }
+
+    std::cout<<"["<<percentComplete<<"%]";
+
+    std::cout<<std::flush;
+}
+
+void nn_progress_bar::print_progress_bar(uint cVal)
+{
+    
     uint i = 0;
     std::unique_lock<std::mutex>lock(m_mtx);
     do
     {
-        std::cout<<"\r["<<m_parrValName<<":"<<m_unCurrVal<<"/"<<m_unMaxVal<<"]";
-        percentComplete = m_unCurrVal * 100;
-        percentComplete /= m_unMaxVal;
-
-        for(i = 0; i < percentComplete; i++)
-        {
-            std::cout<<"#";
-        }
-
-        for(i = 0; i < (100 - percentComplete); i++)
-        {
-            std::cout<<" ";
-        }
-
-        std::cout<<"["<<percentComplete<<"%]";
-
-        std::cout<<std::flush;
+        
+        display_progress_bar();
 
         m_bUpdating = false;
 
@@ -68,7 +76,7 @@ void nn_progress_bar::print_progress_bar(uint cVal)
     return;
 }
 
-void nn_progress_bar::print_progress_bar_periodic(uint cVal, uint ms)
+void nn_progress_bar::print_progress_bar_periodic(uint ms)
 {
     uint percentComplete = 0;
     uint i = 0;
@@ -76,23 +84,7 @@ void nn_progress_bar::print_progress_bar_periodic(uint cVal, uint ms)
     do
     {
         
-        std::cout<<"\r["<<m_parrValName<<":"<<m_unCurrVal<<"/"<<m_unMaxVal<<"]";
-        percentComplete = m_unCurrVal * 100;
-        percentComplete /= m_unMaxVal;
-
-        for(i = 0; i < percentComplete; i++)
-        {
-            std::cout<<"#";
-        }
-
-        for(i = 0; i < (100 - percentComplete); i++)
-        {
-            std::cout<<" ";
-        }
-
-        std::cout<<"["<<percentComplete<<"%]";
-
-        std::cout<<std::flush;
+        display_progress_bar();
 
         m_bUpdating = false;
 
@@ -101,6 +93,8 @@ void nn_progress_bar::print_progress_bar_periodic(uint cVal, uint ms)
         lock.lock();
 
     } while (!m_bStopped);
+
+    display_progress_bar();
 
     std::cout<<"\n";
     

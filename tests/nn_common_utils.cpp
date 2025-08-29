@@ -1,4 +1,5 @@
 #include "nn_common_utils.h"
+#include "nn_utils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -113,3 +114,151 @@ void setOutArrayBCE(uint label, std::vector<float> out, uint num_identify)
 
     }
 }
+
+void Init_NN_for_MNIST(NeuralNet* nn)
+{
+    nn->populateWeightsAndBiasesWithRandomNumbers();
+}
+
+void Train_NN_for_MNIST(NeuralNet* nn)
+{
+    float accuracy = 0.0;
+    uint correct_count = 0;
+    uint label;
+
+    char* line_buff = (char*)malloc(BUFF_SIZE); 
+
+    FILE* fdr = NULL;
+
+    std::vector<float> norm_values(VAL_SIZE);
+    std::vector<float> out(10);
+
+    std::string linestr = "Line";
+    nn_progress_bar *pb = new nn_progress_bar(linestr.c_str(),TRAIN_MAX);
+    std::thread pbThread([&]() {
+        pb->print_progress_bar_periodic();
+    });
+
+    pb->setMax(TRAIN_MAX);
+    fdr = fopen("MNIST/mnist_train.csv","r");
+    //getNextLine(fdr, line_buff);
+
+    std::chrono::high_resolution_clock::time_point start, end;
+    std::chrono::duration<double> time_taken;
+    start = std::chrono::high_resolution_clock::now();
+
+    for(uint i = 0; i < TRAIN_MAX; i++)
+    {
+        
+        if(!fdr)
+        {
+            printf("fdr open fail!!!\n");
+            return;
+        }
+
+        getNextLine(fdr, line_buff);
+
+        label = parseLabelAndNormalizedValues(line_buff, norm_values, NORM_FACTOR);
+
+        setOutArray(label, out);            
+
+        if(nn->Train(norm_values, out))
+        {
+            correct_count += 1.0;
+        }
+
+        pb->update_progress_bar(i + 1);            
+
+    }
+
+    fclose(fdr);
+
+    pb->stop();    
+    pbThread.join();
+    delete pb;
+
+    accuracy = correct_count / ((float)TRAIN_MAX);
+
+    printf("\nTrain Accuracy:%f\n", accuracy);
+    end = std::chrono::high_resolution_clock::now();
+
+    time_taken = end - start;
+
+    printf("Time taken for Train:%fSeconds\n", time_taken.count());
+
+    
+    delete [] line_buff;
+
+}
+
+void Test_NN_for_MNIST(NeuralNet* nn)
+{
+    float accuracy = 0.0;
+    uint correct_count = 0;
+    uint label;
+
+    char* line_buff = (char*)malloc(BUFF_SIZE); 
+
+    
+
+    std::vector<float> norm_values(VAL_SIZE);
+    std::vector<float> out(10);
+
+    std::string linestr = "Line";
+    nn_progress_bar *pb = new nn_progress_bar(linestr.c_str(),TEST_MAX);
+    std::thread pbThread([&]() {
+        pb->print_progress_bar_periodic();
+    });
+    pb->setMax(TEST_MAX);
+
+    FILE* fdr = NULL;
+    fdr = fopen("MNIST/mnist_test.csv","r");
+
+    std::chrono::high_resolution_clock::time_point start, end;
+    std::chrono::duration<double> time_taken;
+    start = std::chrono::high_resolution_clock::now();
+
+    
+
+    //getNextLine(fdr, line_buff);
+
+    for(uint i = 0; i < TEST_MAX; i++)
+    {
+        
+        if(!fdr)
+        {
+            printf("fdr open fail!!!\n");
+            return;
+        }
+        getNextLine(fdr, line_buff);
+
+        label = parseLabelAndNormalizedValues(line_buff, norm_values, NORM_FACTOR);
+
+        setOutArray(label, out);            
+
+        if(nn->Test(norm_values, out))
+        {
+            correct_count += 1.0;
+        }
+
+        pb->update_progress_bar(i + 1);
+    }
+
+    fclose(fdr);
+
+    pb->stop();    
+    pbThread.join();
+    delete pb;
+
+    accuracy = correct_count / ((float)TEST_MAX);
+
+    printf("\nTest Accuracy:%f\n", accuracy);
+    end = std::chrono::high_resolution_clock::now();
+
+    time_taken = end - start;
+
+    printf("Time taken for test:%fSeconds\n", time_taken.count());    
+    
+    delete [] line_buff;
+}
+

@@ -13,12 +13,6 @@
 
 int main()
 {
-    char* line_buff = (char*)malloc(BUFF_SIZE); 
-
-    FILE* fdr = NULL;
-
-    uint label;
-
     uint i = 0;
 
     uint j = 0;
@@ -29,33 +23,9 @@ int main()
 
     std::vector<float> norm_values(VAL_SIZE);
     std::vector<float> out(10);
-
-    std::string linestr = "Line";
-
-    nn_progress_bar *pb = new nn_progress_bar(linestr.c_str(),TRAIN_MAX);
-
-    std::chrono::high_resolution_clock::time_point start, end;
-    std::chrono::duration<double> time_taken;
-
-    float correct_count = 0;
-
-    float accuracy = 0.0;   
-
     uint u_sz = 4;
 
     nnInitData * initData = new nnInitData(u_sz);
-    /*
-    struct nnInitData{
-
-    uint unNoLys = 0;
-    uint* unSzLys = nullptr;
-    eAct_func eAct_Func = eAct_func::SIGMOID;
-    elog_level eLogLevel = elog_level::eLOGLEVEL_WARN;
-    bool bConsolePrint = false;
-    float fLearningRate = 0.5f;
-
-    };
-    */
 
     initData->unNoLys = 4;
 
@@ -78,108 +48,20 @@ int main()
 
     NeuralNet *nn = new NeuralNet(*initData);
 
-    nn->populateWeightsAndBiasesWithRandomNumbers();
-
-    std::thread pbThread(&nn_progress_bar::print_progress_bar_periodic, pb, 0, 1000);
+    Init_NN_for_MNIST(nn);
     
     for(j = 0; j < EPOCH_MAX; j++)
     {
-        start = std::chrono::high_resolution_clock::now();
-
         printf("Epoch[%d] Started!!!\n", j + 1);
-        pb->setMax(TRAIN_MAX);
-        fdr = fopen("MNIST/mnist_train.csv","r");
-        //getNextLine(fdr, line_buff);
-
-        for(i = 0; i < TRAIN_MAX; i++)
-        {
-            
-            if(!fdr)
-            {
-                printf("fdr open fail!!!\n");
-                return 0;
-            }
-
-            getNextLine(fdr, line_buff);
-
-            label = parseLabelAndNormalizedValues(line_buff, norm_values, NORM_FACTOR);
-
-            setOutArray(label, out);            
-
-            if(nn->Train(norm_values, out))
-            {
-                correct_count += 1.0;
-            }
-
-            pb->update_progress_bar(i + 1);            
-
-        }
-
-        fclose(fdr);
-
-        pb->reset();
-
-        accuracy = correct_count / ((float)TRAIN_MAX);
-
-        printf("\nTrain Accuracy:%f\n", accuracy);
-        end = std::chrono::high_resolution_clock::now();
-
-        time_taken = end - start;
-
-        printf("Time taken for Train Epoch[%d]:%fSeconds\n", j + 1, time_taken.count());
-        
-        correct_count = 0.0;
-
-        pb->setMax(TEST_MAX);
-
-        start = std::chrono::high_resolution_clock::now();
-
-        fdr = fopen("MNIST/mnist_test.csv","r");
-
-        //getNextLine(fdr, line_buff);
-
-        for(i = 0; i < TEST_MAX; i++)
-        {
-            
-            if(!fdr)
-            {
-                printf("fdr open fail!!!\n");
-                return 0;
-            }
-            getNextLine(fdr, line_buff);
-
-            label = parseLabelAndNormalizedValues(line_buff, norm_values, NORM_FACTOR);
-
-            setOutArray(label, out);            
-
-            if(nn->Test(norm_values, out))
-            {
-                correct_count += 1.0;
-            }
-
-            pb->update_progress_bar(i + 1);
-        }
-
-
-
-        fclose(fdr);
-
-        pb->reset();
-
-        accuracy = correct_count / ((float)TEST_MAX);
-
-        printf("\nTest Accuracy:%f\n", accuracy);
-        end = std::chrono::high_resolution_clock::now();
-
-        time_taken = end - start;
-
-        printf("Time taken for test Epoch[%d]:%fSeconds\n", j + 1, time_taken.count());
-        
-        correct_count = 0.0;
-
+        Train_NN_for_MNIST(nn);
+        Test_NN_for_MNIST(nn);
     }
 
     printf("start save\n");
+
+    std::chrono::high_resolution_clock::time_point start, end;
+    std::chrono::duration<double> time_taken;
+
     start = std::chrono::high_resolution_clock::now();
 
     std::string sav_loc = "MNIST_EPOCH5.sav";
@@ -208,67 +90,12 @@ int main()
     printf("Time taken to load and init nn from file:%fSeconds\n", time_taken.count());
 
     printf("done load and init\n");
-    
 
-    start = std::chrono::high_resolution_clock::now();
+    printf("\nTest Loaded NN\n");
 
-    fdr = fopen("MNIST/mnist_test.csv","r");
-
-    //getNextLine(fdr, line_buff);
-
-    for(i = 0; i < TEST_MAX; i++)
-    {
-        
-        if(!fdr)
-        {
-            printf("fdr open fail!!!\n");
-            return 0;
-        }
-        getNextLine(fdr, line_buff);
-
-        label = parseLabelAndNormalizedValues(line_buff, norm_values, NORM_FACTOR);
-
-        setOutArray(label, out);            
-
-        if(nn2->Test(norm_values, out))
-        {
-            correct_count += 1.0;
-        }
-
-        pb->update_progress_bar(i + 1);
-    }
-
-
-
-    fclose(fdr);
-
-    pb->reset();
-
-    accuracy = correct_count / ((float)TEST_MAX);
-
-    printf("\nTest loaded nn Accuracy:%f\n", accuracy);
-    end = std::chrono::high_resolution_clock::now();
-
-    time_taken = end - start;
-
-    printf("Time taken for test Epoch[%d]:%fSeconds\n", j + 1, time_taken.count());
-
-
-
-
-
-    pb->stop();
-    
-    pbThread.join();
-    
-
-    
-
-    // delete nn;
+    Test_NN_for_MNIST(nn2);
 
     delete nn2;
-
-    delete pb;
 
     delete initData;
 

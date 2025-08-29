@@ -12,12 +12,6 @@
 
 int main()
 {
-    char* line_buff = (char*)malloc(BUFF_SIZE); 
-
-    FILE* fdr = NULL;
-
-    uint label;
-
     uint i = 0;
 
     uint j = 0;
@@ -29,17 +23,6 @@ int main()
     std::vector<float> norm_values(VAL_SIZE);
 
     std::vector<float> out(10);
-
-    std::string linestr = "Line";
-
-    nn_progress_bar *pb = new nn_progress_bar(linestr.c_str(),TRAIN_MAX);
-
-    std::chrono::high_resolution_clock::time_point start, end;
-    std::chrono::duration<double> time_taken;
-
-    float correct_count = 0;
-
-    float accuracy = 0.0;  
 
     std::vector<float> optParam;
     optParam.push_back(0.0f);
@@ -55,177 +38,20 @@ int main()
     initData->add_pooling_layer(in_dim, ePooling_type::MAX, ePoolingKernelSize::KrSz2x2);
     initData->add_dense_layer(10, eAct_func::SOFTMAX, 0.0f);
 
-    // uint u_sz = 4;
-
-    // nnInitData * initData = new nnInitData(u_sz);
-    // /*
-    // struct nnInitData{
-
-    // uint unNoLys = 0;
-    // uint* unSzLys = nullptr;
-    // eAct_func eAct_Func = eAct_func::SIGMOID;
-    // elog_level eLogLevel = elog_level::eLOGLEVEL_WARN;
-    // bool bConsolePrint = false;
-    // float fLearningRate = 0.5f;
-
-    // };
-    // */
-
-    // initData->unNoLys = 4;
-
-    // // set_layer_info(sz, initData->unNoLys, initData);
-
-    // initData->e_layer_type[0] = eLayer_type::INPUT;
-    // initData->layer_dimensions[0].unInputColumns = 0;
-    // initData->layer_dimensions[0].unInputRows = 0;
-    // initData->layer_dimensions[0].unNoTransformParameterMtx = 0;
-    // initData->layer_dimensions[0].unOutputColumns = 784;
-    // initData->layer_dimensions[0].unOutputRows = 1;
-    // initData->layer_dimensions[0].unTransformParametersColumns = 0;
-    // initData->layer_dimensions[0].unTransformParametersRows = 0;
-
-    
-    // initData->e_layer_type[1] = eLayer_type::CONV;
-    // initData->layer_dimensions[1].unInputColumns = 28;
-    // initData->layer_dimensions[1].unInputRows = 28;
-    // initData->layer_dimensions[1].unNoTransformParameterMtx = 3;
-    // initData->layer_dimensions[1].unOutputColumns = 26;
-    // initData->layer_dimensions[1].unOutputRows = 78;
-    // initData->layer_dimensions[1].unTransformParametersColumns = 3;
-    // initData->layer_dimensions[1].unTransformParametersRows = 3;
-
-
-    // initData->e_layer_type[2] = eLayer_type::DENSE;
-    // initData->layer_dimensions[2].unInputColumns = 2028;
-    // initData->layer_dimensions[2].unInputRows = 1;
-    // initData->layer_dimensions[2].unNoTransformParameterMtx = 1;
-    // initData->layer_dimensions[2].unOutputColumns = 32;
-    // initData->layer_dimensions[2].unOutputRows = 1;
-    // initData->layer_dimensions[2].unTransformParametersColumns = 32;
-    // initData->layer_dimensions[2].unTransformParametersRows = 2028;
-
-    // initData->e_layer_type[3] = eLayer_type::DENSE;
-    // initData->layer_dimensions[3].unInputColumns = 32;
-    // initData->layer_dimensions[3].unInputRows = 1;
-    // initData->layer_dimensions[3].unNoTransformParameterMtx = 1;
-    // initData->layer_dimensions[3].unOutputColumns = 10;
-    // initData->layer_dimensions[3].unOutputRows = 1;
-    // initData->layer_dimensions[3].unTransformParametersColumns = 10;
-    // initData->layer_dimensions[3].unTransformParametersRows = 32;
-
-    // initData->eOpt = eOptimizers::SGD;
-    // initData->eLossFunc = eLossFuncs::HUBER;
-    // initData->fLearningRate = 0.01f;
-
     NeuralNet *nn = new NeuralNet(*initData);
 
-    nn->populateWeightsAndBiasesWithRandomNumbers();
-
-    std::thread pbThread(&nn_progress_bar::print_progress_bar_periodic, pb, 0, 1000);
+    Init_NN_for_MNIST(nn);
 
     for(j = 0; j < EPOCH_MAX; j++)
     {
-        start = std::chrono::high_resolution_clock::now();
-
         printf("Epoch[%d] Started!!!\n", j + 1);
         
-        pb->setMax(TRAIN_MAX);
-        fdr = fopen("MNIST/mnist_train.csv","r");
-        //getNextLine(fdr, line_buff);
+        Train_NN_for_MNIST(nn);
 
-        for(i = 0; i < TRAIN_MAX; i++)
-        {
-            
-            if(!fdr)
-            {
-                printf("fdr open fail!!!\n");
-                return 0;
-            }
-
-            getNextLine(fdr, line_buff);
-
-            label = parseLabelAndNormalizedValues(line_buff, norm_values, NORM_FACTOR);
-
-            setOutArray(label, out);            
-
-            if(nn->Train(norm_values, out))
-            {
-                correct_count += 1.0;
-            }
-
-            pb->update_progress_bar(i + 1);            
-
-        }
-
-        fclose(fdr);
-
-        pb->reset();
-
-        accuracy = correct_count / ((float)TRAIN_MAX);
-
-        printf("\nTrain Accuracy:%f\n", accuracy);
-        end = std::chrono::high_resolution_clock::now();
-
-        time_taken = end - start;
-
-        printf("Time taken for Train Epoch[%d]:%fSeconds\n", j + 1, time_taken.count());
-        
-        correct_count = 0.0;
-
-        pb->setMax(TEST_MAX);
-
-        start = std::chrono::high_resolution_clock::now();
-
-        fdr = fopen("MNIST/mnist_test.csv","r");
-
-        //getNextLine(fdr, line_buff);
-
-        for(i = 0; i < TEST_MAX; i++)
-        {
-            
-            if(!fdr)
-            {
-                printf("fdr open fail!!!\n");
-                return 0;
-            }
-            getNextLine(fdr, line_buff);
-
-            label = parseLabelAndNormalizedValues(line_buff, norm_values, NORM_FACTOR);
-
-            setOutArray(label, out);            
-
-            if(nn->Test(norm_values, out))
-            {
-                correct_count += 1.0;
-            }
-
-            pb->update_progress_bar(i + 1);
-        }
-
-        fclose(fdr);
-
-        pb->reset();
-
-        accuracy = correct_count / ((float)TEST_MAX);
-
-        printf("\nTest Accuracy:%f\n", accuracy);
-        end = std::chrono::high_resolution_clock::now();
-
-        time_taken = end - start;
-
-        printf("Time taken for test Epoch[%d]:%fSeconds\n", j + 1, time_taken.count());
-        
-        correct_count = 0.0;
-
+        Test_NN_for_MNIST(nn);
     }
-
-    pb->stop();
-    
-    pbThread.join();
     
     delete nn;
-
-    delete pb;
 
     delete initData;
 

@@ -45,3 +45,9 @@ void setOutArray(uint label, std::vector<float>& out);
 void set_layer_info(uint* sz, uint sz_sz, nnInitData * initData);
 
 void setOutArrayBCE(uint label, std::vector<float> out, uint num_identify);
+
+void Init_NN_for_MNIST(NeuralNet* nn);
+
+void Train_NN_for_MNIST(NeuralNet* nn);
+
+void Test_NN_for_MNIST(NeuralNet* nn);
