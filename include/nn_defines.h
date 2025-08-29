@@ -197,7 +197,11 @@ std::vector<std::string> split_by_delimiter(const std::string& data, const std::
 
 std::pair<uint,uint> get_pooling_window_rows_cols(ePoolingKernelSize t_pooling_kernel_sz, sLayer_Parsed_Dim& prev_dim);
 
+std::pair<uint,uint> get_conv_window_rows_cols(eConvKernelSize t_conv_kernel_sz);
+
 std::pair<uint, uint> find_pooling_output_dims(sLayer_Parsed_Dim& in_dims, std::pair<uint,uint> krSz);
+
+std::pair<uint, uint> find_conv_output_dims(sLayer_Parsed_Dim& in_dims, std::pair<uint,uint> krSz);
 
 sLayer_Parsed_Dim get_parsed_dims(const sLayer_Dimensions& dims);
 

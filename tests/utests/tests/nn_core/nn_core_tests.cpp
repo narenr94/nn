@@ -107,6 +107,9 @@ TEST(NN_CORE_TESTS, nn_core_testrun_dense_test)
     float in[2] = {0.0f, 1.0f};
     float out[2] = {0.302242f, 0.163498f};
 
+    std::vector<float> in_vec(in, in + 2);
+    std::vector<float> out_vec(out, out + 2);
+
     uint sz[4] = {2,3,2};
     nnInitData * initData = new nnInitData(3); 
     initData->unNoLys = 3;
@@ -158,7 +161,7 @@ TEST(NN_CORE_TESTS, nn_core_testrun_dense_test)
     nn->populate_weights(1, init_lyr1_wts);
     nn->populate_weights(2, init_lyr2_wts);
 
-    nn->Test(in, out);
+    nn->Test(in_vec, out_vec);
 
     for(uint i = 0; i < 2; i++)
     {
@@ -237,7 +240,10 @@ TEST(NN_CORE_TESTS, nn_core_trainrun_dense_test)
     nn->populate_weights(1, init_lyr1_wts);
     nn->populate_weights(2, init_lyr2_wts);
 
-    nn->Train(in, out);
+    std::vector<float> in_ref(in, in + 2);
+    std::vector<float> out_ref(out, out + 2);
+
+    nn->Train(in_ref, out_ref);
 
     for(uint i = 0; i < 2; i++)
     {
@@ -385,7 +391,13 @@ TEST(NN_CORE_TESTS, nn_core_testrun_conv_test)
                     -0.3f, 0.4f, 0.1f,
                     0.01f, 0.7f, -0.01f};
 
+    float inter_out[4] = {0.035f, 0.075f, 
+                            0.0655f, 0.0845f};
+
     float out[2] = {0.063525f, 0.070025f};
+
+    std::vector<float> in_vec(in, in + 9);
+    std::vector<float> out_vec(out, out + 2);
 
     uint sz[4] = {9,4,2};
     nnInitData * initData = new nnInitData(3); 
@@ -439,7 +451,13 @@ TEST(NN_CORE_TESTS, nn_core_testrun_conv_test)
     nn->populate_weights(1, init_lyr1_wts);
     nn->populate_weights(2, init_lyr2_wts);
 
-    nn->Test(in, out);
+    nn->Test(in_vec, out_vec);
+
+    for(uint i = 0; i < 4; i++)
+    {
+        float roundedValue = std::round(nn->GetNodeVal(1, i) * 1000000.0f) / 1000000.0f;
+        EXPECT_EQ(roundedValue, inter_out[i]);
+    }
 
     for(uint i = 0; i < 2; i++)
     {
@@ -539,7 +557,10 @@ TEST(NN_CORE_TESTS, nn_core_trainrun_conv_test)
     nn->populate_weights(1, init_lyr1_wts);
     nn->populate_weights(2, init_lyr2_wts);
 
-    nn->Train(in, out);
+    std::vector<float> in_ref(in, in + 9);
+    std::vector<float> out_ref(out, out + 2);
+
+    nn->Train(in_ref, out_ref);
 
     for(uint i = 0; i < 2; i++)
     {
@@ -620,6 +641,9 @@ TEST(NN_CORE_TESTS, nn_core_testrun_conv_multiKernel_test)
 
     float out[2] = {0.030192f, 0.036692f};
 
+    std::vector<float> in_vec(in, in + 9);
+    std::vector<float> out_vec(out, out + 2);
+
     uint sz[4] = {9,12,2};
     nnInitData * initData = new nnInitData(3); 
     initData->unNoLys = 3;
@@ -672,7 +696,7 @@ TEST(NN_CORE_TESTS, nn_core_testrun_conv_multiKernel_test)
     nn->populate_weights(1, init_lyr1_wts);
     nn->populate_weights(2, init_lyr2_wts);
 
-    nn->Test(in, out);
+    nn->Test(in_vec, out_vec);
 
     for(uint i = 0; i < 2; i++)
     {
@@ -804,7 +828,10 @@ TEST(NN_CORE_TESTS, nn_core_trainrun_conv_multiKernel_test)
     nn->populate_weights(1, init_lyr1_wts);
     nn->populate_weights(2, init_lyr2_wts);
 
-    nn->Train(in, out);
+    std::vector<float> in_ref(in, in + 9);
+    std::vector<float> out_ref(out, out + 2);
+
+    nn->Train(in_ref, out_ref);
 
     for(uint i = 0; i < 2; i++)
     {

@@ -19,12 +19,12 @@ public:
 
     //dense layer
     virtual void do_forwardpass_dense_layer() = 0;
-    virtual void do_backwardpass_from_output_layer(float* pfExpOut, BaseLossFunction* lossFunc) = 0;
+    virtual void do_backwardpass_from_output_layer(std::vector<float>& pfExpOut, BaseLossFunction* lossFunc) = 0;
     virtual void do_backwardpass_dense_layer() = 0;
 
     //convolution layer
-    virtual void do_forwardpass_conv_layer(sLayer_Dimensions t_tims) = 0;
-    virtual void do_backwardpass_conv_layer(sLayer_Dimensions t_tims) = 0;
+    virtual void do_forwardpass_conv_layer() = 0;
+    virtual void do_backwardpass_conv_layer() = 0;
 
     //pooling layer
     virtual void do_forwardpass_pooling_layer(ePooling_type t_pooling_type) = 0;

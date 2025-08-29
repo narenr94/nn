@@ -16,6 +16,6 @@ void SoftmaxActFunc::populate_derv_matrix()
 {
 }
 
-void SoftmaxActFunc::get_delta(float* fVal)
+void SoftmaxActFunc::get_delta(std::vector<float>& fVal)
 {
 }

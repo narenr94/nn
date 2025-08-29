@@ -6,51 +6,9 @@
 #include "nn_utils.h"
 #include <chrono>
 
-#include "setup_layer_info.h"
+#include "nn_common_utils.h"
 
-#define BUFF_SIZE 3500 //buffer size for line of mnist data
-#define TRAIN_MAX 60000 //max number of lines in training set
-#define TEST_MAX 10000 //max number of lines in testing set
-#define NORM_FACTOR 254.0 //max value in data set for normalization
-#define VAL_SIZE 784 //input layer size
 #define EPOCH_MAX 1 //number epochs of training and testing 
-
-/*
-Observation
-Adam doesnt seem to be working with default values for beta1, beta2 and epsilon
-from trial and error found that beta1=0.9f, beta2 = 0.9f and epsilon = 0.1f works
-*/
-
-/*
-getLineNumber : gets particular line from file
-fdr : file descriptor to read from
-line_buff : buffer tos tore output
-line_num : line number to be retreived
-returns : true, line found ... false if line not found
-*/
-bool getLineNumber(FILE* fdr, char* line_buff, uint line_num);
-/*
-getNextLine : gets next line from file
-fdr : file descriptor to read from
-line_buff : buffer tos tore output
-returns : NA
-*/
-void getNextLine(FILE* fdr, char* line_buff);
-/*
-parseLabelAndNormalizedValues : parses line from mnist file and outputs normalized values and label
-line_buff : buffer where mnist line is stored
-norm_values : array where normalized values will be stored
-norm_factor : normalization factor to be used
-returns : numerical value of correct output
-*/
-uint parseLabelAndNormalizedValues(char* line_buff, float* norm_values, float norm_factor);
-/*
-setOutArray : set out array using correct label
-label : value indicating correct output
-out : array where expected output will be stored
-returns : NA
-*/
-void setOutArray(uint label, float* out);
 
 int main()
 {
@@ -67,9 +25,9 @@ int main()
     uint sz[4] = {784,32,32,10};
     eAct_func actFuncs[4] = {eAct_func::TANH, eAct_func::TANH, eAct_func::TANH, eAct_func::TANH};
 
-    float* out = (float*)malloc(10*sizeof(float));
+    std::vector<float> norm_values(VAL_SIZE);
 
-    float* norm_values = (float*)malloc(VAL_SIZE*sizeof(float));
+    std::vector<float> out(10);
 
     std::string linestr = "Line";
 
@@ -95,42 +53,6 @@ int main()
     initData->add_dense_layer(32, eAct_func::TANH, 0.0f);
     initData->add_dense_layer(32, eAct_func::TANH, 0.0f);
     initData->add_dense_layer(10, eAct_func::TANH, 0.0f);
-    // uint u_sz = 4;
-
-    // nnInitData * initData = new nnInitData(u_sz);
-    // /*
-    // struct nnInitData{
-
-    // uint unNoLys = 0;
-    // uint* unSzLys = nullptr;
-    // eAct_func eAct_Func = eAct_func::SIGMOID;
-    // elog_level eLogLevel = elog_level::eLOGLEVEL_WARN;
-    // bool bConsolePrint = false;
-    // float fLearningRate = 0.5f;
-
-    // };
-    // */
-
-    // initData->unNoLys = 4;
-
-    // set_layer_info(sz, initData->unNoLys, initData);
-
-    // for(uint l = 0; l < initData->unNoLys; l++)
-    // {
-    //     if(l != 0)
-    //     {
-    //         initData->e_layer_type[l] = eLayer_type::DENSE;
-    //     }
-    //     else
-    //     {
-    //         initData->e_layer_type[l] = eLayer_type::INPUT;
-    //     }
-        
-    //     initData->eAct_Funcs[l] = actFuncs[l];
-    // }
-    // initData->eOpt = eOptimizers::SGD;
-    // initData->eLossFunc = eLossFuncs::HUBER;
-    // initData->fLearningRate = 0.01f;
 
     NeuralNet *nn = new NeuralNet(*initData);
 
@@ -246,70 +168,4 @@ int main()
 
     return 0;
 
-}
-
-void setOutArray(uint label, float* out)
-{
-
-    uint i = 0;
-
-    for(i = 0; i < 10; i++)
-    {
-        if(label == i)
-        {
-            out[i] = 1.0;
-        }
-        else
-        {
-            out[i] = 0.0;
-        }
-
-    }
-}
-
-uint parseLabelAndNormalizedValues(char* line_buff, float* norm_values, float norm_factor)
-{
-    uint label = 0;
-
-    char* token = strtok(line_buff, ",");
- 
-    label = (uint)atoi(token);
-
-    uint i = 0;
-
-    token = strtok(NULL, ",");
-
-    while (token != NULL) {
-        norm_values[i] = (float)atof(token);
-        norm_values[i] /= norm_factor;
-        token = strtok(NULL, ",");
-        i++;
-    }
-
-    return label;
-}
-
-
-
-bool getLineNumber(FILE* fdr, char* line_buff, uint line_num)
-{
-    uint i = 0;
-    bool ret = false;
-    while(fgets(line_buff, BUFF_SIZE, fdr))
-    {
-        if(i == line_num)
-        {
-            ret = true;
-            break;
-        }
-
-        i++;        
-    }
-
-    return ret;
-}
-
-void getNextLine(FILE* fdr, char* line_buff)
-{
-    fgets(line_buff, BUFF_SIZE, fdr);
 }

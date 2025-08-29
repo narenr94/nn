@@ -92,12 +92,10 @@ BaseLayer::~BaseLayer()
 
 void BaseLayer::do_backwardpass_to_previous_layer()
 {
-    sLayer_Dimensions dims = m_pNextLyr->get_layer_dimensions();
-    
     switch(m_pNextLyr->get_layer_type())
     {
         case eLayer_type::CONV :
-            m_pAccelerator->do_backwardpass_conv_layer(dims);
+            m_pAccelerator->do_backwardpass_conv_layer();
             break;
         case eLayer_type::POOLING :
             m_pAccelerator->do_backwardpass_pooling_layer(static_cast<ePooling_type>(static_cast<int>(m_pNextLyr->get_act_param())));
@@ -132,8 +130,10 @@ bool BaseLayer::set_node_value(float fVal, uint unIdx)
     return bRet;
 }
 
-bool BaseLayer::set_all_node_values(float* pfValue)
+bool BaseLayer::set_all_node_values(std::vector<float>& pfValue)
 {
+    assert(pfValue.size() == m_unNumNodes);
+
     bool bRet = false;
 
     bRet = true;
@@ -250,9 +250,10 @@ void BaseLayer::apply_act_func_all_nodes()
     
 }
 
-void BaseLayer::get_delta_all_nodes(float * fVal)
+void BaseLayer::get_delta_all_nodes(std::vector<float>& fVal)
 {
-    
+    assert(fVal.size() == m_unNumNodes);
+
     if(m_layer_type != eLayer_type::INPUT)
     {
         m_pActFunc->get_delta(fVal);
@@ -276,7 +277,7 @@ BaseLayer* BaseLayer::GetNextLayer()
     return m_pNextLyr;
 }
 
-void BaseLayer::do_backwardpass_to_previous_layer_output_layer(float* fExpOut, BaseLossFunction* lossFunc)
+void BaseLayer::do_backwardpass_to_previous_layer_output_layer(std::vector<float>& fExpOut, BaseLossFunction* lossFunc)
 {
     assert(m_bPrevNxtLyrsSet == true);
     m_pAccelerator->do_backwardpass_from_output_layer(fExpOut, lossFunc);

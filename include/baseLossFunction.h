@@ -3,6 +3,8 @@
 
 #include "nn_math.h"
 
+#include <vector>
+
 class BaseLayer; //forward declaration, class defined in baseLayer.h
 
 class BaseLossFunction{
@@ -17,9 +19,9 @@ public:
 
     BaseLossFunction(){}
 
-    virtual float apply_loss_func(float* fExpOut) = 0;
+    virtual float apply_loss_func(std::vector<float>& fExpOut) = 0;
 
-    virtual void get_loss_func_derv(float* fExpOut, float* fVal) = 0;
+    virtual void get_loss_func_derv(std::vector<float>& fExpOut, std::vector<float>& fVal) = 0;
 
     virtual ~BaseLossFunction(){}
 

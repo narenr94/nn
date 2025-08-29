@@ -4,6 +4,6 @@ void LeakyReluActFunc::apply_act_func()
 {
 }
 
-void LeakyReluActFunc::get_delta(float* fVal)
+void LeakyReluActFunc::get_delta(std::vector<float>& fVal)
 {
 }

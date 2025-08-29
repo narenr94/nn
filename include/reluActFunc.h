@@ -11,7 +11,7 @@ class ReluActFunc : public BaseActivationFunction
 
         void apply_act_func();
 
-        void get_delta(float* fVal);
+        void get_delta(std::vector<float>& fVal);
 
         ~ReluActFunc(){}
 

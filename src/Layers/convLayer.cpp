@@ -19,7 +19,7 @@ ConvLayer::~ConvLayer()
 void ConvLayer::do_forwardpass_to_current_layer()
 {
     assert(m_bPrevNxtLyrsSet == true);
-    m_pAccelerator->do_forwardpass_conv_layer(m_Dimensions);
+    m_pAccelerator->do_forwardpass_conv_layer();
 }
 
 void ConvLayer::set_transform_matrix_parameter(uint unInIdx, uint unOutIdx, float fWt)

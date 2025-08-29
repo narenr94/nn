@@ -66,7 +66,7 @@ public:
 
     void apply_act_func_all_nodes();
     
-    void get_delta_all_nodes(float * fVal);
+    void get_delta_all_nodes(std::vector<float>& fVal);
 
     eLayer_type get_layer_type();
 
@@ -91,7 +91,7 @@ public:
         @value : array containing values to be added
         
     */
-    bool set_all_node_values(float* value);
+    bool set_all_node_values(std::vector<float>& value);
 
     /*
         set_all_node_biases() : sets value of all nodes in layer
@@ -150,7 +150,7 @@ public:
 
     void do_backwardpass_to_previous_layer();
 
-    void do_backwardpass_to_previous_layer_output_layer(float* fExpOut, BaseLossFunction* lossFunc);
+    void do_backwardpass_to_previous_layer_output_layer(std::vector<float>& fExpOut, BaseLossFunction* lossFunc);
 
     float get_transform_matrix_parameter(uint Idx);
 

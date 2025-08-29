@@ -17,10 +17,12 @@ set(TESTS mnist_basic_test.cpp
 
 set(EXECUTABLE_TARGETS)
 
+set(COMMON_SRC ./nn_common_utils.cpp)
+
 # Create executables for each example 
 foreach(TEST ${TESTS}) 
     get_filename_component(TEST_NAME ${TEST} NAME_WE)
-    add_executable(${TEST_NAME} ${TEST})
+    add_executable(${TEST_NAME} ${TEST} ${COMMON_SRC})
     target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/utils) 
     add_dependencies(${TEST_NAME} nncore nnutils)
     target_link_libraries(${TEST_NAME} ${CMAKE_BINARY_DIR}/src/libnncore.so ${CMAKE_BINARY_DIR}/utils/libnnutils.so) 

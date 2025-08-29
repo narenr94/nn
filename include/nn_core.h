@@ -82,7 +82,7 @@ class NeuralNet{
 
         @input_arr : array containing input node values
     */
-    bool do_forward_pass(float* pfInputArr);
+    bool do_forward_pass(std::vector<float>& pfInputArr);
 
 
     /*
@@ -107,14 +107,14 @@ class NeuralNet{
         @exp_out : expected output array
         @error : array where error ought to be stored
     */
-    float calculate_error(float* pfExpOut, float* pfError);
+    float calculate_error(std::vector<float>& pfExpOut, std::vector<float>& pfError);
 
     /*
         backward_propogation() : backward propogate once
 
         @exp_out : expected output array
     */
-    bool do_backward_pass(float* pfExpOut);
+    bool do_backward_pass(std::vector<float>& pfExpOut);
     
     /*
         Train() : train neural net
@@ -122,7 +122,7 @@ class NeuralNet{
         @in : input array
         @out : expected output array
     */
-    bool Train(float* pfIn, float* pfOut);
+    bool Train(std::vector<float>& pfIn, std::vector<float>& pfOut);
 
     /*
         Train() : train neural net
@@ -130,7 +130,7 @@ class NeuralNet{
         @in : input array
         @out : expected output array
     */
-    uint Train_batch(float** in, float** out, uint numIn);
+    uint Train_batch(std::vector<std::vector<float>>& in, std::vector<std::vector<float>>& out, uint numIn);
 
     /*
         populateWeightsAndBiasesWithRandomNumbers() : fill weights and biases with random numbers
@@ -145,7 +145,7 @@ class NeuralNet{
         @in : input array
         @out : expected output array
     */
-    bool Test(float* pfIn, float* pfOut);
+    bool Test(std::vector<float>& pfIn, std::vector<float>& pfOut);
 
     uint GetNumLys();
 
@@ -182,11 +182,11 @@ class NeuralNet{
 
     private:
      
-    bool isCorrectPrediction(float* pfOut);   
+    bool isCorrectPrediction(std::vector<float>& pfOut);   
 
     void Batch_Training(uint i);
 
-    void Populate_Batch_Processing_Args(float** in, float** out, uint numIn);
+    void Populate_Batch_Processing_Args(std::vector<std::vector<float>>& in, std::vector<std::vector<float>>& out, uint numIn);
 
     void Set_Init_Data(nnInitData& other_initData);
 

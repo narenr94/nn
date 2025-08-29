@@ -26,13 +26,21 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_MAE)
     DenseLayer* curr_lyr = new DenseLayer(dims, eAct_func::TANH, 0.999f);
     curr_lyr->SetPreviousNextLayers(nullptr, nullptr);
 
-    float fExpOut[5] = {0.1f, 0.22f, 0.001f, 0.0f, 1.0f};
+    std::vector<float> fExpOut;
+
+    fExpOut.push_back(0.1f);
+    fExpOut.push_back(0.22f);
+    fExpOut.push_back(0.001f);
+    fExpOut.push_back(0.0f);
+    fExpOut.push_back(1.0f);
 
     float fActOut[5] = {0.5f, 0.77f, 0.0f, 1.0f, 0.0f};
 
     float out[5] = {0.15f, 0.08142f, -0.2f, 0.0f, -0.2f};
 
-    curr_lyr->set_all_node_values(fActOut);
+    std::vector<float> fActOut_vec(fActOut, fActOut + 5);
+
+    curr_lyr->set_all_node_values(fActOut_vec);
 
     BaseLossFunction* mae = new MeanAbsoluteError(curr_lyr);
 
@@ -64,13 +72,21 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_MSE)
     DenseLayer* curr_lyr = new DenseLayer(dims, eAct_func::TANH, 0.999f);
     curr_lyr->SetPreviousNextLayers(nullptr, nullptr);
 
-    float fExpOut[5] = {0.1f, 0.22f, 0.001f, 0.0f, 1.0f};
+    std::vector<float> fExpOut;
+
+    fExpOut.push_back(0.1f);
+    fExpOut.push_back(0.22f);
+    fExpOut.push_back(0.001f);
+    fExpOut.push_back(0.0f);
+    fExpOut.push_back(1.0f);
 
     float fActOut[5] = {0.5f, 0.77f, 0.0f, 1.0f, 0.0f};
 
     float out[5] = {0.12f, 0.089562f, -0.0004f, 0.0f, -0.4f};
 
-    curr_lyr->set_all_node_values(fActOut);
+    std::vector<float> fActOut_vec(fActOut, fActOut + 5);
+
+    curr_lyr->set_all_node_values(fActOut_vec);
 
     BaseLossFunction* mae = new MeanSquaredError(curr_lyr);
 
@@ -102,13 +118,21 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_HUBER)
     DenseLayer* curr_lyr = new DenseLayer(dims, eAct_func::TANH, 0.999f);
     curr_lyr->SetPreviousNextLayers(nullptr, nullptr);
 
-    float fExpOut[5] = {0.1f, 0.22f, 0.001f, 0.0f, 1.0f};
+    std::vector<float> fExpOut;
+
+    fExpOut.push_back(0.1f);
+    fExpOut.push_back(0.22f);
+    fExpOut.push_back(0.001f);
+    fExpOut.push_back(0.0f);
+    fExpOut.push_back(1.0f);
 
     float fActOut[5] = {0.5f, 0.77f, 0.0f, 1.0f, 0.0f};
 
     float out[5] = {0.3f, 0.223905f, -0.001f, 0.0f, -1.0f};
 
-    curr_lyr->set_all_node_values(fActOut);
+    std::vector<float> fActOut_vec(fActOut, fActOut + 5);
+
+    curr_lyr->set_all_node_values(fActOut_vec);
 
     BaseLossFunction* mae = new HuberLoss(curr_lyr);
 
@@ -140,13 +164,21 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_CCE)
     DenseLayer* curr_lyr = new DenseLayer(dims, eAct_func::TANH, 0.999f);
     curr_lyr->SetPreviousNextLayers(nullptr, nullptr);
 
-    float fExpOut[5] = {1.0f, 0.0f, 1.0f, 0.0f, 0.0f};
+    std::vector<float> fExpOut;
+
+    fExpOut.push_back(1.0f);
+    fExpOut.push_back(0.0f);
+    fExpOut.push_back(1.0f);
+    fExpOut.push_back(0.0f);
+    fExpOut.push_back(0.0f);
 
     float fActOut[5] = {0.5f, 0.77f, 0.01f, 1.0f, 0.01f};
 
     float out[5] = {-1.5f, 0.0f, -99.99f, 0.0f, 0.0f};
 
-    curr_lyr->set_all_node_values(fActOut);
+    std::vector<float> fActOut_vec(fActOut, fActOut + 5);
+
+    curr_lyr->set_all_node_values(fActOut_vec);
 
     BaseLossFunction* mae = new CompetitiveCrossEntropyLoss(curr_lyr);
 
@@ -179,13 +211,16 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_BCE)
     curr_lyr->SetPreviousNextLayers(nullptr, nullptr);
     BaseLossFunction* mae = new CompetitiveCrossEntropyLoss(curr_lyr);
 
-    float fExpOut[1] = {1.0f};
+    std::vector<float> fExpOut;
+    fExpOut.push_back(1.0f);
 
     float fActOut[1] = {0.5f};
 
     float out[1] = {-0.5f};
 
-    curr_lyr->set_all_node_values(fActOut);    
+    std::vector<float> fActOut_vec(fActOut, fActOut + 1);
+
+    curr_lyr->set_all_node_values(fActOut_vec);   
 
     curr_lyr->do_backwardpass_to_previous_layer_output_layer(fExpOut, mae);
 
@@ -194,11 +229,11 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_BCE)
 
     fExpOut[1] = {0.0f};
 
-    fActOut[1] = {0.5f};
+    fActOut_vec[1] = {0.5f};
 
     out[0] = {-0.999999f};
 
-    curr_lyr->set_all_node_values(fActOut);    
+    curr_lyr->set_all_node_values(fActOut_vec);    
 
     curr_lyr->do_backwardpass_to_previous_layer_output_layer(fExpOut, mae);
 
@@ -207,11 +242,11 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_BCE)
 
     fExpOut[1] = {0.0f};
 
-    fActOut[1] = {-0.5f};
+    fActOut_vec[1] = {-0.5f};
 
     out[0] = {-0.999999f};
 
-    curr_lyr->set_all_node_values(fActOut);    
+    curr_lyr->set_all_node_values(fActOut_vec);    
 
     curr_lyr->do_backwardpass_to_previous_layer_output_layer(fExpOut, mae);
 
@@ -220,11 +255,11 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_outputLayer_backwardpass_BCE)
 
     fExpOut[1] = {1.0f};
 
-    fActOut[1] = {1.5f};
+    fActOut_vec[1] = {1.5f};
 
     out[0] = {0.0f};
 
-    curr_lyr->set_all_node_values(fActOut);    
+    curr_lyr->set_all_node_values(fActOut_vec);    
 
     curr_lyr->do_backwardpass_to_previous_layer_output_layer(fExpOut, mae);
 

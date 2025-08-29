@@ -9,7 +9,7 @@ void SigmoidActFunc::apply_act_func()
     }
 }
 
-void SigmoidActFunc::get_delta(float* fVal)
+void SigmoidActFunc::get_delta(std::vector<float>& fVal)
 {
     for(uint i = 0; i < m_pLayer->get_num_nodes(); i++)
     {

@@ -9,7 +9,7 @@ void ReluActFunc::apply_act_func()
     }
 }
 
-void ReluActFunc::get_delta(float* fVal)
+void ReluActFunc::get_delta(std::vector<float>& fVal)
 {
     for(uint i = 0; i < m_pLayer->get_num_nodes(); i++)
     {

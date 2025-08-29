@@ -50,9 +50,12 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_relu_test)
 
     float out[3] = {-0.34f, -0.22f, 0.0f};
 
-    curr_lyr->set_all_node_values(curr_vals);
+    std::vector<float> curr_vals_vec(curr_vals, curr_vals + 3);
+    std::vector<float> nxt_val_vec(nxt_val, nxt_val + 2);
 
-    nxt_lyr->set_all_node_values(nxt_val);
+    curr_lyr->set_all_node_values(curr_vals_vec);
+
+    nxt_lyr->set_all_node_values(nxt_val_vec);
 
     nxt_lyr->set_node_delta(nxt_delta[0], 0);
 
@@ -122,9 +125,12 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_leakyRelu_test)
 
     float out[3] = {-0.34f, -0.22f, 0.00242f};
 
-    curr_lyr->set_all_node_values(curr_vals);
+    std::vector<float> curr_vals_vec(curr_vals, curr_vals + 3);
+    std::vector<float> nxt_val_vec(nxt_val, nxt_val + 2);
 
-    nxt_lyr->set_all_node_values(nxt_val);
+    curr_lyr->set_all_node_values(curr_vals_vec);
+
+    nxt_lyr->set_all_node_values(nxt_val_vec);
 
     nxt_lyr->set_node_delta(nxt_delta[0], 0);
 
@@ -194,9 +200,12 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_tanh_test)
 
     float out[3] = {-0.3366f, -0.209352f, -0.37752f};
 
-    curr_lyr->set_all_node_values(curr_vals);
+    std::vector<float> curr_vals_vec(curr_vals, curr_vals + 3);
+    std::vector<float> nxt_val_vec(nxt_val, nxt_val + 2);
 
-    nxt_lyr->set_all_node_values(nxt_val);
+    curr_lyr->set_all_node_values(curr_vals_vec);
+
+    nxt_lyr->set_all_node_values(nxt_val_vec);
 
     nxt_lyr->set_node_delta(nxt_delta[0], 0);
 
@@ -266,9 +275,12 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_sigmoid_test)
 
     float out[3] = {-0.0306f, -0.037752f, -1.00672f};
 
-    curr_lyr->set_all_node_values(curr_vals);
+    std::vector<float> curr_vals_vec(curr_vals, curr_vals + 3);
+    std::vector<float> nxt_val_vec(nxt_val, nxt_val + 2);
 
-    nxt_lyr->set_all_node_values(nxt_val);
+    curr_lyr->set_all_node_values(curr_vals_vec);
+
+    nxt_lyr->set_all_node_values(nxt_val_vec);
 
     nxt_lyr->set_node_delta(nxt_delta[0], 0);
 
@@ -338,9 +350,12 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_dense_backwardpass_softmax_test)
 
     float out[3] = {0.01296f, 0.054912f, -1.13856f};
 
-    curr_lyr->set_all_node_values(curr_vals);
+    std::vector<float> curr_vals_vec(curr_vals, curr_vals + 3);
+    std::vector<float> nxt_val_vec(nxt_val, nxt_val + 2);
 
-    nxt_lyr->set_all_node_values(nxt_val);
+    curr_lyr->set_all_node_values(curr_vals_vec);
+
+    nxt_lyr->set_all_node_values(nxt_val_vec);
 
     nxt_lyr->set_node_delta(nxt_delta[0], 0);
 
@@ -421,7 +436,8 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_conv_backwardpass_leakyRelu_test)
 -0.040000f, 0.080000f, 0.100000f, 0.100000f, 0.140000f, 0.020000f,
 -0.020000f, 0.040000f, 0.050000f, 0.050000f, 0.070000f, 0.010000f};
 
-    curr_lyr->set_all_node_values(curr_vals);
+    std::vector<float> curr_vals_vec(curr_vals, curr_vals + 16);
+    curr_lyr->set_all_node_values(curr_vals_vec);
 
     for(int i = 0; i < 36; i++)
     {
@@ -438,7 +454,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_conv_backwardpass_leakyRelu_test)
 
     CpuAccelerator* cpuAcc = new CpuAccelerator(prev_lyr);
 
-    cpuAcc->do_backwardpass_conv_layer(dims2);
+    cpuAcc->do_backwardpass_conv_layer();
 
     for(int i = 0; i < 36; i++)
     {
@@ -528,7 +544,7 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_conv_backwardpass_multiKernel_leakyRelu_test)
 
     CpuAccelerator* cpuAcc = new CpuAccelerator(prev_lyr);
 
-    cpuAcc->do_backwardpass_conv_layer(dims2);
+    cpuAcc->do_backwardpass_conv_layer();
 
     for(int i = 0; i < 36; i++)
     {
@@ -623,7 +639,9 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_pooling_backwardpass_max)
         0.0, 0.5,       0.5
     };
 
-    curr_lyr->set_all_node_values(prev_value);
+    std::vector<float> prev_vals_vec(prev_value, prev_value + 27);
+    curr_lyr->set_all_node_values(prev_vals_vec);
+
     for(uint i = 0; i < 12; i++)
     {
         nxt_lyr->set_node_delta(curr_delta[i], i);
@@ -728,7 +746,9 @@ TEST(CPU_ACC_TESTS, cpuAccelerator_pooling_backwardpass_avg)
         0.295, 0.295,       0.6
     };
 
-    curr_lyr->set_all_node_values(prev_value);
+    std::vector<float> prev_vals_vec(prev_value, prev_value + 27);
+
+    curr_lyr->set_all_node_values(prev_vals_vec);
     for(uint i = 0; i < 12; i++)
     {
         nxt_lyr->set_node_delta(curr_delta[i], i);

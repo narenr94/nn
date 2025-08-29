@@ -81,8 +81,8 @@ struct Batch_Training_Instance_data{
 };
 
 struct Batch_Training_Args{
-    float *in;
-    float *out;
+    std::vector<float> in;
+    std::vector<float> out;
     Batch_Training_Instance_data *sBData;
 };
 
@@ -501,7 +501,7 @@ void NeuralNet::SetupLayersAndWeightMatrices(std::vector<eLayer_type>& layer_typ
 }
 
 
-bool NeuralNet::do_forward_pass(float* pfInputArr)
+bool NeuralNet::do_forward_pass(std::vector<float>& pfInputArr)
 {
 
     bool bRet = false;
@@ -544,7 +544,7 @@ bool NeuralNet::populate_nodes_bias(uint unLyrIdx, float* pfBias)
     return bRet;
 }
 
-float NeuralNet::calculate_error(float* pfExpOut, float* pfError)
+float NeuralNet::calculate_error(std::vector<float>& pfExpOut, std::vector<float>& pfError)
 {
     float fRet = 0;
 
@@ -554,7 +554,7 @@ float NeuralNet::calculate_error(float* pfExpOut, float* pfError)
 
 }
 
-bool NeuralNet::do_backward_pass(float* pfExpOut)
+bool NeuralNet::do_backward_pass(std::vector<float>& pfExpOut)
 {
     bool bRet = false;
 
@@ -588,7 +588,7 @@ bool NeuralNet::do_backward_pass(float* pfExpOut)
 }
 
 
-bool NeuralNet::Train(float* in, float* out)
+bool NeuralNet::Train(std::vector<float>& in, std::vector<float>& out)
 {
     bool bRet = false;
 
@@ -643,9 +643,9 @@ void Setup_Batch_Processing_Args(uint numIn, uint TotalCorrectableNodes, uint in
     {
         args[i] = new Batch_Training_Args();
         
-        args[i]->in = new float[inputLayerSz];
+        args[i]->in = std::vector<float>(inputLayerSz);
         
-        args[i]->out = new float[outputLayerSz];
+        args[i]->out = std::vector<float>(outputLayerSz);
         
         args[i]->sBData = new Batch_Training_Instance_data();        
         
@@ -662,15 +662,15 @@ void Release_Args(uint numIn)
     {
         delete [] args[i]->sBData->deltas;
         delete args[i]->sBData;
-        delete [] args[i]->out;
-        delete [] args[i]->in;
+        args[i]->out.clear();
+        args[i]->in.clear();
         delete args[i];
     }
 
     delete [] args;
 }
 
-void NeuralNet::Populate_Batch_Processing_Args(float** in, float** out, uint numIn)
+void NeuralNet::Populate_Batch_Processing_Args(std::vector<std::vector<float>>& in, std::vector<std::vector<float>>& out, uint numIn)
 {
     for(uint i =0; i < numIn; i++)
     {
@@ -712,7 +712,7 @@ void NeuralNet::Init_Batch_Training(uint batchSz)
 }
 
 
-uint NeuralNet::Train_batch(float** in, float** out, uint numIn)
+uint NeuralNet::Train_batch(std::vector<std::vector<float>>& in, std::vector<std::vector<float>>& out, uint numIn)
 {
     // printf("\nEntered Train_batch\n");
     // fflush(stdout);
@@ -825,7 +825,7 @@ void NeuralNet::populateWeightsAndBiasesWithExistingNN(NeuralNet* other)
 
 
 
-bool NeuralNet::isCorrectPrediction(float* pfOut)
+bool NeuralNet::isCorrectPrediction(std::vector<float>& pfOut)
 {
     bool bRet = false;
 
@@ -884,7 +884,7 @@ bool NeuralNet::isCorrectPrediction(float* pfOut)
 
 }
 
-bool NeuralNet::Test(float* pfIn, float* pfOut)
+bool NeuralNet::Test(std::vector<float>& pfIn, std::vector<float>& pfOut)
 {
 
     bool ret = false;

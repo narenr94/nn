@@ -120,49 +120,30 @@ sMtx_Dim nnInitData::add_conv_layer(sMtx_Dim in_dim, eConvKernelSize t_kernel_si
 {
     assert((in_dim.rows * in_dim.columns) == (layer_dimensions[unNoLys - 1].unOutputColumns * layer_dimensions[unNoLys - 1].unOutputRows));
     unNoLys++;
-    uint kernelRow;
-    uint kernelColumn;
-    uint outRow;
-    uint outCols;
+    
+    sLayer_Dimensions prev_dim = layer_dimensions[unNoLys - 2];
+    prev_dim.unOutputRows = in_dim.rows;
+    prev_dim.unOutputColumns = in_dim.columns;
+    sLayer_Parsed_Dim prev_parsed_dim = get_parsed_dims(prev_dim);
+    std::pair<uint,uint> kr_row_col = get_conv_window_rows_cols(t_kernel_size);
+    std::pair<uint,uint> out_dim = find_conv_output_dims(prev_parsed_dim, kr_row_col);
 
-    switch(t_kernel_size)
-    {
-        case eConvKernelSize::Sz3x3:
-            kernelRow = 3;
-            kernelColumn = 3;
-            break;
-        case eConvKernelSize::Sz5x5:
-            kernelRow = 5;
-            kernelColumn = 5;
-            break;
-        case eConvKernelSize::Sz7x7:
-            kernelRow = 7;
-            kernelColumn = 7;
-            break;
-        default:
-            assert(0); //uknown kernel size
-            break;
-    }
-
-    outRow = (in_dim.rows - kernelRow + 1) * t_num_kernels;
-    outCols = in_dim.columns - kernelColumn + 1;
-
-    sMtx_Dim out_dim, tran_dim;
-    out_dim.rows = outRow;
-    out_dim.columns = outCols;
-    tran_dim.rows = kernelRow;
-    tran_dim.columns = kernelColumn;
+    sMtx_Dim out_dims, tran_dim;
+    out_dims.rows = out_dim.first * t_num_kernels;
+    out_dims.columns = out_dim.second;
+    tran_dim.rows = kr_row_col.first;
+    tran_dim.columns = kr_row_col.second;
 
     assert(tran_dim.rows <= layer_dimensions[unNoLys - 2].unOutputRows);
     assert(tran_dim.columns <= layer_dimensions[unNoLys - 2].unOutputColumns);
 
-    layer_dimensions.emplace_back(in_dim, out_dim, tran_dim, t_num_kernels);
+    layer_dimensions.emplace_back(in_dim, out_dims, tran_dim, t_num_kernels);
     eAct_Funcs.emplace_back(t_act_func);
     e_layer_type.emplace_back(eLayer_type::CONV);
     actParam1.emplace_back(t_act_param);
     ePoolingType.emplace_back(ePooling_type::NA);
 
-    return out_dim;
+    return out_dims;
 
 }
 
@@ -287,6 +268,42 @@ std::pair<uint,uint> get_pooling_window_rows_cols(ePoolingKernelSize t_pooling_k
     }
 
     return ret;
+}
+
+std::pair<uint,uint> get_conv_window_rows_cols(eConvKernelSize t_conv_kernel_sz)
+{
+    std::pair<uint,uint> ret;
+
+    switch(t_conv_kernel_sz)
+    {
+        case eConvKernelSize::Sz3x3:
+            ret.first = 3;
+            ret.second = 3;
+            break;
+        case eConvKernelSize::Sz5x5:
+            ret.first = 5;
+            ret.second = 5;
+            break;
+        case eConvKernelSize::Sz7x7:
+            ret.first = 7;
+            ret.second = 7;
+            break;
+        default:
+            assert(0); //unknown kernel size
+            break;
+    }
+
+    return ret;
+}
+
+std::pair<uint, uint> find_conv_output_dims(sLayer_Parsed_Dim& in_dims, std::pair<uint,uint> krSz)
+{
+    uint col_slide = in_dims.cols - krSz.second + 1;
+
+    uint row_slide = in_dims.rows - krSz.first + 1;
+    
+    return std::pair<uint, uint>(row_slide, col_slide);
+
 }
 
 std::pair<uint, uint> find_pooling_output_dims(sLayer_Parsed_Dim& in_dims, std::pair<uint,uint> krSz)

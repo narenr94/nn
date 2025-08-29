@@ -4,6 +4,6 @@ void TanhActFunc::apply_act_func()
 {
 }
 
-void TanhActFunc::get_delta(float* fVal)
+void TanhActFunc::get_delta(std::vector<float>& fVal)
 {
 }

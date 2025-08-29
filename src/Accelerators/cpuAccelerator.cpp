@@ -48,12 +48,12 @@ void CpuAccelerator::do_forwardpass_dense_layer()
     out_lyr->apply_act_func_all_nodes();
 }
 
-void CpuAccelerator::do_backwardpass_from_output_layer(float* pfExpOut, BaseLossFunction* lossFunc)
+void CpuAccelerator::do_backwardpass_from_output_layer(std::vector<float>& pfExpOut, BaseLossFunction* lossFunc)
 {
     //i = layer index
     uint j = 0; //current layer node index
     
-    float * temp = new float[m_pLayer->get_num_nodes()];
+    std::vector<float> temp(m_pLayer->get_num_nodes(), 0.0f);
     
     // m_pLossFunc->get_loss_func_derv(pfExpOut, temp);
     lossFunc->get_loss_func_derv(pfExpOut, temp);
@@ -63,8 +63,6 @@ void CpuAccelerator::do_backwardpass_from_output_layer(float* pfExpOut, BaseLoss
     {
         m_pLayer->set_node_delta(temp[j], j);
     }
-
-    delete [] temp;
     
 }
 
@@ -74,15 +72,13 @@ void CpuAccelerator::do_backwardpass_dense_layer()
     uint j = 0; //current layer node index
     uint k = 0; //previous layer node index
 
-    float * temp = new float[m_pLayer->get_num_nodes()];
+    std::vector<float> temp(m_pLayer->get_num_nodes(), 0.0f);
 
     uint curr_mtx_sz = m_pLayer->get_num_nodes();
     uint nxt_mtx_sz = m_pLayer->GetNextLayer()->get_num_nodes();
 
     for(j = 0; j < curr_mtx_sz; j++)
     {
-        temp[j] = 0.0f;
-
         // m_pLayer->GetNextLayer()
         for(k = 0; k < nxt_mtx_sz; k++)
         {
@@ -96,103 +92,130 @@ void CpuAccelerator::do_backwardpass_dense_layer()
     {
         m_pLayer->set_node_delta(temp[j], j);
     }
-
-    delete [] temp;
 }
 
 
-void CpuAccelerator::do_forwardpass_conv_layer(sLayer_Dimensions t_dims)
+void CpuAccelerator::do_forwardpass_conv_layer()
 {
-    uint input_rows = t_dims.unInputRows;
-    uint input_columns = t_dims.unInputColumns;
-    uint filter_rows = t_dims.unTransformParametersRows;
-    uint filter_columns = t_dims.unTransformParametersColumns;
-    uint output_rows = t_dims.unInputRows - t_dims.unTransformParametersRows + 1; //per filter
-    uint output_columns = t_dims.unInputColumns - t_dims.unTransformParametersColumns + 1; //per filter
+
+    sLayer_Parsed_Dim curr_parsed_dims = get_parsed_dims(m_pLayer->get_layer_dimensions());
+
+    sLayer_Parsed_Dim prev_parsed_dims;
+
+    prev_parsed_dims.num_mtx = m_pLayer->GetPreviousLayer()->get_layer_dimensions().unNoTransformParameterMtx;
+
+    prev_parsed_dims.rows = m_pLayer->get_layer_dimensions().unInputRows;
     
+    prev_parsed_dims.rows /= prev_parsed_dims.num_mtx;
 
-    BaseLayer* in_lyr = m_pLayer->GetPreviousLayer();
+    prev_parsed_dims.cols = m_pLayer->get_layer_dimensions().unInputColumns;
 
-    uint kernalSz = filter_rows * filter_columns;
+    uint out_mtx_size = curr_parsed_dims.rows * curr_parsed_dims.cols;
 
-    uint outSz = output_rows * output_columns;
+    uint kernalSz = m_pLayer->get_layer_dimensions().unTransformParametersRows * m_pLayer->get_layer_dimensions().unTransformParametersColumns;
 
-    float sigma = 0.0f;
+    float val = 0.0f;
 
-    for(uint f = 0; f < t_dims.unNoTransformParameterMtx; f++)
+    for(uint m = 0; m < curr_parsed_dims.num_mtx; m++)
     {
-
-        for(uint i = 0; i < output_rows; i++)
+        for(uint i = 0; i < curr_parsed_dims.rows; i++)
         {
-            for(uint j = 0; j < output_columns; j++)
+            for(uint j = 0; j < curr_parsed_dims.cols; j++)
             {
-                for(uint k = 0; k < filter_rows; k++)
-                {
-                    for(uint l = 0; l < filter_columns; l++)
-                    {
-                        //output[i][j] += input[i + k][j + l] * filter[k][l];
-                        sigma += in_lyr->get_node_value_idx(((i + k) * input_columns) + (j + l)) * m_pLayer->get_transform_matrix_parameter(((k * filter_columns) + l) + (f * kernalSz));
-                    }
-                }
-
-                sigma += m_pLayer->get_node_bias_idx(((i * output_columns) + j) + (f * outSz));
-                sigma /= kernalSz;
-                m_pLayer->set_node_value(sigma, ((i * output_columns) + j) + (f * outSz));
-                sigma = 0.0f;
+                val = find_conv_at_window_all_channels(std::pair<uint, uint>(i,j), prev_parsed_dims, m);
+                val += m_pLayer->get_node_bias_idx((m * out_mtx_size) + ((i * curr_parsed_dims.cols) + j));
+                val /= kernalSz;
+                m_pLayer->set_node_value(val, (m * out_mtx_size) + ((i * curr_parsed_dims.cols) + j));
             }
-        }
+            
+        }        
+
     }
 
     //apply activation function
     m_pLayer->apply_act_func_all_nodes();
 }
 
-void CpuAccelerator::do_backwardpass_conv_layer(sLayer_Dimensions t_dims)
+float CpuAccelerator::find_conv_at_window_all_channels(
+    std::pair<uint, uint> row_col_pos,
+    sLayer_Parsed_Dim& t_prev_parsed_dims, 
+    uint t_kernel_num)
 {
-    uint input_rows = t_dims.unInputRows;
-    uint input_columns = t_dims.unInputColumns;
-    uint filter_rows = t_dims.unTransformParametersRows;
-    uint filter_columns = t_dims.unTransformParametersColumns;
-
-    uint kernelSz = filter_rows * filter_columns;
-   
-
-    float * temp = new float[m_pLayer->get_num_nodes()];
-
-    for(uint i = 0; i < m_pLayer->get_num_nodes(); i++)
+    float val = 0.0f;
+    
+    for(uint m = 0; m < t_prev_parsed_dims.num_mtx; m++)
     {
-        temp[i] = 0.0f;
+        val += find_conv_at_window_one_channels(m, row_col_pos, t_prev_parsed_dims, t_kernel_num);
     }
 
+    val /= t_prev_parsed_dims.num_mtx;
+
+    return val;
+}
+
+float CpuAccelerator::find_conv_at_window_one_channels(
+    uint mtx_num,
+    std::pair<uint, uint> row_col_pos,
+    sLayer_Parsed_Dim& t_prev_parsed_dims,
+    uint t_kernel_num)
+{
+    float val = 0.0f;
+
+    // Calculate the starting row in the previous layer for this channel
+    uint absolute_row_prev = (mtx_num * t_prev_parsed_dims.rows) + row_col_pos.first;
+
+    // Kernel size (number of elements in one kernel)
+    uint kernel_rows = m_pLayer->get_layer_dimensions().unTransformParametersRows;
+    uint kernel_cols = m_pLayer->get_layer_dimensions().unTransformParametersColumns;
+    uint kernel_sz = kernel_rows * kernel_cols;
+
+    // For each element in the kernel window
+    for (uint i = 0; i < kernel_rows; ++i) {
+        for (uint j = 0; j < kernel_cols; ++j) {
+            // Index in the kernel weights for this kernel and channel
+            uint kernel_idx = (t_kernel_num * kernel_sz) + (i * kernel_cols) + j;
+            // Index in the input feature map for this channel
+            uint input_idx = ((absolute_row_prev + i) * t_prev_parsed_dims.cols) + (row_col_pos.second + j);
+
+            float weight = m_pLayer->get_transform_matrix_parameter(kernel_idx);
+            float input = m_pLayer->GetPreviousLayer()->get_node_value_idx(input_idx);
+
+            val += weight * input;
+        }
+    }
+
+    return val;
+}
+
+void CpuAccelerator::do_backwardpass_conv_layer()
+{
+    sLayer_Dimensions dims = m_pLayer->GetNextLayer()->get_layer_dimensions();
+    uint input_rows = dims.unInputRows;
+    uint input_columns = dims.unInputColumns;
+    uint filter_rows = dims.unTransformParametersRows;
+    uint filter_columns = dims.unTransformParametersColumns;   
+
+    std::vector<float> temp(m_pLayer->get_num_nodes(), 0.0f);
+
     uint out_rows = input_rows - filter_rows + 1;
-    uint out_columns = input_columns - filter_columns + 1;
-
-    uint outSz = out_rows * out_columns;
-
-    uint p = 0; //out_rows
-    uint q = 0; //out_columns
-
-    uint m = 0; //filter_rows
-    uint n = 0; //filter_columns
+    uint out_columns = input_columns - filter_columns + 1;    
 
     uint rm = 0;
     uint rn = 0;
     uint rot_filter_idx = 0;
+    uint next_lyr_idx = 0;
+    uint kernelSz = filter_rows * filter_columns;
+    uint outSz = out_rows * out_columns;
 
-
-    float next_lyr_idx = 0.0f;
-    float filter_idx = 0.0f;
-
-    for(uint f  = 0; f < t_dims.unNoTransformParameterMtx; f++)
+    for(uint f  = 0; f < dims.unNoTransformParameterMtx; f++)
     {
-
-        for (p = 0; p < out_rows; ++p) 
+        for (uint p = 0; p < out_rows; ++p) 
         {
-            for (q = 0; q < out_columns; ++q) 
+            for (uint q = 0; q < out_columns; ++q) 
             {
-                for (m = 0; m < filter_rows; ++m) 
+                for (uint m = 0; m < filter_rows; ++m) 
                 {
-                    for (n = 0; n < filter_columns; ++n) 
+                    for (uint n = 0; n < filter_columns; ++n) 
                     {
                         // dX[p + m][q + n] += dOut[p][q] * kernel[m][n];
 
@@ -218,7 +241,6 @@ void CpuAccelerator::do_backwardpass_conv_layer(sLayer_Dimensions t_dims)
         m_pLayer->set_node_delta(temp[j], j);
     }
 
-    delete [] temp;
 }
 
 void CpuAccelerator::do_forwardpass_pooling_layer(ePooling_type t_pooling_type)

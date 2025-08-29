@@ -9,7 +9,7 @@ void TanhActFunc::apply_act_func()
     }
 }
 
-void TanhActFunc::get_delta(float* fVal)
+void TanhActFunc::get_delta(std::vector<float>& fVal)
 {
     for(uint i = 0; i < m_pLayer->get_num_nodes(); i++)
     {

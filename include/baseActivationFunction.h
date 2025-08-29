@@ -3,6 +3,8 @@
 
 #include "nn_math.h"
 
+#include <vector>
+
 class BaseLayer;
 
 class BaseActivationFunction{
@@ -16,7 +18,7 @@ public:
 
     virtual void apply_act_func() = 0;
 
-    virtual void get_delta(float *fVal) = 0;
+    virtual void get_delta(std::vector<float>& fVal) = 0;
 
     virtual ~BaseActivationFunction(){}
 
